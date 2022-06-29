@@ -6,8 +6,10 @@
 
 (defun rackscratch--unique-session-name ()
   "Unique name for a scratch buffer session."
-  ;; TODO: make it human-friendly
-  (sha1 (format "%s" (current-time))))
+  (let ((time (current-time)))
+    (concat (format-time-string "%Y-%m-%d" time)
+            "-"
+            (sha1 (format "%s" time)))))
 
 (defun rackscratch-write (index)
   "Write scratch buffer to disk with index INDEX."
@@ -15,7 +17,7 @@
                       (rackscratch--unique-session-name)))
          (base-path (concat (file-name-as-directory rackscratch-path)
                             (file-name-as-directory session)))
-         (index (or index 0)))
+         (index (or index 1)))
     (unless (file-directory-p base-path)
       (mkdir base-path t))
     (write-file
