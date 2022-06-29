@@ -8,19 +8,6 @@
 (setq rackscratch-default-template
       (concat (file-name-as-directory rackscratch-template-path)
               rackscratch-default-template-name))
-(setq rackscratch-template rackscratch-default-template)
-
-(defun rackscratch-initialize ()
-  "Create necessary initial config."
-  (interactive)
-  (unless (file-directory-p rackscratch-template-path)
-    (mkdir rackscratch-template-path t)
-    (let ((buf (generate-new-buffer "default-template")))
-      (with-current-buffer buf
-        (insert "#lang racket\n\n")
-        (write-file (concat rackscratch-template-path
-                            rackscratch-default-template-name)))
-      (kill-buffer buf))))
 
 (defun rackscratch--unique-session-name ()
   "Unique name for a scratch buffer session."
@@ -43,7 +30,23 @@
              (format "%d" index)
              rackscratch-file-extension))))
 
-(cl-defun rackscratch--new-scratch-buffer (buffer-name &optional index)
+(defun rackscratch--ensure-templates-exist ()
+  "Ensure that the templates directory exists and contains the default template."
+  (unless (file-directory-p rackscratch-template-path)
+    (mkdir rackscratch-template-path t)
+    (let ((buf (generate-new-buffer "default-template")))
+      (with-current-buffer buf
+        (insert "#lang racket\n\n")
+        (write-file (concat rackscratch-template-path
+                            rackscratch-default-template-name)))
+      (kill-buffer buf))))
+
+(defun rackscratch-insert-template (template)
+  "Insert TEMPLATE into the current buffer."
+  (rackscratch--ensure-templates-exist)
+  (insert-file-contents template))
+
+(cl-defun rackscratch--new-scratch-buffer (buffer-name template &optional index)
   "Create a new empty buffer.
 
 The buffer will be named BUFFER-NAME and will be created in the
@@ -57,25 +60,32 @@ URL `https://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
 Version 2017-11-01"
   (interactive)
   (let ((buf (generate-new-buffer buffer-name))
-        (major-mode-to-use rackscratch-major-mode)
-        (template rackscratch-template))
+        (major-mode-to-use rackscratch-major-mode))
     (with-current-buffer buf
       (funcall major-mode-to-use)
       (setq buffer-offer-save nil)
-      (insert-file-contents template)
+      (rackscratch-insert-template template)
       (goto-char (point-max))
       (rackscratch-write index)
       (rename-buffer buffer-name))
     buf))
 
-(defun rackscratch-get-or-create-scratch-buffer ()
+(cl-defun rackscratch-get-or-create-scratch-buffer (&optional template)
   "Get the active scratch buffer or create a new one."
   (let* ((buffer-name "*scratch - Racket*")
-         (buf (get-buffer buffer-name)))
-    (or buf (rackscratch--new-scratch-buffer buffer-name))))
+         (buf (get-buffer buffer-name))
+         (template (or template rackscratch-default-template)))
+    (or buf (rackscratch--new-scratch-buffer buffer-name
+                                             template))))
 
 (defun rackscratch-switch-to-scratch-buffer ()
   "Switch to scratch buffer."
   (interactive)
   (let ((buf (rackscratch-get-or-create-scratch-buffer)))
+    (switch-to-buffer buf)))
+
+(defun rackscratch-switch-to-scratch-buffer-with-template (template)
+  "Start a new scratch buffer using a specific template."
+  (interactive (list (read-file-name "Which template? " rackscratch-template-path)))
+  (let ((buf (rackscratch-get-or-create-scratch-buffer template)))
     (switch-to-buffer buf)))
