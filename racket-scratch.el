@@ -1,8 +1,26 @@
 ;; defcustoms
-(setq rackscratch-path "/var/tmp/racket/")
+(setq rackscratch-path "/var/tmp/racket/") ; TODO: make platform-independent
+(setq rackscratch-template-path "~/.racket-mode/scratch/templates/") ; TODO: make platform-independent
 (setq rackscratch-session-name nil)
 (setq rackscratch-major-mode 'racket-mode)
 (setq rackscratch-file-extension ".rkt")
+(setq rackscratch-default-template-name "racket.rkt")
+(setq rackscratch-default-template
+      (concat (file-name-as-directory rackscratch-template-path)
+              rackscratch-default-template-name))
+(setq rackscratch-template rackscratch-default-template)
+
+(defun rackscratch-initialize ()
+  "Create necessary initial config."
+  (interactive)
+  (unless (file-directory-p rackscratch-template-path)
+    (mkdir rackscratch-template-path t)
+    (let ((buf (generate-new-buffer "default-template")))
+      (with-current-buffer buf
+        (insert "#lang racket\n\n")
+        (write-file (concat rackscratch-template-path
+                            rackscratch-default-template-name)))
+      (kill-buffer buf))))
 
 (defun rackscratch--unique-session-name ()
   "Unique name for a scratch buffer session."
@@ -39,10 +57,13 @@ URL `https://ergoemacs.org/emacs/emacs_new_empty_buffer.html'
 Version 2017-11-01"
   (interactive)
   (let ((buf (generate-new-buffer buffer-name))
-        (major-mode-to-use rackscratch-major-mode))
+        (major-mode-to-use rackscratch-major-mode)
+        (template rackscratch-template))
     (with-current-buffer buf
       (funcall major-mode-to-use)
       (setq buffer-offer-save nil)
+      (insert-file-contents template)
+      (goto-char (point-max))
       (rackscratch-write index)
       (rename-buffer buffer-name))
     buf))
