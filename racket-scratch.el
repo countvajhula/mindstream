@@ -1,6 +1,7 @@
 ;; defcustoms
 (setq rackscratch-path "/var/tmp/racket/") ; TODO: make platform-independent
 (setq rackscratch-template-path "~/.racket-mode/scratch/templates/") ; TODO: make platform-independent
+(setq rackscratch-save-file-path user-home-directory)
 (setq rackscratch-session-name nil)
 (setq rackscratch-major-mode 'racket-mode)
 (setq rackscratch-file-extension ".rkt")
@@ -249,5 +250,5 @@ backwards in the scratch buffer history."
 
 (defun rackscratch-save-file (filename)
   "Save the current scratch buffer to a file."
-  (interactive (list (read-file-name "Save file as: " user-home-directory)))
+  (interactive (list (read-file-name "Save file as: " rackscratch-save-file-path "")))
   (write-file filename))
