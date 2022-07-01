@@ -198,7 +198,25 @@ buffer currently exists, then TEMPLATE is ignored."
           ;; save and return the new one
           (with-current-buffer buf
             (if (equal session rackscratch-session-name)
+                ;; TODO: in these cases, it may be better to save the current
+                ;; scratch buffer as the N+1 file and copy it to the N file.
+                ;; That way, the point location and other state information
+                ;; (e.g. the current evil state) would be preserved without
+                ;; needing any bookkeeping. But that seems just a bit hacky.
                 (rackscratch-write (1+ index))
               (rackscratch-write))) ; start numbering from 1 if new session
           buf)
       (rackscratch--ab-initio-iterate))))
+
+(defun rackscratch-initialize ()
+  "Advise any functions that should implicitly cause the scratch buffer to iterate."
+  (advice-add #'racket-run :around #'rackscratch-implicitly-iterate-advice))
+
+(defun rackscratch-implicitly-iterate-advice (orig-fn &rest args)
+  "Implicitly iterate the scratch buffer upon execution of some command."
+  (let ((buffer-modified (buffer-modified-p)))
+    (let ((result (apply orig-fn args)))
+      (when buffer-modified
+        (let ((buf (rackscratch-iterate)))
+          (switch-to-buffer buf)))
+      result)))
