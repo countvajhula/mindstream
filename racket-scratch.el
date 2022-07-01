@@ -208,31 +208,31 @@ buffer currently exists, then TEMPLATE is ignored."
           buf)
       (rackscratch--ab-initio-iterate))))
 
-(defun rackscratch-next ()
-  "Go to a newer scratch buffer in the current session."
-  (interactive)
+(defun rackscratch--navigate (fn)
+  "Go to an older or newer scratch buffer in the current session.
+
+FN is expected to be a function that accepts an index and returns a new
+index. Typically, FN will be either 1+ or 1-, to navigate forwards or
+backwards in the scratch buffer history."
   (let* ((file (buffer-file-name))
          (dir (file-name-directory file))
          (ext (file-name-extension file))
          (index (rackscratch--buffer-index (current-buffer)))
-         (next-file (concat dir (number-to-string (1+ index)) "." ext)))
+         (next-file (concat dir (number-to-string (funcall fn index)) "." ext)))
     (when (file-exists-p next-file)
       (kill-buffer)
       (find-file next-file) ; also set REPL?
       (rename-buffer rackscratch-buffer-name))))
 
+(defun rackscratch-next ()
+  "Go to a newer scratch buffer in the current session."
+  (interactive)
+  (rackscratch--navigate #'1+))
+
 (defun rackscratch-previous ()
   "Go to an older scratch buffer in the current session."
   (interactive)
-  (let* ((file (buffer-file-name))
-         (dir (file-name-directory file))
-         (ext (file-name-extension file))
-         (index (rackscratch--buffer-index (current-buffer)))
-         (previous-file (concat dir (number-to-string (1- index)) "." ext)))
-    (when (file-exists-p previous-file)
-      (kill-buffer)
-      (find-file previous-file) ; also set REPL?
-      (rename-buffer rackscratch-buffer-name))))
+  (rackscratch--navigate #'1-))
 
 (defun rackscratch-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
