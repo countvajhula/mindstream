@@ -2,6 +2,7 @@
 (setq rackscratch-path "/var/tmp/racket/") ; TODO: make platform-independent
 (setq rackscratch-template-path "~/.racket-mode/scratch/templates/") ; TODO: make platform-independent
 (setq rackscratch-save-file-path user-home-directory)
+(setq rackscratch-save-session-path user-home-directory)
 (setq rackscratch-session-name nil)
 (setq rackscratch-major-mode 'racket-mode)
 (setq rackscratch-file-extension ".rkt")
@@ -26,6 +27,12 @@ is iterated, it will create a new folder to hold the scratch buffer stages
 for the new session."
   (setq rackscratch-session-name (rackscratch--unique-session-name)))
 
+(cl-defun rackscratch--session-path (&optional session)
+  "Path to the directory on disk containing SESSION."
+  (let ((session (or session rackscratch-session-name)))
+    (concat (file-name-as-directory rackscratch-path)
+            (file-name-as-directory session))))
+
 (cl-defun rackscratch-write (&optional index)
   "Write scratch buffer to disk with index INDEX.
 
@@ -33,8 +40,7 @@ This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
   (let* ((session (or rackscratch-session-name
                       (rackscratch--unique-session-name)))
-         (base-path (concat (file-name-as-directory rackscratch-path)
-                            (file-name-as-directory session)))
+         (base-path (rackscratch--session-path session))
          (index (or index 1)))
     (unless (file-directory-p base-path)
       (mkdir base-path t))
@@ -252,3 +258,10 @@ backwards in the scratch buffer history."
   "Save the current scratch buffer to a file."
   (interactive (list (read-file-name "Save file as: " rackscratch-save-file-path "")))
   (write-file filename))
+
+(defun rackscratch-save-session (dir)
+  "Save the current scratch session to a directory."
+  (interactive (list (read-directory-name "Save session in: " rackscratch-save-session-path)))
+  ;; TODO: ideally, also be able to give it a name
+  (copy-directory (rackscratch--session-path rackscratch-session-name)
+                  dir))
