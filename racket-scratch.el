@@ -108,6 +108,9 @@ if Emacs is exited."
       (funcall major-mode-to-use)
       (setq buffer-offer-save nil)
       (setq-local buffer-session rackscratch-session-name)
+      ;; Ignore whatever `racket-repl-buffer-name-function' just did to
+      ;; set `racket-repl-buffer-name' and give this its own REPL.
+      (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
       (insert contents)
       ;; place point at the end of the buffer
       (goto-char (point-max)))
