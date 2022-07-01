@@ -246,3 +246,8 @@ backwards in the scratch buffer history."
         (let ((buf (rackscratch-iterate)))
           (switch-to-buffer buf)))
       result)))
+
+(defun rackscratch-save-file (filename)
+  "Save the current scratch buffer to a file."
+  (interactive (list (read-file-name "Save file as: " user-home-directory)))
+  (write-file filename))
