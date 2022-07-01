@@ -208,6 +208,32 @@ buffer currently exists, then TEMPLATE is ignored."
           buf)
       (rackscratch--ab-initio-iterate))))
 
+(defun rackscratch-next ()
+  "Go to a newer scratch buffer in the current session."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (dir (file-name-directory file))
+         (ext (file-name-extension file))
+         (index (rackscratch--buffer-index (current-buffer)))
+         (next-file (concat dir (number-to-string (1+ index)) "." ext)))
+    (when (file-exists-p next-file)
+      (kill-buffer)
+      (find-file next-file) ; also set REPL?
+      (rename-buffer rackscratch-buffer-name))))
+
+(defun rackscratch-previous ()
+  "Go to an older scratch buffer in the current session."
+  (interactive)
+  (let* ((file (buffer-file-name))
+         (dir (file-name-directory file))
+         (ext (file-name-extension file))
+         (index (rackscratch--buffer-index (current-buffer)))
+         (previous-file (concat dir (number-to-string (1- index)) "." ext)))
+    (when (file-exists-p previous-file)
+      (kill-buffer)
+      (find-file previous-file) ; also set REPL?
+      (rename-buffer rackscratch-buffer-name))))
+
 (defun rackscratch-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
   (advice-add #'racket-run :around #'rackscratch-implicitly-iterate-advice))
