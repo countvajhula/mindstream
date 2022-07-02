@@ -197,25 +197,27 @@ buffer currently exists, then TEMPLATE is ignored."
   (let ((buffer (rackscratch--get-scratch-buffer)))
     (if buffer
         (let ((index (rackscratch--buffer-index buffer))
-              (session (rackscratch--buffer-session buffer))
-              (buf (if template
-                       (rackscratch--new-buffer-from-template template)
-                     (rackscratch--new-buffer-copy buffer))))
-          (with-current-buffer buffer
-            ;; first save the existing scratch buffer
-            (save-buffer)
-            (kill-buffer))
-          ;; save and return the new one
-          (with-current-buffer buf
-            (if (equal session rackscratch-session-name)
-                ;; TODO: in these cases, it may be better to save the current
-                ;; scratch buffer as the N+1 file and copy it to the N file.
-                ;; That way, the point location and other state information
-                ;; (e.g. the current evil state) would be preserved without
-                ;; needing any bookkeeping. But that seems just a bit hacky.
-                (rackscratch-write (1+ index))
-              (rackscratch-write))) ; start numbering from 1 if new session
-          buf)
+              (session (rackscratch--buffer-session buffer)))
+          (if template
+              (let ((buf (rackscratch--new-buffer-from-template template)))
+                (with-current-buffer buffer
+                  ;; first save the existing scratch buffer
+                  (save-buffer)
+                  (kill-buffer))
+                ;; save and return the new one
+                (with-current-buffer buf
+                  (if (equal session rackscratch-session-name)
+                      (rackscratch-write (1+ index))
+                    (rackscratch-write))) ; start numbering from 1 if new session
+                buf)
+            (with-current-buffer buffer
+              ;; first save the existing scratch buffer
+              (save-buffer)
+              ;; save and return the new one
+              (if (equal session rackscratch-session-name)
+                  (rackscratch-write (1+ index))
+                (rackscratch-write))) ; start numbering from 1 if new session
+            buffer))
       (rackscratch--ab-initio-iterate))))
 
 (defun rackscratch--navigate (fn)
