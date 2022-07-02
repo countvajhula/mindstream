@@ -226,15 +226,20 @@ buffer currently exists, then TEMPLATE is ignored."
 FN is expected to be a function that accepts an index and returns a new
 index. Typically, FN will be either 1+ or 1-, to navigate forwards or
 backwards in the scratch buffer history."
-  (let* ((file (buffer-file-name))
+  (let* ((original-point (point))
+         (file (buffer-file-name))
          (dir (file-name-directory file))
          (ext (file-name-extension file))
          (index (rackscratch--buffer-index (current-buffer)))
          (next-file (concat dir (number-to-string (funcall fn index)) "." ext)))
     (when (file-exists-p next-file)
-      (kill-buffer)
-      (find-file next-file) ; also set REPL?
-      (rename-buffer rackscratch-buffer-name))))
+      (erase-buffer)
+      (insert-file-contents next-file)
+      (set-visited-file-name next-file)
+      (rename-buffer rackscratch-buffer-name)
+      (goto-char (if (> original-point (point-max))
+                     (point-max)
+                   original-point)))))
 
 (defun rackscratch-next ()
   "Go to a newer scratch buffer in the current session."
