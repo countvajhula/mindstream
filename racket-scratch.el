@@ -12,6 +12,24 @@
       (concat (file-name-as-directory rackscratch-template-path)
               rackscratch-default-template-name))
 
+(define-minor-mode rackscratch-mode
+  "Minor mode providing keybindings for rackscratch mode."
+  :lighter " racket-scratch"
+  :global t
+  :keymap
+  (let ((rackscratch-map (make-sparse-keymap)))
+    (define-key rackscratch-map (kbd "C-c C-r n") #'rackscratch-new)
+    (define-key rackscratch-map (kbd "C-c C-r x") #'rackscratch-switch-to-scratch-buffer)
+    (define-key rackscratch-map (kbd "C-c C-r h") #'rackscratch-previous)
+    (define-key rackscratch-map (kbd "C-c C-r l") #'rackscratch-next)
+    (define-key rackscratch-map (kbd "C-c C-r c") #'rackscratch-clear)
+    (define-key rackscratch-map (kbd "C-c C-r s") #'rackscratch-save-file)
+    (define-key rackscratch-map (kbd "C-c C-r S") #'rackscratch-save-session)
+    rackscratch-map)
+  (if rackscratch-mode
+      (rackscratch-initialize)
+    (rackscratch-disable)))
+
 (defun rackscratch--unique-session-name ()
   "Unique name for a scratch buffer session."
   (let ((time (current-time)))
@@ -254,6 +272,10 @@ backwards in the scratch buffer history."
 (defun rackscratch-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
   (advice-add #'racket-run :around #'rackscratch-implicitly-iterate-advice))
+
+(defun rackscratch-disable ()
+  "Remove any advice for racket scratch buffers."
+  (advice-remove #'racket-run #'rackscratch-implicitly-iterate-advice))
 
 (defun rackscratch-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command."
