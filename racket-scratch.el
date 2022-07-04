@@ -51,6 +51,21 @@ for the new session."
     (concat (file-name-as-directory rackscratch-path)
             (file-name-as-directory session))))
 
+(cl-defun rackscratch--session-max-index (&optional session)
+  "Max (latest) index for the current session."
+  (let* ((session (or session rackscratch-session-name))
+         (path (rackscratch--session-path session))
+         ;; note that non-numeric filenames are converted to
+         ;; index 0 by string-to-number. That shouldn't be
+         ;; relevant for our purposes since we're picking
+         ;; the largest, in any case.
+         (indices (seq-map
+                   ;; filter to only numbers and then sort them
+                   ;; as numbers
+                   (lambda (filespec) (string-to-number (car filespec)))
+                   (directory-files-and-attributes path))))
+    (apply #'max indices)))
+
 (cl-defun rackscratch-write (&optional index)
   "Write scratch buffer to disk with index INDEX.
 
@@ -70,7 +85,7 @@ it should typically be run using `with-current-buffer`."
           (error (format "Scratch file with requested index %d in session %s already exists!"
                          index
                          rackscratch-session-name))
-          (write-file filename)))
+        (write-file filename)))
     (rename-buffer rackscratch-buffer-name)
     ;; store the current session as a buffer-local variable
     ;; on the scratch buffer. This is used to reset the index
@@ -214,8 +229,8 @@ scratch buffer will be copied over to the new file. If no scratch
 buffer currently exists, then TEMPLATE is ignored."
   (let ((buffer (rackscratch--get-scratch-buffer)))
     (if buffer
-        (let ((index (rackscratch--buffer-index buffer))
-              (session (rackscratch--buffer-session buffer)))
+        (let* ((session (rackscratch--buffer-session buffer))
+               (index (rackscratch--session-max-index session)))
           (if template
               (let ((buf (rackscratch--new-buffer-from-template template)))
                 (with-current-buffer buffer
@@ -229,9 +244,10 @@ buffer currently exists, then TEMPLATE is ignored."
                     (rackscratch-write))) ; start numbering from 1 if new session
                 buf)
             (with-current-buffer buffer
-              ;; first save the existing scratch buffer
-              (save-buffer)
-              ;; save and return the new one
+              ;; save with the new filename, so that any mutations to
+              ;; the scratch buffer always get appended to the end
+              ;; as a fresh state, instead of being treated as mutations
+              ;; of an existing state.
               (if (equal session rackscratch-session-name)
                   (rackscratch-write (1+ index))
                 (rackscratch-write))) ; start numbering from 1 if new session
