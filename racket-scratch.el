@@ -270,6 +270,7 @@ backwards in the scratch buffer history."
       (erase-buffer)
       (insert-file-contents next-file)
       (set-visited-file-name next-file)
+      (set-buffer-modified-p nil)
       (rename-buffer rackscratch-buffer-name)
       (goto-char (if (> original-point (point-max))
                      (point-max)
