@@ -5,8 +5,6 @@ A rapid prototyping UX for Racket programming in Emacs, based on versioned and s
 
 In the future, besides being usable at all (it's still in development!), this may be generalized for use with other languages and authoring settings in general.
 
-See https://github.com/greghendershott/racket-mode/issues/628 for background and motivation.
-
 Usage
 =====
 
@@ -23,6 +21,11 @@ You can also explore adding new templates in ``rackscratch-template-path`` (defa
 Try ``M-x rackscratch- ...`` to see all the available interactive commands. These will soon be added to a global minor mode so that there will be convenient and customizable keybindings for them.
 
 The ``rackscratch-next`` and ``rackscratch-previous`` features work just for navigation of your development history, but aren't properly modeled yet -- so, don't expect to be able to use them for anything other than read-only / save-file purposes.
+
+Acknowledgements
+================
+
+This package was conceived in `discussion with Greg Hendershott <https://github.com/greghendershott/racket-mode/issues/628>`_.
 
 "License"
 ==========
