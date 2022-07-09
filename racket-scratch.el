@@ -294,17 +294,29 @@ backwards in the scratch buffer history."
   "Remove any advice for racket scratch buffers."
   (advice-remove #'racket-run #'rackscratch-implicitly-iterate-advice))
 
+(defun rackscratch-scratch-buffer-p ()
+  "Predicate to check if the current buffer is the Scratch buffer."
+  (equal rackscratch-buffer-name (buffer-name)))
+
 (defun rackscratch-implicitly-iterate-advice (orig-fn &rest args)
-  "Implicitly iterate the scratch buffer upon execution of some command."
+  "Implicitly iterate the scratch buffer upon execution of some command.
+
+This only iterates the buffer if it is the current buffer and has been
+modified since the last persistent state. Otherwise, it takes no action."
   (let ((buffer-modified (buffer-modified-p)))
     (let ((result (apply orig-fn args)))
-      (when buffer-modified
+      (when (and buffer-modified (rackscratch-scratch-buffer-p))
         (let ((buf (rackscratch-iterate)))
           (switch-to-buffer buf)))
       result)))
 
 (defun rackscratch-save-file (filename)
-  "Save the current scratch buffer to a file."
+  "Save the current scratch buffer to a file.
+
+This is for interactive use only, for saving the file to a persistent
+location of your choice. To just save the file to its existing (tmp)
+location, use a low-level utility like `save-buffer` or `write-file`
+directly."
   (interactive (list (read-file-name "Save file as: " rackscratch-save-file-path "")))
   (write-file filename))
 
