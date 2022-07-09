@@ -24,7 +24,7 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
 Usage
 =====
 
-If you'd like to try out this very early and untested version (you courageous pioneer, you!), here's how you can do it:
+If you'd like to try out this early version (you pioneer, you!), here's how you can do it:
 
 1. Follow the installation instructions above to install this package using straight.el
 2. Ensure ``(mindstream-initialize)`` is somewhere in your config. This advises Racket Mode's ``racket-run`` to "iterate" the scratch buffer, providing implicit versioning for your Racket scratch buffer.
