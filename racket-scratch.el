@@ -1,60 +1,60 @@
 ;; defcustoms
-(setq rackscratch-path "/var/tmp/racket/") ; TODO: make platform-independent
-(setq rackscratch-template-path "~/.racket-mode/scratch/templates/") ; TODO: make platform-independent
-(setq rackscratch-save-file-path user-home-directory)
-(setq rackscratch-save-session-path user-home-directory)
-(setq rackscratch-session-name nil)
-(setq rackscratch-major-mode 'racket-mode)
-(setq rackscratch-file-extension ".rkt")
-(setq rackscratch-buffer-name "*scratch - Racket*")
-(setq rackscratch-default-template-name "racket.rkt")
-(setq rackscratch-default-template
-      (concat (file-name-as-directory rackscratch-template-path)
-              rackscratch-default-template-name))
+(setq mindstream-path "/var/tmp/racket/") ; TODO: make platform-independent
+(setq mindstream-template-path "~/.racket-mode/scratch/templates/") ; TODO: make platform-independent
+(setq mindstream-save-file-path user-home-directory)
+(setq mindstream-save-session-path user-home-directory)
+(setq mindstream-session-name nil)
+(setq mindstream-major-mode 'racket-mode)
+(setq mindstream-file-extension ".rkt")
+(setq mindstream-buffer-name "*scratch - Racket*")
+(setq mindstream-default-template-name "racket.rkt")
+(setq mindstream-default-template
+      (concat (file-name-as-directory mindstream-template-path)
+              mindstream-default-template-name))
 
-(define-minor-mode rackscratch-mode
-  "Minor mode providing keybindings for rackscratch mode."
-  :lighter " racket-scratch"
+(define-minor-mode mindstream-mode
+  "Minor mode providing keybindings for mindstream mode."
+  :lighter " mindstream"
   :global t
   :keymap
-  (let ((rackscratch-map (make-sparse-keymap)))
-    (define-key rackscratch-map (kbd "C-c C-r n") #'rackscratch-new)
-    (define-key rackscratch-map (kbd "C-c C-r x") #'rackscratch-switch-to-scratch-buffer)
-    (define-key rackscratch-map (kbd "C-c C-r h") #'rackscratch-previous)
-    (define-key rackscratch-map (kbd "C-c C-r l") #'rackscratch-next)
-    (define-key rackscratch-map (kbd "C-c C-r c") #'rackscratch-clear)
-    (define-key rackscratch-map (kbd "C-c C-r s") #'rackscratch-save-file)
-    (define-key rackscratch-map (kbd "C-c C-r S") #'rackscratch-save-session)
-    rackscratch-map)
-  (if rackscratch-mode
-      (rackscratch-initialize)
-    (rackscratch-disable)))
+  (let ((mindstream-map (make-sparse-keymap)))
+    (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
+    (define-key mindstream-map (kbd "C-c C-r x") #'mindstream-switch-to-scratch-buffer)
+    (define-key mindstream-map (kbd "C-c C-r h") #'mindstream-previous)
+    (define-key mindstream-map (kbd "C-c C-r l") #'mindstream-next)
+    (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
+    (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-file)
+    (define-key mindstream-map (kbd "C-c C-r S") #'mindstream-save-session)
+    mindstream-map)
+  (if mindstream-mode
+      (mindstream-initialize)
+    (mindstream-disable)))
 
-(defun rackscratch--unique-session-name ()
+(defun mindstream--unique-session-name ()
   "Unique name for a scratch buffer session."
   (let ((time (current-time)))
     (concat (format-time-string "%Y-%m-%d" time)
             "-"
             (sha1 (format "%s" time)))))
 
-(defun rackscratch-start-session ()
+(defun mindstream-start-session ()
   "Start a new session.
 
 This simply updates the current session name. The next time the scratch buffer
 is iterated, it will create a new folder to hold the scratch buffer stages
 for the new session."
-  (setq rackscratch-session-name (rackscratch--unique-session-name)))
+  (setq mindstream-session-name (mindstream--unique-session-name)))
 
-(cl-defun rackscratch--session-path (&optional session)
+(cl-defun mindstream--session-path (&optional session)
   "Path to the directory on disk containing SESSION."
-  (let ((session (or session rackscratch-session-name)))
-    (concat (file-name-as-directory rackscratch-path)
+  (let ((session (or session mindstream-session-name)))
+    (concat (file-name-as-directory mindstream-path)
             (file-name-as-directory session))))
 
-(cl-defun rackscratch--session-max-index (&optional session)
+(cl-defun mindstream--session-max-index (&optional session)
   "Max (latest) index for the current session."
-  (let* ((session (or session rackscratch-session-name))
-         (path (rackscratch--session-path session))
+  (let* ((session (or session mindstream-session-name))
+         (path (mindstream--session-path session))
          ;; note that non-numeric filenames are converted to
          ;; index 0 by string-to-number. That shouldn't be
          ;; relevant for our purposes since we're picking
@@ -66,67 +66,67 @@ for the new session."
                    (directory-files-and-attributes path))))
     (apply #'max indices)))
 
-(cl-defun rackscratch-write (&optional index)
+(cl-defun mindstream-write (&optional index)
   "Write scratch buffer to disk with index INDEX.
 
 This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
-  (let* ((session (or rackscratch-session-name
-                      (rackscratch--unique-session-name)))
-         (base-path (rackscratch--session-path session))
+  (let* ((session (or mindstream-session-name
+                      (mindstream--unique-session-name)))
+         (base-path (mindstream--session-path session))
          (index (or index 1)))
     (unless (file-directory-p base-path)
       (mkdir base-path t))
     (let ((filename (concat base-path
                             (format "%d" index)
-                            rackscratch-file-extension)))
+                            mindstream-file-extension)))
       (if (file-exists-p filename)
           ;; we don't expect this to happen and it would be a bug if it did
           (error (format "Scratch file with requested index %d in session %s already exists!"
                          index
-                         rackscratch-session-name))
+                         mindstream-session-name))
         (write-file filename)))
-    (rename-buffer rackscratch-buffer-name)
+    (rename-buffer mindstream-buffer-name)
     ;; store the current session as a buffer-local variable
     ;; on the scratch buffer. This is used to reset the index
     ;; to 1 when a new session is started.
-    (setq rackscratch-session-name session)))
+    (setq mindstream-session-name session)))
 
-(defun rackscratch--ensure-templates-exist ()
+(defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   ;; consider alternative: an initialization function to do this the first time
-  (unless (file-directory-p rackscratch-template-path)
-    (mkdir rackscratch-template-path t)
+  (unless (file-directory-p mindstream-template-path)
+    (mkdir mindstream-template-path t)
     (let ((buf (generate-new-buffer "default-template")))
       (with-current-buffer buf
         (insert "#lang racket\n\n")
-        (write-file (concat rackscratch-template-path
-                            rackscratch-default-template-name)))
+        (write-file (concat mindstream-template-path
+                            mindstream-default-template-name)))
       (kill-buffer buf))))
 
-(defun rackscratch--file-contents (filename)
+(defun mindstream--file-contents (filename)
   "Get contents of FILENAME as a string."
   (with-temp-buffer
     (insert-file-contents filename)
     (buffer-string)))
 
-(defun rackscratch--buffer-contents (buffer)
+(defun mindstream--buffer-contents (buffer)
   "Get contents of BUFFER."
   (with-current-buffer buffer
     (buffer-string)))
 
-(defun rackscratch--buffer-index (buffer)
+(defun mindstream--buffer-index (buffer)
   "Get the index of the buffer in the current scratch session."
   (string-to-number
    (file-name-base
     (buffer-file-name buffer))))
 
-(defun rackscratch--buffer-session (buffer)
+(defun mindstream--buffer-session (buffer)
   "Get the session of the BUFFER."
   (with-current-buffer buffer
     buffer-session))
 
-(defun rackscratch--new-buffer-with-contents (contents)
+(defun mindstream--new-buffer-with-contents (contents)
   "Create a new scratch buffer containing CONTENTS.
 
 This does not save the buffer.
@@ -134,13 +134,13 @@ This does not save the buffer.
 As a \"scratch\" buffer, its contents will be treated as
 disposable, and it will not prompt to save if it is closed or
 if Emacs is exited."
-  (let* ((buffer-name rackscratch-buffer-name)
+  (let* ((buffer-name mindstream-buffer-name)
          (buf (generate-new-buffer buffer-name))
-         (major-mode-to-use rackscratch-major-mode))
+         (major-mode-to-use mindstream-major-mode))
     (with-current-buffer buf
       (funcall major-mode-to-use)
       (setq buffer-offer-save nil)
-      (setq-local buffer-session rackscratch-session-name)
+      (setq-local buffer-session mindstream-session-name)
       ;; Ignore whatever `racket-repl-buffer-name-function' just did to
       ;; set `racket-repl-buffer-name' and give this its own REPL.
       (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
@@ -149,21 +149,21 @@ if Emacs is exited."
       (goto-char (point-max)))
     buf))
 
-(defun rackscratch--new-buffer-from-template (template)
+(defun mindstream--new-buffer-from-template (template)
   "Create a new (unsaved) buffer from TEMPLATE."
-  (rackscratch--ensure-templates-exist)
-  (let* ((contents (rackscratch--file-contents template))
-         (buf (rackscratch--new-buffer-with-contents contents)))
+  (mindstream--ensure-templates-exist)
+  (let* ((contents (mindstream--file-contents template))
+         (buf (mindstream--new-buffer-with-contents contents)))
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
       ;; on the scratch buffer
       (setq-local buffer-template template))
     buf))
 
-(defun rackscratch--new-buffer-copy (buffer)
+(defun mindstream--new-buffer-copy (buffer)
   "Create a new (unsaved) buffer using the contents of BUFFER."
-  (let* ((contents (rackscratch--buffer-contents buffer))
-         (buf (rackscratch--new-buffer-with-contents contents))
+  (let* ((contents (mindstream--buffer-contents buffer))
+         (buf (mindstream--new-buffer-with-contents contents))
          (template (with-current-buffer buffer
                      buffer-template)))
     (with-current-buffer buf
@@ -172,12 +172,12 @@ if Emacs is exited."
       (setq-local buffer-template template))
     buf))
 
-(defun rackscratch--get-scratch-buffer ()
+(defun mindstream--get-scratch-buffer ()
   "Get the active scratch buffer, if it exists."
-  (let ((buffer-name rackscratch-buffer-name))
+  (let ((buffer-name mindstream-buffer-name))
     (get-buffer buffer-name)))
 
-(defun rackscratch--get-or-create-scratch-buffer ()
+(defun mindstream--get-or-create-scratch-buffer ()
   "Get the active scratch buffer or create a new one.
 
 If the scratch buffer doesn't exist, this creates a new one using
@@ -186,39 +186,39 @@ the default configured template.
 This is a convenience utility for \"read only\" cases where we simply want to
 get the scratch buffer - whatever it may be. It is too connoted to be
 useful in features implementing the scratch buffer iteration model."
-  (or (rackscratch--get-scratch-buffer)
-      (rackscratch-new rackscratch-default-template)))
+  (or (mindstream--get-scratch-buffer)
+      (mindstream-new mindstream-default-template)))
 
-(defun rackscratch-switch-to-scratch-buffer ()
+(defun mindstream-switch-to-scratch-buffer ()
   "Switch to scratch buffer."
   (interactive)
-  (let ((buf (rackscratch--get-or-create-scratch-buffer)))
+  (let ((buf (mindstream--get-or-create-scratch-buffer)))
     (switch-to-buffer buf)))
 
-(defun rackscratch-new (template)
+(defun mindstream-new (template)
   "Start a new scratch buffer using a specific template.
 
 This also begins a new session."
-  (interactive (list (read-file-name "Which template? " rackscratch-template-path)))
-  (rackscratch-start-session) ; start a new session
-  (let ((buf (rackscratch-iterate template)))
+  (interactive (list (read-file-name "Which template? " mindstream-template-path)))
+  (mindstream-start-session) ; start a new session
+  (let ((buf (mindstream-iterate template)))
     (switch-to-buffer buf)))
 
-(defun rackscratch-clear ()
+(defun mindstream-clear ()
   "Start a new scratch buffer using a specific template."
   (interactive)
-  (let ((buf (rackscratch-iterate buffer-template)))
+  (let ((buf (mindstream-iterate buffer-template)))
     (switch-to-buffer buf)))
 
-(defun rackscratch--ab-initio-iterate ()
+(defun mindstream--ab-initio-iterate ()
   "Create a scratch buffer for the first time."
-  (let ((buf (rackscratch--new-buffer-from-template rackscratch-default-template)))
+  (let ((buf (mindstream--new-buffer-from-template mindstream-default-template)))
     ;; now that it's created, save it
     (with-current-buffer buf
-      (rackscratch-write))
+      (mindstream-write))
     buf))
 
-(cl-defun rackscratch-iterate (&optional template)
+(cl-defun mindstream-iterate (&optional template)
   "Create a successor to the current scratch buffer.
 
 This uses the index of the current scratch buffer incremented by one
@@ -227,34 +227,34 @@ the index at 1.  If a TEMPLATE is provided, it will be used as the
 contents of the new buffer, otherwise, the contents of the existing
 scratch buffer will be copied over to the new file. If no scratch
 buffer currently exists, then TEMPLATE is ignored."
-  (let ((buffer (rackscratch--get-scratch-buffer)))
+  (let ((buffer (mindstream--get-scratch-buffer)))
     (if buffer
-        (let* ((session (rackscratch--buffer-session buffer))
-               (index (rackscratch--session-max-index session)))
+        (let* ((session (mindstream--buffer-session buffer))
+               (index (mindstream--session-max-index session)))
           (if template
-              (let ((buf (rackscratch--new-buffer-from-template template)))
+              (let ((buf (mindstream--new-buffer-from-template template)))
                 (with-current-buffer buffer
                   ;; first save the existing scratch buffer
                   (save-buffer)
                   (kill-buffer))
                 ;; save and return the new one
                 (with-current-buffer buf
-                  (if (equal session rackscratch-session-name)
-                      (rackscratch-write (1+ index))
-                    (rackscratch-write))) ; start numbering from 1 if new session
+                  (if (equal session mindstream-session-name)
+                      (mindstream-write (1+ index))
+                    (mindstream-write))) ; start numbering from 1 if new session
                 buf)
             (with-current-buffer buffer
               ;; save with the new filename, so that any mutations to
               ;; the scratch buffer always get appended to the end
               ;; as a fresh state, instead of being treated as mutations
               ;; of an existing state.
-              (if (equal session rackscratch-session-name)
-                  (rackscratch-write (1+ index))
-                (rackscratch-write))) ; start numbering from 1 if new session
+              (if (equal session mindstream-session-name)
+                  (mindstream-write (1+ index))
+                (mindstream-write))) ; start numbering from 1 if new session
             buffer))
-      (rackscratch--ab-initio-iterate))))
+      (mindstream--ab-initio-iterate))))
 
-(defun rackscratch--navigate (fn)
+(defun mindstream--navigate (fn)
   "Go to an older or newer scratch buffer in the current session.
 
 FN is expected to be a function that accepts an index and returns a new
@@ -264,63 +264,63 @@ backwards in the scratch buffer history."
          (file (buffer-file-name))
          (dir (file-name-directory file))
          (ext (file-name-extension file))
-         (index (rackscratch--buffer-index (current-buffer)))
+         (index (mindstream--buffer-index (current-buffer)))
          (next-file (concat dir (number-to-string (funcall fn index)) "." ext)))
     (when (file-exists-p next-file)
       (erase-buffer)
       (insert-file-contents next-file)
       (set-visited-file-name next-file)
       (set-buffer-modified-p nil)
-      (rename-buffer rackscratch-buffer-name)
+      (rename-buffer mindstream-buffer-name)
       (goto-char (if (> original-point (point-max))
                      (point-max)
                    original-point)))))
 
-(defun rackscratch-next ()
+(defun mindstream-next ()
   "Go to a newer scratch buffer in the current session."
   (interactive)
-  (rackscratch--navigate #'1+))
+  (mindstream--navigate #'1+))
 
-(defun rackscratch-previous ()
+(defun mindstream-previous ()
   "Go to an older scratch buffer in the current session."
   (interactive)
-  (rackscratch--navigate #'1-))
+  (mindstream--navigate #'1-))
 
-(defun rackscratch-initialize ()
+(defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
-  (advice-add #'racket-run :around #'rackscratch-implicitly-iterate-advice))
+  (advice-add #'racket-run :around #'mindstream-implicitly-iterate-advice))
 
-(defun rackscratch-disable ()
+(defun mindstream-disable ()
   "Remove any advice for racket scratch buffers."
-  (advice-remove #'racket-run #'rackscratch-implicitly-iterate-advice))
+  (advice-remove #'racket-run #'mindstream-implicitly-iterate-advice))
 
-(defun rackscratch-scratch-buffer-p ()
+(defun mindstream-scratch-buffer-p ()
   "Predicate to check if the current buffer is the Scratch buffer."
-  (equal rackscratch-buffer-name (buffer-name)))
+  (equal mindstream-buffer-name (buffer-name)))
 
-(defun rackscratch-implicitly-iterate-advice (orig-fn &rest args)
+(defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command.
 
 This only iterates the buffer if it is the current buffer and has been
 modified since the last persistent state. Otherwise, it takes no action."
-  (when (and (rackscratch-scratch-buffer-p) (buffer-modified-p))
-    (rackscratch-iterate))
+  (when (and (mindstream-scratch-buffer-p) (buffer-modified-p))
+    (mindstream-iterate))
   (let ((result (apply orig-fn args)))
     result))
 
-(defun rackscratch-save-file (filename)
+(defun mindstream-save-file (filename)
   "Save the current scratch buffer to a file.
 
 This is for interactive use only, for saving the file to a persistent
 location of your choice. To just save the file to its existing (tmp)
 location, use a low-level utility like `save-buffer` or `write-file`
 directly."
-  (interactive (list (read-file-name "Save file as: " rackscratch-save-file-path "")))
+  (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
   (write-file filename))
 
-(defun rackscratch-save-session (dir)
+(defun mindstream-save-session (dir)
   "Save the current scratch session to a directory."
-  (interactive (list (read-directory-name "Save session in: " rackscratch-save-session-path)))
+  (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
   ;; TODO: ideally, also be able to give it a name
-  (copy-directory (rackscratch--session-path rackscratch-session-name)
+  (copy-directory (mindstream--session-path mindstream-session-name)
                   dir))
