@@ -303,12 +303,10 @@ backwards in the scratch buffer history."
 
 This only iterates the buffer if it is the current buffer and has been
 modified since the last persistent state. Otherwise, it takes no action."
-  (let ((buffer-modified (buffer-modified-p)))
-    (let ((result (apply orig-fn args)))
-      (when (and buffer-modified (rackscratch-scratch-buffer-p))
-        (let ((buf (rackscratch-iterate)))
-          (switch-to-buffer buf)))
-      result)))
+  (when (and (rackscratch-scratch-buffer-p) (buffer-modified-p))
+    (rackscratch-iterate))
+  (let ((result (apply orig-fn args)))
+    result))
 
 (defun rackscratch-save-file (filename)
   "Save the current scratch buffer to a file.
