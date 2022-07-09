@@ -1,16 +1,37 @@
-;; defcustoms
-(setq mindstream-path "/var/tmp/racket/") ; TODO: make platform-independent
-(setq mindstream-template-path "~/.racket-mode/scratch/templates/") ; TODO: make platform-independent
-(setq mindstream-save-file-path user-home-directory)
-(setq mindstream-save-session-path user-home-directory)
+;;; mindstream.el --- A scratch buffer -*- lexical-binding: t -*-
+
+;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
+;; URL: https://github.com/countvajhula/mindstream
+;; Version: 0.0
+;; Package-Requires: ((emacs "25.1") (racket-mode "20220705.1452"))
+;; Keywords: lisp, convenience, languages
+
+;; This program is "part of the world," in the sense described at
+;; https://drym.org.  From your perspective, this is no different than
+;; MIT or BSD or other such "liberal" licenses that you may be
+;; familiar with, that is to say, you are free to do whatever you like
+;; with this program.  It is much more than BSD or MIT, however, in
+;; that it isn't a license at all but an idea about the world and how
+;; economic systems could be set up so that everyone wins.  Learn more
+;; at drym.org.
+;;
+;; This work transcends traditional legal and economic systems, but
+;; for the purposes of any such systems within which you may need to
+;; operate:
+;;
+;; This is free and unencumbered software released into the public domain.
+;; The authors relinquish any copyright claims on this work.
+;;
+
+;;; Commentary:
+
+;; A scratch buffer.
+
+;;; Code:
+
+(require 'mindstream-custom)
+
 (setq mindstream-session-name nil)
-(setq mindstream-major-mode 'racket-mode)
-(setq mindstream-file-extension ".rkt")
-(setq mindstream-buffer-name "*scratch - Racket*")
-(setq mindstream-default-template-name "racket.rkt")
-(setq mindstream-default-template
-      (concat (file-name-as-directory mindstream-template-path)
-              mindstream-default-template-name))
 
 (define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."
@@ -286,6 +307,7 @@ backwards in the scratch buffer history."
   (interactive)
   (mindstream--navigate #'1-))
 
+;;;###autoload
 (defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
   (advice-add #'racket-run :around #'mindstream-implicitly-iterate-advice))
@@ -324,3 +346,6 @@ directly."
   ;; TODO: ideally, also be able to give it a name
   (copy-directory (mindstream--session-path mindstream-session-name)
                   dir))
+
+(provide 'mindstream)
+;;; mindstream.el ends here
