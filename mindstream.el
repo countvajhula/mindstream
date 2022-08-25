@@ -33,6 +33,7 @@
 
 (setq mindstream-session-name nil)
 
+;;;###autoload
 (define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."
   :lighter " mindstream"
