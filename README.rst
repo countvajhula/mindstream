@@ -34,7 +34,7 @@ If you'd like to try out this early version (you pioneer, you!), here's how you 
 3. Run ``mindstream-new`` to create a Racket scratch buffer.
 4. Hack away!
 
-You can also explore adding new templates in ``mindstream-template-path`` (default: ``"~/.racket-mode/scratch/templates/"``) -- ordinary Racket files -- which will then be available as options in ``mindstream-new``. You can also save scratch buffers that you'd like to keep, or even entire scratch buffer sessions (which are simply saved as a directory containing a series of Racket files representing stages in your development process, bounded either by ``racket-run`` invocations, or by calls to ``mindstream-clear`` which restores the buffer to a "clear" state, i.e. to its original template form).
+You can also explore adding new templates in ``mindstream-template-path`` (default: ``"~/.mindstream/templates/"``) -- ordinary Racket files -- which will then be available as options in ``mindstream-new``. You can also save scratch buffers that you'd like to keep, or even entire scratch buffer sessions (which are simply saved as a directory containing a series of Racket files representing stages in your development process, bounded either by ``racket-run`` invocations, or by calls to ``mindstream-clear`` which restores the buffer to a "clear" state, i.e. to its original template form).
 
 Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in a global minor mode -- try ``mindstream-mode``.
 

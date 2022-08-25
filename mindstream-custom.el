@@ -40,7 +40,7 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-template-path "~/.racket-mode/scratch/templates/"  ; TODO: make platform-independent?
+(defcustom mindstream-template-path "~/.mindstream/templates/"  ; TODO: make platform-independent?
   "Directory path where mindstream will look for templates."
   :type 'string
   :group 'mindstream)
