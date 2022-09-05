@@ -294,6 +294,8 @@ backwards in the scratch buffer history."
       (set-visited-file-name next-file)
       (set-buffer-modified-p nil)
       (rename-buffer mindstream-buffer-name)
+      ;; TODO: avoid duplication of some of these vs mindstream--new-buffer-with-contents
+      ;; (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
       (goto-char (if (> original-point (point-max))
                      (point-max)
                    original-point)))))
