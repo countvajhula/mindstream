@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(defvar mindstream--user-home-directory (getenv "HOME"))
+
 (defgroup mindstream nil
   "A scratch buffer."
   :group 'Editing)
@@ -45,12 +47,12 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-save-file-path user-home-directory
+(defcustom mindstream-save-file-path mindstream--user-home-directory
   "Default directory path for saving mindstream buffers."
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-save-session-path user-home-directory
+(defcustom mindstream-save-session-path mindstream--user-home-directory
   "Default directory path for saving mindstream sessions."
   :type 'string
   :group 'mindstream)
