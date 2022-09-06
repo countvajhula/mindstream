@@ -67,6 +67,11 @@
   :type 'string
   :group 'mindstream)
 
+(defcustom mindstream-filename "scratch"
+  "Filename to use for mindstream buffers."
+  :type 'string
+  :group 'mindstream)
+
 (defcustom mindstream-buffer-name "*scratch - Racket*"
   "The name of the mindstream scratch buffer."
   :type 'string

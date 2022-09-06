@@ -88,26 +88,55 @@ for the new session."
                    (directory-files-and-attributes path))))
     (apply #'max indices)))
 
-(cl-defun mindstream-write (&optional index)
+;; TODO: restore navigation backwards and forwards
+;; TODO: test "save file" still works
+;; TODO: restore "save session" functionality (probably just
+;;       git-clone it to another path without setting an upstream)
+;; TODO: test that git-timemachine for read-only navigation
+;;       and magit for all the usual stuff work out of the box
+;; TODO: use first line of changeset as commit message?
+;; TODO: start with linearized navigation of versions,
+;;       i.e. modification of any prior state results
+;;       in a fresh commit on a single branch.
+;;       Later, support nonlinear navigation, i.e. modification
+;;       creates a commit on a fresh branch beginning there
+;; TODO: create a rigpa mode to navigate buffer states
+;; TODO: switching branch selects the latest commit on the branch
+;;       to avoid confusion
+;; TODO: test everything, especially the various entry points
+;;       from an ab initio state
+
+(cl-defun mindstream--execute-shell-command (command &optional directory)
+  "Execute COMMAND at DIRECTORY and return its output."
+  (let ((default-directory (or directory
+                               (file-name-directory (buffer-file-name)))))
+    (shell-command-to-string command)))
+
+(defun mindstream-commit ()
+  "Commit the current state as part of iteration."
+  (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
+
+(cl-defun mindstream-write (&optional index) ; HERE: instead of index, a flag on whether it should be a new session
   "Write scratch buffer to disk with index INDEX.
 
 This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
   (let* ((session (or mindstream-session-name
+                      ;; TODO: should this ever be hit?
+                      ;; we already have mindstream-new
                       (mindstream--unique-session-name)))
          (base-path (mindstream--session-path session))
          (index (or index 1)))
     (unless (file-directory-p base-path)
-      (mkdir base-path t))
+      (mkdir base-path t)
+      (mindstream--execute-shell-command "git init" base-path))
+    ;;; HERE: write should be a synonym for commit
     (let ((filename (concat base-path
-                            (format "%d" index)
+                            mindstream-filename
                             mindstream-file-extension)))
-      (if (file-exists-p filename)
-          ;; we don't expect this to happen and it would be a bug if it did
-          (error (format "Scratch file with requested index %d in session %s already exists!"
-                         index
-                         mindstream-session-name))
-        (write-file filename)))
+      ;; except for the ab initio case, the file would exist
+      (write-file filename)
+      (mindstream-commit))
     (rename-buffer mindstream-buffer-name)
     ;; store the current session as a buffer-local variable
     ;; on the scratch buffer. This is used to reset the index
