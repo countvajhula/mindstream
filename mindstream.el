@@ -109,6 +109,11 @@ and Git repository for the new session."
 ;;       to avoid confusion
 ;; TODO: test everything, especially the various entry points
 ;;       from an ab initio state
+;; TODO: support operation in any buffer, but also provide a
+;;       (decoupled) scratch buffer framework
+;;       - it may make sense to tag the initial state so that
+;;         the session could be kept track of and e.g. squashed
+;;         when progress has been made.
 
 (cl-defun mindstream--execute-shell-command (command &optional directory)
   "Execute COMMAND at DIRECTORY and return its output."
@@ -266,11 +271,15 @@ This also begins a new session."
   (let ((buf (mindstream-iterate template)))
     (switch-to-buffer buf)))
 
+;; Note that many of these interfaces assume that they are
+;; invoked while visiting a scratch buffer.
 (defun mindstream-clear ()
   "Start a new scratch buffer using a specific template."
   (interactive)
-  (let ((buf (mindstream-iterate buffer-template)))
-    (switch-to-buffer buf)))
+  ;; first write the existing scratch buffer
+  ;; if there are unsaved changes
+  (mindstream-write)
+  (mindstream-iterate buffer-template))
 
 (defun mindstream--ab-initio-iterate (&optional template)
   "Create a scratch buffer for the first time."
@@ -293,7 +302,10 @@ scratch buffer will be copied over to the new file. If no scratch
 buffer currently exists, then TEMPLATE is ignored."
   (let ((buffer (mindstream--get-scratch-buffer)))
     (if buffer
-        (mindstream-write)
+        ;; note: in this case, this assumes that this is called
+        ;; while visiting a scratch buffer
+        (progn (mindstream-write)
+               buffer)
       (mindstream--ab-initio-iterate template))))
 
 ;; TODO: modify this to just git checkout the rev and proactively
