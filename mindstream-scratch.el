@@ -31,7 +31,7 @@
 
 (require 'mindstream-custom)
 
-(setq mindstream-session-name nil) ; TODO: rename to reflect "scratch" session
+(defvar mindstream-session-name nil) ; TODO: rename to reflect "scratch" session
 
 (defun mindstream--unique-session-name ()
   "Unique name for a scratch buffer session."
