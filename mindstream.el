@@ -51,6 +51,8 @@
       (mindstream-initialize)
     (mindstream-disable)))
 
+;; TODO: should there be a distinct notion of "session" apart
+;;       from the scratch buffer?
 ;; TODO: restore navigation backwards and forwards
 ;; TODO: test "save file" still works
 ;; TODO: restore "save session" functionality (probably just
