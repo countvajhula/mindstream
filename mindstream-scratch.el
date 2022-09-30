@@ -101,6 +101,8 @@ and Git repository for the new session."
   "Initialize a newly created buffer.
 
 This sets the session name and any other necessary attributes."
+  ;; TODO: instead of hardcoding the major mode, just let Emacs
+  ;; choose it based on the file extension
   (let* ((buffer-name mindstream-buffer-name)
          (major-mode-to-use mindstream-major-mode))
     (unless (eq major-mode major-mode-to-use)

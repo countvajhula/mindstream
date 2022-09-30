@@ -51,6 +51,8 @@
       (mindstream-initialize)
     (mindstream-disable)))
 
+;; TODO: saving a scratch buffer should switch focus to the newly
+;;       saved file but also preserve the scratch buffer (or clear it).
 ;; TODO: should there be a distinct notion of "session" apart
 ;;       from the scratch buffer?
 ;; TODO: restore navigation backwards and forwards
