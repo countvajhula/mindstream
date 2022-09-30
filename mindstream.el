@@ -118,17 +118,22 @@ it should typically be run using `with-current-buffer`."
    (file-name-base
     (buffer-file-name buffer))))
 
-(defun mindstream-new (template)
-  "Start a new scratch buffer using a specific template.
-
-This also begins a new session."
-  (interactive (list (read-file-name "Which template? " mindstream-template-path)))
+(defun mindstream--end-session ()
+  "End an active session."
   (with-current-buffer (mindstream--get-scratch-buffer)
     ;; first write the existing scratch buffer
     ;; if there are unsaved changes
     (mindstream-write)
     ;; then kill it
-    (kill-buffer))
+    (kill-buffer)))
+
+(defun mindstream-new (template)
+  "Start a new scratch buffer using a specific template.
+
+This also begins a new session."
+  (interactive (list (read-file-name "Which template? " mindstream-template-path)))
+  ;; end the current session
+  (mindstream--end-session)
   ;; start a new session
   (mindstream-start-session)
   ;; (ab initio) iterate
@@ -247,15 +252,9 @@ directly."
 (defun mindstream-load-session (dir)
   "Load a session from a directory."
   (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
-  ;; save and delete existing scratch buffer
-  ;; open scratch file
-  ;; rename it to scratch
-  (with-current-buffer (mindstream--get-scratch-buffer)
-    ;; first write the existing scratch buffer
-    ;; if there are unsaved changes
-    (mindstream-write)
-    ;; then kill it
-    (kill-buffer))
+  ;; end the current session
+  (mindstream--end-session)
+  ;; restore the old session
   (let* ((session (file-name-nondirectory
                    (string-trim default-directory "" "/")))
          (filename (concat dir
