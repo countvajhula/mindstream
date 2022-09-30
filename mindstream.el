@@ -244,5 +244,28 @@ directly."
   (copy-directory (mindstream--session-path mindstream-session-name)
                   dir))
 
+(defun mindstream-load-session (dir)
+  "Load a session from a directory."
+  (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
+  ;; save and delete existing scratch buffer
+  ;; open scratch file
+  ;; rename it to scratch
+  (with-current-buffer (mindstream--get-scratch-buffer)
+    ;; first write the existing scratch buffer
+    ;; if there are unsaved changes
+    (mindstream-write)
+    ;; then kill it
+    (kill-buffer))
+  (let* ((session (file-name-nondirectory
+                   (string-trim default-directory "" "/")))
+         (filename (concat dir
+                           mindstream-filename
+                           mindstream-file-extension)))
+    (find-file filename)
+    ;; TODO: this should be in a setup function somewhere
+    ;; so it doesn't need to be duplicated
+    (setq mindstream-session-name session)
+    (rename-buffer mindstream-buffer-name)))
+
 (provide 'mindstream)
 ;;; mindstream.el ends here
