@@ -52,6 +52,14 @@
       (mindstream-initialize)
     (mindstream-disable)))
 
+;; TODO:
+;; 1. There can only be one anonymous scratch session active at any time.
+;; 2. New sessions always begin as anonymous.
+;; 3. Named sessions may be loaded without interfering with the active
+;;    anonymous session.
+;; 4. Any number of named sessions could be active at the same time.
+;;    State should be maintained on the filesystem or in buffer-locals
+;;    (i.e. no global state) to keep named sessions self-contained and independent.
 ;; TODO: saving a scratch buffer should switch focus to the newly
 ;;       saved file but also preserve the scratch buffer (or clear it).
 ;; TODO: should there be a distinct notion of "session" apart
