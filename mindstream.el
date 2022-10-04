@@ -257,7 +257,7 @@ directly."
   (mindstream--end-session)
   ;; restore the old session
   (let* ((session (file-name-nondirectory
-                   (string-trim default-directory "" "/")))
+                   (string-trim dir "" "/")))
          (filename (concat dir
                            mindstream-filename
                            mindstream-file-extension)))
