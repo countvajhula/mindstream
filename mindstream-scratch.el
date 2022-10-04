@@ -47,17 +47,23 @@ This updates the current session name and creates a new directory
 and Git repository for the new session."
   (setq mindstream-session-name (mindstream--unique-session-name))
   (let* ((session mindstream-session-name)
-         (base-path (mindstream--session-path session)))
+         (base-path (mindstream--generate-session-path session)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
       (mindstream--execute-shell-command "git init" base-path))))
 
-(cl-defun mindstream--session-path (&optional session)
-  "Path to the directory on disk containing SESSION."
+(cl-defun mindstream--generate-session-path (&optional session)
+  "A path on disk to use for a newly created SESSION."
   (let ((session (or session mindstream-session-name)))
     (concat (file-name-as-directory mindstream-path)
             (file-name-as-directory session))))
 
+(cl-defun mindstream--current-session-path ()
+  "Path to the directory on disk containing the current session."
+  (let ((buf (mindstream--get-scratch-buffer)))
+    (and buf
+         (file-name-directory
+          (buffer-file-name buf)))))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."

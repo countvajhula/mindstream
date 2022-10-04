@@ -109,11 +109,11 @@
 
 This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
-  (let* ((session mindstream-session-name)
-         (base-path (mindstream--session-path session))
-         (filename (concat base-path
-                           mindstream-filename
-                           mindstream-file-extension)))
+  (let ((filename (or (buffer-file-name) ; normal case
+                      ;; ab initio case
+                      (concat (mindstream--generate-session-path mindstream-session-name)
+                              mindstream-filename
+                              mindstream-file-extension))))
     ;; except for the ab initio case, the file would exist
     (write-file filename)
     ;; writing the file changes the buffer name to the filename,
@@ -129,12 +129,14 @@ it should typically be run using `with-current-buffer`."
 
 (defun mindstream--end-session ()
   "End an active session."
-  (with-current-buffer (mindstream--get-scratch-buffer)
-    ;; first write the existing scratch buffer
-    ;; if there are unsaved changes
-    (mindstream-write)
-    ;; then kill it
-    (kill-buffer)))
+  (let ((buf (mindstream--get-scratch-buffer)))
+    (when buf
+      (with-current-buffer buf
+        ;; first write the existing scratch buffer
+        ;; if there are unsaved changes
+        (mindstream-write)
+        ;; then kill it
+        (kill-buffer)))))
 
 (defun mindstream-new (template)
   "Start a new scratch buffer using a specific template.
@@ -180,8 +182,8 @@ scratch buffer will be copied over to the new file. If no scratch
 buffer currently exists, then TEMPLATE is ignored."
   (let ((buffer (mindstream--get-scratch-buffer)))
     (if buffer
-        ;; note: in this case, this assumes that this is called
-        ;; while visiting a scratch buffer
+        ;; note: in the normal (non ab-inito) case, we assume that this
+        ;; is called while visiting a scratch buffer.
         (progn (mindstream-write)
                buffer)
       (mindstream--ab-initio-iterate template))))
@@ -251,12 +253,18 @@ directly."
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
   (write-file filename))
 
-(defun mindstream-save-session (dir)
+(defun mindstream-save-session (dest-dir)
   "Save the current scratch session to a directory."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  ;; TODO: ideally, also be able to give it a name
-  (copy-directory (mindstream--session-path mindstream-session-name)
-                  dir))
+  ;; Note: Assumes the scratch buffer is the current buffer.
+  ;; The chosen name of the directory becomes the name of the session
+  ;; the next time it is loaded.
+  ;; TODO: the saved session should become current, and the
+  ;; current session should be renamed (i.e. there would no longer
+  ;; be an active anonymous session - one can always be started again
+  ;; via `new`).
+  (copy-directory (mindstream--current-session-path)
+                  dest-dir))
 
 (defun mindstream-load-session (dir)
   "Load a session from a directory."
