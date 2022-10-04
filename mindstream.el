@@ -258,29 +258,37 @@ directly."
   (write-file filename))
 
 (defun mindstream-save-session (dest-dir)
-  "Save the current scratch session to a directory."
+  "Save the current scratch session to a directory.
+
+If DEST-DIR is a non-existent path, it will be used as the name of a
+new directory that will contain the session. If it is an existing path,
+then the session will be saved at that path with its current name.
+
+It is advisable to use a descriptive name when saving a session, i.e.
+you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
   ;; Note: Assumes the scratch buffer is the current buffer.
-  ;; The chosen name of the directory becomes the name of the session
-  ;; the next time it is loaded.
-  ;; TODO: the saved session should become current, and the
-  ;; current session should be renamed (i.e. there would no longer
-  ;; be an active anonymous session - one can always be started again
-  ;; via `new`).
-  (copy-directory (mindstream--current-session-path)
-                  dest-dir))
+  ;; The chosen name of the directory becomes the name of the session.
+  (let ((original-session-name mindstream-session-name)
+        (named (not (file-directory-p dest-dir))))
+    (mindstream-write)                  ; ensure no unsaved changes
+    (copy-directory (mindstream--current-session-path)
+                    dest-dir)
+    (mindstream--end-session)
+    (if named
+        (mindstream-load-session dest-dir)
+      (mindstream-load-session (concat dest-dir original-session-name)))))
 
 (defun mindstream-load-session (dir)
   "Load a session from a directory."
   (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
-  ;; end the current session
-  (mindstream--end-session)
   ;; restore the old session
   (let* ((session (file-name-nondirectory
                    (string-trim dir "" "/")))
-         (filename (concat dir
-                           mindstream-filename
-                           mindstream-file-extension)))
+         (filename (expand-file-name
+                    (concat mindstream-filename
+                            mindstream-file-extension)
+                    dir)))
     (find-file filename)
     ;; TODO: this should be in a setup function somewhere
     ;; so it doesn't need to be duplicated
