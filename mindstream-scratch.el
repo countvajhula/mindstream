@@ -40,6 +40,7 @@
             "-"
             (sha1 (format "%s" time)))))
 
+;; TODO: rename to start-anonymous-session
 (defun mindstream-start-session ()
   "Start a new session.
 
