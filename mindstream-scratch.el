@@ -58,20 +58,6 @@ and Git repository for the new session."
     (concat (file-name-as-directory mindstream-path)
             (file-name-as-directory session))))
 
-(cl-defun mindstream--session-max-index (&optional session)
-  "Max (latest) index for the current session."
-  (let* ((session (or session mindstream-session-name))
-         (path (mindstream--session-path session))
-         ;; note that non-numeric filenames are converted to
-         ;; index 0 by string-to-number. That shouldn't be
-         ;; relevant for our purposes since we're picking
-         ;; the largest, in any case.
-         (indices (seq-map
-                   ;; filter to only numbers and then sort them
-                   ;; as numbers
-                   (lambda (filespec) (string-to-number (car filespec)))
-                   (directory-files-and-attributes path))))
-    (apply #'max indices)))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
