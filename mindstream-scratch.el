@@ -132,6 +132,9 @@ if Emacs is exited."
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
       ;; on the scratch buffer
+      ;; TODO: rename to mindstream-template-used
+      ;; and also declare/document it so we know it's a fully
+      ;; qualified path
       (setq-local buffer-template template))
     buf))
 

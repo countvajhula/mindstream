@@ -108,7 +108,7 @@
   "Commit the current state as part of iteration."
   (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
 
-(cl-defun mindstream-write ()
+(defun mindstream-iterate ()
   "Write scratch buffer to disk and increment the version.
 
 This assumes that the scratch buffer is the current buffer, so
@@ -138,7 +138,7 @@ it should typically be run using `with-current-buffer`."
       (with-current-buffer buf
         ;; first write the existing scratch buffer
         ;; if there are unsaved changes
-        (mindstream-write)
+        (mindstream-iterate)
         ;; then kill it
         (kill-buffer)))))
 
@@ -152,7 +152,7 @@ This also begins a new session."
   ;; start a new session
   (mindstream-start-session)
   ;; (ab initio) iterate
-  (let ((buf (mindstream-iterate template)))
+  (let ((buf (mindstream--ab-initio-iterate template)))
     (switch-to-buffer buf)))
 
 ;; Note that many of these interfaces assume that they are
@@ -172,25 +172,8 @@ This also begins a new session."
          (buf (mindstream--new-buffer-from-template template)))
     ;; save and commit the initial state
     (with-current-buffer buf
-      (mindstream-write))
+      (mindstream-iterate))
     buf))
-
-(cl-defun mindstream-iterate (&optional template)
-  "Create a successor to the current scratch buffer.
-
-This uses the index of the current scratch buffer incremented by one
-as the index of the new file. If no scratch buffer exists, this starts
-the index at 1.  If a TEMPLATE is provided, it will be used as the
-contents of the new buffer, otherwise, the contents of the existing
-scratch buffer will be copied over to the new file. If no scratch
-buffer currently exists, then TEMPLATE is ignored."
-  (let ((buffer (mindstream--get-scratch-buffer)))
-    (if buffer
-        ;; note: in the normal (non ab-inito) case, we assume that this
-        ;; is called while visiting a scratch buffer.
-        (progn (mindstream-write)
-               buffer)
-      (mindstream--ab-initio-iterate template))))
 
 ;; TODO: modify this to just git checkout the rev and proactively
 ;; refresh from disk
@@ -271,7 +254,7 @@ you would typically want to specify a new, non-existent folder."
   ;; The chosen name of the directory becomes the name of the session.
   (let ((original-session-name mindstream-session-name)
         (named (not (file-directory-p dest-dir))))
-    (mindstream-write)                  ; ensure no unsaved changes
+    (mindstream-iterate) ; ensure no unsaved changes
     (copy-directory (mindstream--current-session-path)
                     dest-dir)
     (mindstream--end-session)
