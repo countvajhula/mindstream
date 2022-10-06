@@ -65,7 +65,8 @@ New sessions always start anonymous."
       (mindstream--execute-shell-command "git init" base-path)
       (with-current-buffer buf
         (setq mindstream-session-name session)
-        (write-file filename))
+        (write-file filename)
+        (rename-buffer mindstream-buffer-name))
       buf)))
 
 (defun mindstream--generate-anonymous-session-path (session)
