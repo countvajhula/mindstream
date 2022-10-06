@@ -40,7 +40,6 @@
             "-"
             (sha1 (format "%s" time)))))
 
-;; TODO: rename to start-anonymous-session
 (cl-defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
@@ -91,7 +90,7 @@ New sessions always start anonymous."
 (defun mindstream--initialize-buffer ()
   "Initialize a newly created buffer.
 
-This sets the session name and any other necessary attributes."
+This sets the major mode and any other necessary attributes."
   ;; TODO: instead of hardcoding the major mode, just let Emacs
   ;; choose it based on the file extension
   (let* ((buffer-name mindstream-buffer-name)
@@ -99,7 +98,6 @@ This sets the session name and any other necessary attributes."
     (unless (eq major-mode major-mode-to-use)
       (funcall major-mode-to-use))
     (setq buffer-offer-save nil)
-    (setq-local buffer-session mindstream-session-name)
     ;; Ignore whatever `racket-repl-buffer-name-function' just did to
     ;; set `racket-repl-buffer-name' and give this its own REPL.
     (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
@@ -115,8 +113,7 @@ As a \"scratch\" buffer, its contents will be treated as
 disposable, and it will not prompt to save if it is closed or
 if Emacs is exited."
   (let* ((buffer-name mindstream-buffer-name)
-         (buf (generate-new-buffer buffer-name))
-         (major-mode-to-use mindstream-major-mode))
+         (buf (generate-new-buffer buffer-name)))
     (with-current-buffer buf
       (insert contents)
       (mindstream--initialize-buffer))
