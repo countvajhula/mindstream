@@ -29,6 +29,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'mindstream-custom)
 (require 'mindstream-util)
 

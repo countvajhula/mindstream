@@ -29,6 +29,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (cl-defun mindstream--execute-shell-command (command &optional directory)
   "Execute COMMAND at DIRECTORY and return its output."
   (let ((default-directory (or directory
