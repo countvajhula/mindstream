@@ -31,7 +31,11 @@
 
 (require 'mindstream-custom)
 
-(defvar-local mindstream-session-name nil)
+(defvar-local mindstream-session-name nil
+  "The name of the mindstream session represented by the current buffer. For anonymous sessions this is a randomly generated identifier, while for named sessions it's the name of the containing folder.")
+
+(defvar-local mindstream-template-used nil
+  "The template used (if any) in creating the current buffer. This is a string representing a path to a file on disk.")
 
 (defun mindstream--unique-session-name ()
   "Unique name for a scratch buffer session."
@@ -127,10 +131,9 @@ if Emacs is exited."
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
       ;; on the scratch buffer
-      ;; TODO: rename to mindstream-template-used
       ;; and also declare/document it so we know it's a fully
       ;; qualified path
-      (setq-local buffer-template template))
+      (setq mindstream-template-used template))
     buf))
 
 (defun mindstream--get-anonymous-scratch-buffer ()

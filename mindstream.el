@@ -165,8 +165,8 @@ This also begins a new session."
   (erase-buffer)
   ;; if the buffer was originally created using a template,
   ;; then insert the template contents
-  (when buffer-template
-    (insert (mindstream--file-contents buffer-template)))
+  (when mindstream-template-used
+    (insert (mindstream--file-contents mindstream-template-used)))
   ;; write the fresh state
   (mindstream--iterate))
 
