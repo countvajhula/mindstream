@@ -162,8 +162,15 @@ This also begins a new session."
   (interactive)
   ;; first write the existing scratch buffer
   ;; if there are unsaved changes
-  (mindstream-write)
-  (mindstream-iterate buffer-template))
+  (mindstream-iterate)
+  ;; clear the buffer
+  (erase-buffer)
+  ;; if the buffer was originally created using a template,
+  ;; then insert the template contents
+  (when buffer-template
+    (insert (mindstream--file-contents buffer-template)))
+  ;; write the fresh state
+  (mindstream-iterate))
 
 (defun mindstream--ab-initio-iterate (&optional template)
   "Create a scratch buffer for the first time."
