@@ -31,7 +31,7 @@
 
 (require 'mindstream-custom)
 
-(defvar mindstream-session-name nil) ; TODO: rename to reflect "scratch" session
+(defvar-local mindstream-session-name nil)
 
 (defun mindstream--unique-session-name ()
   "Unique name for a scratch buffer session."
@@ -41,25 +41,28 @@
             (sha1 (format "%s" time)))))
 
 ;; TODO: rename to start-anonymous-session
-(defun mindstream-start-session ()
+(cl-defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
 This updates the current session name and creates a new directory
 and Git repository for the new session.
 
 New sessions always start anonymous."
-  (setq mindstream-session-name (mindstream--unique-session-name))
-  (let* ((session mindstream-session-name)
-         (base-path (mindstream--generate-session-path session)))
+  (let* ((session (mindstream--unique-session-name))
+         (base-path (mindstream--generate-anonymous-session-path session))
+         (template (or template mindstream-default-template))
+         (buf (mindstream--new-buffer-from-template template)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
-      (mindstream--execute-shell-command "git init" base-path))))
+      (mindstream--execute-shell-command "git init" base-path)
+      (with-current-buffer buf
+        (setq mindstream-session-name session))
+      buf)))
 
-(cl-defun mindstream--generate-session-path (&optional session)
+(cl-defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."
-  (let ((session (or session mindstream-session-name)))
-    (concat (file-name-as-directory mindstream-path)
-            (file-name-as-directory session))))
+  (concat (file-name-as-directory mindstream-path)
+          (file-name-as-directory session)))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."

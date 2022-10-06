@@ -111,16 +111,12 @@
 
 This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
-  (let ((filename (or (buffer-file-name) ; normal case
-                      ;; ab initio case
-                      (concat (mindstream--generate-session-path mindstream-session-name)
-                              mindstream-filename
-                              mindstream-file-extension))))
-    ;; except for the ab initio case, the file would exist
-    (write-file filename)
+  (let ((anonymous (mindstream-anonymous-scratch-buffer-p)))
+    (save-buffer)
     ;; writing the file changes the buffer name to the filename,
     ;; so we restore the original buffer name
-    (rename-buffer mindstream-buffer-name)
+    (when anonymous
+      (rename-buffer mindstream-buffer-name))
     (mindstream--commit)))
 
 (defun mindstream--buffer-index (buffer)
@@ -151,9 +147,10 @@ This also begins a new session."
   ;; end the current anonymous session
   (mindstream--end-session)
   ;; start a new session (sessions always start anonymous)
-  (mindstream-start-session)
-  ;; (ab initio) iterate
-  (let ((buf (mindstream--ab-initio-iterate template)))
+  (let ((buf (mindstream-start-session template)))
+    ;; (ab initio) iterate
+    (with-current-buffer buf
+      (mindstream--iterate))
     (switch-to-buffer buf)))
 
 (defun mindstream-clear ()
@@ -172,16 +169,6 @@ This also begins a new session."
     (insert (mindstream--file-contents buffer-template)))
   ;; write the fresh state
   (mindstream--iterate))
-
-(defun mindstream--ab-initio-iterate (&optional template)
-  "Create a scratch buffer for the first time."
-  (let* ((template (or template mindstream-default-template))
-         ;; create the scratch buffer
-         (buf (mindstream--new-buffer-from-template template)))
-    ;; save and commit the initial state
-    (with-current-buffer buf
-      (mindstream--iterate))
-    buf))
 
 ;; TODO: modify this to just git checkout the rev and proactively
 ;; refresh from disk
