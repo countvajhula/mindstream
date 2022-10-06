@@ -45,10 +45,7 @@
     (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-file)
     (define-key mindstream-map (kbd "C-c C-r S") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
-    mindstream-map)
-  (if mindstream-mode
-      (mindstream-initialize)
-    (mindstream-disable)))
+    mindstream-map))
 
 ;; TODO:
 ;; 1. There can only be one anonymous scratch session active at any time.
