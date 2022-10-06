@@ -36,11 +36,9 @@
 (define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."
   :lighter " mindstream"
-  :global t
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
-    (define-key mindstream-map (kbd "C-c C-r x") #'mindstream-switch-to-scratch-buffer)
     (define-key mindstream-map (kbd "C-c C-r h") #'mindstream-previous)
     (define-key mindstream-map (kbd "C-c C-r l") #'mindstream-next)
     (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
@@ -104,11 +102,11 @@
                                (file-name-directory (buffer-file-name)))))
     (shell-command-to-string command)))
 
-(defun mindstream-commit ()
+(defun mindstream--commit ()
   "Commit the current state as part of iteration."
   (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
 
-(defun mindstream-iterate ()
+(defun mindstream--iterate ()
   "Write scratch buffer to disk and increment the version.
 
 This assumes that the scratch buffer is the current buffer, so
@@ -123,7 +121,7 @@ it should typically be run using `with-current-buffer`."
     ;; writing the file changes the buffer name to the filename,
     ;; so we restore the original buffer name
     (rename-buffer mindstream-buffer-name)
-    (mindstream-commit)))
+    (mindstream--commit)))
 
 (defun mindstream--buffer-index (buffer)
   "Get the index of the buffer in the current scratch session."
@@ -132,13 +130,16 @@ it should typically be run using `with-current-buffer`."
     (buffer-file-name buffer))))
 
 (defun mindstream--end-session ()
-  "End an active session."
-  (let ((buf (mindstream--get-scratch-buffer)))
+  "End the current anonymous session.
+
+This always affects the current anonymous session and does not affect
+a named session that you may happen to be visiting."
+  (let ((buf (mindstream--get-anonymous-scratch-buffer)))
     (when buf
       (with-current-buffer buf
         ;; first write the existing scratch buffer
         ;; if there are unsaved changes
-        (mindstream-iterate)
+        (mindstream--iterate)
         ;; then kill it
         (kill-buffer)))))
 
@@ -147,22 +148,22 @@ it should typically be run using `with-current-buffer`."
 
 This also begins a new session."
   (interactive (list (read-file-name "Which template? " mindstream-template-path)))
-  ;; end the current session
+  ;; end the current anonymous session
   (mindstream--end-session)
-  ;; start a new session
+  ;; start a new session (sessions always start anonymous)
   (mindstream-start-session)
   ;; (ab initio) iterate
   (let ((buf (mindstream--ab-initio-iterate template)))
     (switch-to-buffer buf)))
 
-;; Note that many of these interfaces assume that they are
-;; invoked while visiting a scratch buffer.
 (defun mindstream-clear ()
   "Start a new scratch buffer using a specific template."
   (interactive)
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
   ;; first write the existing scratch buffer
   ;; if there are unsaved changes
-  (mindstream-iterate)
+  (mindstream--iterate)
   ;; clear the buffer
   (erase-buffer)
   ;; if the buffer was originally created using a template,
@@ -170,7 +171,7 @@ This also begins a new session."
   (when buffer-template
     (insert (mindstream--file-contents buffer-template)))
   ;; write the fresh state
-  (mindstream-iterate))
+  (mindstream--iterate))
 
 (defun mindstream--ab-initio-iterate (&optional template)
   "Create a scratch buffer for the first time."
@@ -179,7 +180,7 @@ This also begins a new session."
          (buf (mindstream--new-buffer-from-template template)))
     ;; save and commit the initial state
     (with-current-buffer buf
-      (mindstream-iterate))
+      (mindstream--iterate))
     buf))
 
 ;; TODO: modify this to just git checkout the rev and proactively
@@ -211,11 +212,15 @@ backwards in the scratch buffer history."
 (defun mindstream-next ()
   "Go to a newer scratch buffer in the current session."
   (interactive)
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
   (mindstream--navigate #'1+))
 
 (defun mindstream-previous ()
   "Go to an older scratch buffer in the current session."
   (interactive)
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
   (mindstream--navigate #'1-))
 
 ;;;###autoload
@@ -232,8 +237,8 @@ backwards in the scratch buffer history."
 
 This only iterates the buffer if it is the current buffer and has been
 modified since the last persistent state. Otherwise, it takes no action."
-  (when (and (mindstream-scratch-buffer-p) (buffer-modified-p))
-    (mindstream-iterate))
+  (when (and mindstream-mode (buffer-modified-p))
+    (mindstream--iterate))
   (let ((result (apply orig-fn args)))
     result))
 
@@ -245,6 +250,8 @@ location of your choice. To just save the file to its existing (tmp)
 location, use a low-level utility like `save-buffer` or `write-file`
 directly."
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
   (write-file filename))
 
 (defun mindstream-save-session (dest-dir)
@@ -257,12 +264,13 @@ then the session will be saved at that path with its current name.
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  ;; Note: Assumes the scratch buffer is the current buffer.
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
   ;; The chosen name of the directory becomes the name of the session.
   (let ((original-session-name mindstream-session-name)
         (named (not (file-directory-p dest-dir))))
-    (mindstream-iterate) ; ensure no unsaved changes
-    (copy-directory (mindstream--current-session-path)
+    (mindstream--iterate) ; ensure no unsaved changes
+    (copy-directory (file-name-directory (buffer-file-name))
                     dest-dir)
     (mindstream--end-session)
     (if named
@@ -280,10 +288,7 @@ you would typically want to specify a new, non-existent folder."
                             mindstream-file-extension)
                     dir)))
     (find-file filename)
-    ;; TODO: this should be in a setup function somewhere
-    ;; so it doesn't need to be duplicated
-    (setq mindstream-session-name session)
-    (rename-buffer mindstream-buffer-name)))
+    (setq mindstream-session-name session)))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here

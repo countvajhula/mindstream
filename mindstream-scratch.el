@@ -42,10 +42,12 @@
 
 ;; TODO: rename to start-anonymous-session
 (defun mindstream-start-session ()
-  "Start a new session.
+  "Start a new anonymous session.
 
 This updates the current session name and creates a new directory
-and Git repository for the new session."
+and Git repository for the new session.
+
+New sessions always start anonymous."
   (setq mindstream-session-name (mindstream--unique-session-name))
   (let* ((session mindstream-session-name)
          (base-path (mindstream--generate-session-path session)))
@@ -58,13 +60,6 @@ and Git repository for the new session."
   (let ((session (or session mindstream-session-name)))
     (concat (file-name-as-directory mindstream-path)
             (file-name-as-directory session))))
-
-(cl-defun mindstream--current-session-path ()
-  "Path to the directory on disk containing the current session."
-  (let ((buf (mindstream--get-scratch-buffer)))
-    (and buf
-         (file-name-directory
-          (buffer-file-name buf)))))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
@@ -138,7 +133,7 @@ if Emacs is exited."
       (setq-local buffer-template template))
     buf))
 
-(defun mindstream--get-scratch-buffer ()
+(defun mindstream--get-anonymous-scratch-buffer ()
   "Get the active scratch buffer, if it exists."
   (let ((buffer-name mindstream-buffer-name))
     (get-buffer buffer-name)))
@@ -152,17 +147,17 @@ the default configured template.
 This is a convenience utility for \"read only\" cases where we simply want to
 get the scratch buffer - whatever it may be. It is too connoted to be
 useful in features implementing the scratch buffer iteration model."
-  (or (mindstream--get-scratch-buffer)
+  (or (mindstream--get-anonymous-scratch-buffer)
       (mindstream-new mindstream-default-template)))
 
 (defun mindstream-switch-to-scratch-buffer ()
-  "Switch to scratch buffer."
+  "Switch to the anonymous scratch buffer."
   (interactive)
   (let ((buf (mindstream--get-or-create-scratch-buffer)))
     (switch-to-buffer buf)))
 
-(defun mindstream-scratch-buffer-p ()
-  "Predicate to check if the current buffer is the Scratch buffer."
+(defun mindstream-anonymous-scratch-buffer-p ()
+  "Predicate to check if the current buffer is the anonymous scratch buffer."
   (equal mindstream-buffer-name (buffer-name)))
 
 (provide 'mindstream-scratch)
