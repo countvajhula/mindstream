@@ -54,15 +54,19 @@ New sessions always start anonymous."
   (let* ((session (mindstream--unique-session-name))
          (base-path (mindstream--generate-anonymous-session-path session))
          (template (or template mindstream-default-template))
-         (buf (mindstream--new-buffer-from-template template)))
+         (buf (mindstream--new-buffer-from-template template))
+         (filename (concat base-path
+                           mindstream-filename
+                           mindstream-file-extension)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
       (mindstream--execute-shell-command "git init" base-path)
       (with-current-buffer buf
-        (setq mindstream-session-name session))
+        (setq mindstream-session-name session)
+        (write-file filename))
       buf)))
 
-(cl-defun mindstream--generate-anonymous-session-path (session)
+(defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."
   (concat (file-name-as-directory mindstream-path)
           (file-name-as-directory session)))
