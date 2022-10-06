@@ -30,6 +30,7 @@
 ;;; Code:
 
 (require 'mindstream-custom)
+(require 'mindstream-util)
 
 (defvar-local mindstream-session-name nil
   "The name of the mindstream session represented by the current buffer. For anonymous sessions this is a randomly generated identifier, while for named sessions it's the name of the containing folder.")
@@ -63,7 +64,6 @@ New sessions always start anonymous."
       (mindstream--execute-shell-command "git init" base-path)
       (with-current-buffer buf
         (setq mindstream-session-name session)
-        (mindstream-mode 1)
         (write-file filename))
       buf)))
 
@@ -145,24 +145,6 @@ if Emacs is exited."
   "Get the active scratch buffer, if it exists."
   (let ((buffer-name mindstream-buffer-name))
     (get-buffer buffer-name)))
-
-(defun mindstream--get-or-create-scratch-buffer ()
-  "Get the active scratch buffer or create a new one.
-
-If the scratch buffer doesn't exist, this creates a new one using
-the default configured template.
-
-This is a convenience utility for \"read only\" cases where we simply want to
-get the scratch buffer - whatever it may be. It is too connoted to be
-useful in features implementing the scratch buffer iteration model."
-  (or (mindstream--get-anonymous-scratch-buffer)
-      (mindstream-new mindstream-default-template)))
-
-(defun mindstream-switch-to-scratch-buffer ()
-  "Switch to the anonymous scratch buffer."
-  (interactive)
-  (let ((buf (mindstream--get-or-create-scratch-buffer)))
-    (switch-to-buffer buf)))
 
 (defun mindstream-anonymous-scratch-buffer-p ()
   "Predicate to check if the current buffer is the anonymous scratch buffer."

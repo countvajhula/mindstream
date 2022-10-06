@@ -31,6 +31,7 @@
 
 (require 'mindstream-custom)
 (require 'mindstream-scratch)
+(require 'mindstream-util)
 
 ;;;###autoload
 (define-minor-mode mindstream-mode
@@ -93,12 +94,6 @@
 ;;       (define an execution loop that is decoupled from the
 ;;       current buffer)
 
-(cl-defun mindstream--execute-shell-command (command &optional directory)
-  "Execute COMMAND at DIRECTORY and return its output."
-  (let ((default-directory (or directory
-                               (file-name-directory (buffer-file-name)))))
-    (shell-command-to-string command)))
-
 (defun mindstream--commit ()
   "Commit the current state as part of iteration."
   (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
@@ -147,6 +142,7 @@ This also begins a new session."
   (let ((buf (mindstream-start-session template)))
     ;; (ab initio) iterate
     (with-current-buffer buf
+      (mindstream-mode 1)
       (mindstream--iterate))
     (switch-to-buffer buf)))
 
@@ -273,6 +269,24 @@ you would typically want to specify a new, non-existent folder."
                     dir)))
     (find-file filename)
     (setq mindstream-session-name session)))
+
+(defun mindstream--get-or-create-scratch-buffer ()
+  "Get the active scratch buffer or create a new one.
+
+If the scratch buffer doesn't exist, this creates a new one using
+the default configured template.
+
+This is a convenience utility for \"read only\" cases where we simply want to
+get the scratch buffer - whatever it may be. It is too connoted to be
+useful in features implementing the scratch buffer iteration model."
+  (or (mindstream--get-anonymous-scratch-buffer)
+      (mindstream-new mindstream-default-template)))
+
+(defun mindstream-switch-to-scratch-buffer ()
+  "Switch to the anonymous scratch buffer."
+  (interactive)
+  (let ((buf (mindstream--get-or-create-scratch-buffer)))
+    (switch-to-buffer buf)))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here
