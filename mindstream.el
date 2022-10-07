@@ -218,6 +218,8 @@ backwards in the scratch buffer history."
 This only iterates the buffer if it is the current buffer and has been
 modified since the last persistent state. Otherwise, it takes no action."
   (when (and mindstream-mode (buffer-modified-p))
+    ;; TODO: this doesn't iterate if we save the buffer via C-x C-s
+    ;; so it should also check for modification on disk
     (mindstream--iterate))
   (let ((result (apply orig-fn args)))
     result))
