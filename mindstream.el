@@ -268,6 +268,7 @@ you would typically want to specify a new, non-existent folder."
                             mindstream-file-extension)
                     dir)))
     (find-file filename)
+    (mindstream-mode 1)
     (setq mindstream-session-name session)))
 
 (defun mindstream--get-or-create-scratch-buffer ()
