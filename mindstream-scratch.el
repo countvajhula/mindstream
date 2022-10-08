@@ -3,7 +3,6 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
-;; Package-Requires: ((emacs "25.1") (racket-mode "20220705.1452"))
 ;; Keywords: lisp, convenience, languages
 
 ;; This program is "part of the world," in the sense described at
@@ -34,23 +33,30 @@
 (require 'mindstream-util)
 
 (defvar-local mindstream-session-name nil
-  "The name of the mindstream session represented by the current buffer. For anonymous sessions this is a randomly generated identifier, while for named sessions it's the name of the containing folder.")
+  "The name of the mindstream session represented by the current buffer.
+
+For anonymous sessions this is a randomly generated identifier, while
+for named sessions it's the name of the containing folder.")
 
 (defvar-local mindstream-template-used nil
-  "The template used (if any) in creating the current buffer. This is a string representing a path to a file on disk.")
+  "The template used (if any) in creating the current buffer.
+
+This is a string representing a path to a file on disk.")
 
 (defun mindstream--unique-session-name ()
   "Unique name for a scratch buffer session."
   (let ((time (current-time)))
-    (concat (format-time-string "%Y-%m-%d" time)
+    (concat (format-time-string "%F" time)
             "-"
             (sha1 (format "%s" time)))))
 
 (cl-defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
-This updates the current session name and creates a new directory
-and Git repository for the new session.
+This creates a new directory and Git repository for the new
+session. It populates the empty buffer with the contents of TEMPLATE
+if one is specified. Otherwise, it uses the configured default
+template.
 
 New sessions always start anonymous."
   (let* ((session (mindstream--unique-session-name))
@@ -104,8 +110,7 @@ New sessions always start anonymous."
 This sets the major mode and any other necessary attributes."
   ;; TODO: instead of hardcoding the major mode, just let Emacs
   ;; choose it based on the file extension
-  (let* ((buffer-name mindstream-buffer-name)
-         (major-mode-to-use mindstream-major-mode))
+  (let ((major-mode-to-use mindstream-major-mode))
     (unless (eq major-mode major-mode-to-use)
       (funcall major-mode-to-use))
     (setq buffer-offer-save nil)

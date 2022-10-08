@@ -134,7 +134,7 @@ a named session that you may happen to be visiting."
         (kill-buffer)))))
 
 (defun mindstream-new (template)
-  "Start a new scratch buffer using a specific template.
+  "Start a new scratch buffer using a specific TEMPLATE.
 
 This also begins a new session."
   (interactive (list (read-file-name "Which template? " mindstream-template-path)))
@@ -218,7 +218,10 @@ backwards in the scratch buffer history."
   "Implicitly iterate the scratch buffer upon execution of some command.
 
 This only iterates the buffer if it is the current buffer and has been
-modified since the last persistent state. Otherwise, it takes no action."
+modified since the last persistent state. Otherwise, it takes no action.
+
+ORIG-FN is the original function invoked, and ARGS are the arguments
+in that invocation."
   (when (and mindstream-mode
              (or (buffer-modified-p)
                  (magit-anything-modified-p)))
@@ -230,9 +233,9 @@ modified since the last persistent state. Otherwise, it takes no action."
   "Save the current scratch buffer to a file.
 
 This is for interactive use only, for saving the file to a persistent
-location of your choice. To just save the file to its existing (tmp)
-location, use a low-level utility like `save-buffer` or `write-file`
-directly."
+location of your choice (i.e. FILENAME). To just save the file to its
+existing (tmp) location, use a low-level utility like `save-buffer` or
+`write-file` directly."
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
   (unless mindstream-mode
     (error "Not a mindstream buffer!"))
@@ -262,7 +265,9 @@ you would typically want to specify a new, non-existent folder."
       (mindstream-load-session (concat dest-dir original-session-name)))))
 
 (defun mindstream-load-session (dir)
-  "Load a session from a directory."
+  "Load a session from a directory.
+
+DIR is the directory containing the session."
   (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
   ;; restore the old session
   (let* ((session (file-name-nondirectory
