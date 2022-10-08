@@ -3,7 +3,7 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
-;; Package-Requires: ((emacs "25.1") (racket-mode "20220705.1452"))
+;; Package-Requires: ((emacs "25.1") (racket-mode "20220705.1452") (magit "3.3.0"))
 ;; Keywords: lisp, convenience, languages
 
 ;; This program is "part of the world," in the sense described at
