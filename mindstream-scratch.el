@@ -98,12 +98,6 @@ New sessions always start anonymous."
     (insert-file-contents filename)
     (buffer-string)))
 
-(defun mindstream--buffer-index (buffer)
-  "Get the index of the buffer in the current scratch session."
-  (string-to-number
-   (file-name-base
-    (buffer-file-name buffer))))
-
 (defun mindstream--initialize-buffer ()
   "Initialize a newly created buffer.
 

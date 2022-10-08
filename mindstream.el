@@ -42,8 +42,6 @@
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
-    (define-key mindstream-map (kbd "C-c C-r h") #'mindstream-previous)
-    (define-key mindstream-map (kbd "C-c C-r l") #'mindstream-next)
     (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
     (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-file)
     (define-key mindstream-map (kbd "C-c C-r S") #'mindstream-save-session)
@@ -113,12 +111,6 @@ it should typically be run using `with-current-buffer`."
       (rename-buffer mindstream-buffer-name))
     (mindstream--commit)))
 
-(defun mindstream--buffer-index (buffer)
-  "Get the index of the buffer in the current scratch session."
-  (string-to-number
-   (file-name-base
-    (buffer-file-name buffer))))
-
 (defun mindstream--end-session ()
   "End the current anonymous session.
 
@@ -164,46 +156,6 @@ This also begins a new session."
     (insert (mindstream--file-contents mindstream-template-used)))
   ;; write the fresh state
   (mindstream--iterate))
-
-;; TODO: modify this to just git checkout the rev and proactively
-;; refresh from disk
-(defun mindstream--navigate (fn)
-  "Go to an older or newer scratch buffer in the current session.
-
-FN is expected to be a function that accepts an index and returns a new
-index. Typically, FN will be either 1+ or 1-, to navigate forwards or
-backwards in the scratch buffer history."
-  (let* ((original-point (point))
-         (file (buffer-file-name))
-         (dir (file-name-directory file))
-         (ext (file-name-extension file))
-         (index (mindstream--buffer-index (current-buffer)))
-         (next-file (concat dir (number-to-string (funcall fn index)) "." ext)))
-    (when (file-exists-p next-file)
-      (erase-buffer)
-      (insert-file-contents next-file)
-      (set-visited-file-name next-file)
-      (set-buffer-modified-p nil)
-      (rename-buffer mindstream-buffer-name)
-      ;; TODO: avoid duplication of some of these vs mindstream--new-buffer-with-contents
-      ;; (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
-      (goto-char (if (> original-point (point-max))
-                     (point-max)
-                   original-point)))))
-
-(defun mindstream-next ()
-  "Go to a newer scratch buffer in the current session."
-  (interactive)
-  (unless mindstream-mode
-    (error "Not a mindstream buffer!"))
-  (mindstream--navigate #'1+))
-
-(defun mindstream-previous ()
-  "Go to an older scratch buffer in the current session."
-  (interactive)
-  (unless mindstream-mode
-    (error "Not a mindstream buffer!"))
-  (mindstream--navigate #'1-))
 
 ;;;###autoload
 (defun mindstream-initialize ()
