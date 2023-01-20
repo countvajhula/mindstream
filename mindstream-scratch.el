@@ -53,10 +53,9 @@ This is a string representing a path to a file on disk.")
 (cl-defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
-This creates a new directory and Git repository for the new
-session. It populates the empty buffer with the contents of TEMPLATE
-if one is specified. Otherwise, it uses the configured default
-template.
+This creates a new directory and Git repository for the new session.
+It populates the empty buffer with the contents of TEMPLATE if one is
+specified.  Otherwise, it uses the configured default template.
 
 New sessions always start anonymous."
   (let* ((session (mindstream--unique-session-name))

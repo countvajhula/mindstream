@@ -3,7 +3,7 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
-;; Package-Requires: ((emacs "25.1") (racket-mode "20220705.1452") (magit "3.3.0"))
+;; Package-Requires: ((emacs "25.1") (racket-mode "20210517.1613") (magit "3.3.0"))
 ;; Keywords: lisp, convenience, languages
 
 ;; This program is "part of the world," in the sense described at
@@ -170,7 +170,8 @@ This also begins a new session."
   "Implicitly iterate the scratch buffer upon execution of some command.
 
 This only iterates the buffer if it is the current buffer and has been
-modified since the last persistent state. Otherwise, it takes no action.
+modified since the last persistent state.  Otherwise, it takes no
+action.
 
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
@@ -185,7 +186,7 @@ in that invocation."
   "Save the current scratch buffer to a file.
 
 This is for interactive use only, for saving the file to a persistent
-location of your choice (i.e. FILENAME). To just save the file to its
+location of your choice (i.e. FILENAME).  To just save the file to its
 existing (tmp) location, use a low-level utility like `save-buffer` or
 `write-file` directly."
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
@@ -197,8 +198,9 @@ existing (tmp) location, use a low-level utility like `save-buffer` or
   "Save the current scratch session to a directory.
 
 If DEST-DIR is a non-existent path, it will be used as the name of a
-new directory that will contain the session. If it is an existing path,
-then the session will be saved at that path with its current name.
+new directory that will contain the session.  If it is an existing
+path, then the session will be saved at that path with its current
+name.
 
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
@@ -238,9 +240,10 @@ DIR is the directory containing the session."
 If the scratch buffer doesn't exist, this creates a new one using
 the default configured template.
 
-This is a convenience utility for \"read only\" cases where we simply want to
-get the scratch buffer - whatever it may be. It is too connoted to be
-useful in features implementing the scratch buffer iteration model."
+This is a convenience utility for \"read only\" cases where we simply
+want to get the scratch buffer - whatever it may be. It is too
+connoted to be useful in features implementing the scratch buffer
+iteration model."
   (or (mindstream--get-anonymous-scratch-buffer)
       (mindstream-new mindstream-default-template)))
 
