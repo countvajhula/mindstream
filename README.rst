@@ -41,6 +41,17 @@ You can also explore adding new templates in ``mindstream-template-path`` (defau
 
 Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in a minor mode -- ``mindstream-mode`` -- which is enabled locally in scratch buffers.
 
+Design
+======
+
+Mindstream structures your workflow in sessions, which are version-controlled files. When you first start a session it begins as anonymous, meaning that it doesn't have a name. If the session develops into something worth keeping, you can save it to a preconfigured (or any) location on disk by giving the session a name. A session is stored as a version-controlled folder. You can also save just the file rather than the entire session. With that in mind, here are some properties of the design:
+
+1. There is only one anonymous scratch session active at any time.
+2. Saving an anonymous session turns it into a named session, and there is no active anonymous session at that point. Named sessions work the same as anonymous sessions aside from having a name and being in a permanent location on disk. A new anonymous session could be started at any time via `mindstream-new`.
+3. New sessions always begin as anonymous.
+4. Named sessions may be loaded without interfering with the active anonymous session.
+5. Any number of named sessions could be active at the same time. There is no global state, so that named sessions are self-contained and independent.
+
 Tips
 ====
 

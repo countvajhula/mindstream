@@ -54,12 +54,12 @@
 ;; 3. Named sessions may be loaded without interfering with the active
 ;;    anonymous session.
 ;; 4. Any number of named sessions could be active at the same time.
-;;    State should be maintained on the filesystem or in buffer-locals
-;;    (i.e. no global state) to keep named sessions self-contained and independent.
 ;; 5. Saving an anonymous session turns it into a named session, and there
 ;;    is no active anonymous session at that point. A new one could be
 ;;    started via `new`.
 ;; -> document the UX in some form of user's manual at some point.
+;; TODO: test that loading a saved session works the same as anonymous
+;;       sessions.
 ;; TODO: saving a scratch buffer should switch focus to the newly
 ;;       saved file but also preserve the scratch buffer (or clear it).
 ;; TODO: should there be a distinct notion of "session" apart
