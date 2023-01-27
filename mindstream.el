@@ -108,7 +108,7 @@ it should typically be run using `with-current-buffer`."
     ;; writing the file changes the buffer name to the filename,
     ;; so we restore the original buffer name
     (when anonymous
-      (rename-buffer mindstream-buffer-name))
+      (rename-buffer mindstream-anonymous-buffer-name))
     (mindstream--commit)))
 
 (defun mindstream--end-session ()

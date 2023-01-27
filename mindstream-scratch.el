@@ -71,7 +71,7 @@ New sessions always start anonymous."
       (with-current-buffer buf
         (setq mindstream-session-name session)
         (write-file filename)
-        (rename-buffer mindstream-buffer-name))
+        (rename-buffer mindstream-anonymous-buffer-name))
       buf)))
 
 (defun mindstream--generate-anonymous-session-path (session)
@@ -121,7 +121,7 @@ This does not save the buffer.
 As a \"scratch\" buffer, its contents will be treated as
 disposable, and it will not prompt to save if it is closed or
 if Emacs is exited."
-  (let* ((buffer-name mindstream-buffer-name)
+  (let* ((buffer-name mindstream-anonymous-buffer-name)
          (buf (generate-new-buffer buffer-name)))
     (with-current-buffer buf
       (insert contents)
@@ -143,12 +143,12 @@ if Emacs is exited."
 
 (defun mindstream--get-anonymous-scratch-buffer ()
   "Get the active scratch buffer, if it exists."
-  (let ((buffer-name mindstream-buffer-name))
+  (let ((buffer-name mindstream-anonymous-buffer-name))
     (get-buffer buffer-name)))
 
 (defun mindstream-anonymous-scratch-buffer-p ()
   "Predicate to check if the current buffer is the anonymous scratch buffer."
-  (equal mindstream-buffer-name (buffer-name)))
+  (equal mindstream-anonymous-buffer-name (buffer-name)))
 
 (provide 'mindstream-scratch)
 ;;; mindstream-scratch.el ends here
