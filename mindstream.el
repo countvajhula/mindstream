@@ -125,11 +125,10 @@ a named session that you may happen to be visiting."
         ;; then kill it
         (kill-buffer)))))
 
-(defun mindstream-new (template)
+(defun mindstream--new (template)
   "Start a new scratch buffer using a specific TEMPLATE.
 
 This also begins a new session."
-  (interactive (list (read-file-name "Which template? " mindstream-template-path)))
   ;; end the current anonymous session
   (mindstream--end-session)
   ;; start a new session (sessions always start anonymous)
@@ -138,6 +137,14 @@ This also begins a new session."
     (with-current-buffer buf
       (mindstream-mode 1)
       (mindstream--iterate))
+    buf))
+
+(defun mindstream-new (template)
+  "Start a new scratch buffer using a specific TEMPLATE.
+
+This also begins a new session."
+  (interactive (list (read-file-name "Which template? " mindstream-template-path)))
+  (let ((buf (mindstream--new template)))
     (switch-to-buffer buf)))
 
 (defun mindstream-clear ()
@@ -245,7 +252,7 @@ want to get the scratch buffer - whatever it may be. It is too
 connoted to be useful in features implementing the scratch buffer
 iteration model."
   (or (mindstream--get-anonymous-scratch-buffer)
-      (mindstream-new mindstream-default-template)))
+      (mindstream--new mindstream-default-template)))
 
 (defun mindstream-switch-to-scratch-buffer ()
   "Switch to the anonymous scratch buffer."
