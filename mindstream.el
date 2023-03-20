@@ -48,18 +48,9 @@
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
-;; TODO:
-;; 1. There can only be one anonymous scratch session active at any time.
-;; 2. New sessions always begin as anonymous.
-;; 3. Named sessions may be loaded without interfering with the active
-;;    anonymous session.
-;; 4. Any number of named sessions could be active at the same time.
-;; 5. Saving an anonymous session turns it into a named session, and there
-;;    is no active anonymous session at that point. A new one could be
-;;    started via `new`.
-;; -> document the UX in some form of user's manual at some point.
-;; TODO: test that loading a saved session works the same as anonymous
-;;       sessions.
+;; TODO: test that saving as a file does not preserve the anonymous
+;;       session, but also disables mindstream mode on the saved
+;;       file [mindstream mode is still enabled]
 ;; TODO: saving a scratch buffer should switch focus to the newly
 ;;       saved file but also preserve the scratch buffer (or clear it).
 ;; TODO: should there be a distinct notion of "session" apart
