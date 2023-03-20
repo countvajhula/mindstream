@@ -48,9 +48,6 @@
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
-;; TODO: test that saving as a file does not preserve the anonymous
-;;       session, but also disables mindstream mode on the saved
-;;       file [mindstream mode is still enabled]
 ;; TODO: saving a scratch buffer should switch focus to the newly
 ;;       saved file but also preserve the scratch buffer (or clear it).
 ;; TODO: should there be a distinct notion of "session" apart
@@ -190,7 +187,8 @@ existing (tmp) location, use a low-level utility like `save-buffer` or
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
   (unless mindstream-mode
     (error "Not a mindstream buffer!"))
-  (write-file filename))
+  (write-file filename)
+  (mindstream-mode -1))
 
 (defun mindstream-save-session (dest-dir)
   "Save the current scratch session to a directory.
