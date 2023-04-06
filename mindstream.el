@@ -3,7 +3,7 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
-;; Package-Requires: ((emacs "25.1") (racket-mode "20220705.1452"))
+;; Package-Requires: ((emacs "25.1") (racket-mode "20210517.1613") (magit "3.3.0"))
 ;; Keywords: lisp, convenience, languages
 
 ;; This program is "part of the world," in the sense described at
@@ -29,286 +29,126 @@
 
 ;;; Code:
 
-(require 'mindstream-custom)
+(require 'magit-git)
 
-(setq mindstream-session-name nil)
+(require 'mindstream-custom)
+(require 'mindstream-scratch)
+(require 'mindstream-util)
+
+;; These are customization or config variables defined elsewhere;
+;; explicitly declare them here to avoid byte compile warnings
+;; TODO: handle this via an explicit configuration step
+(declare-function racket-run "ext:racket-mode")
 
 ;;;###autoload
 (define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."
   :lighter " mindstream"
-  :global t
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
-    (define-key mindstream-map (kbd "C-c C-r x") #'mindstream-switch-to-scratch-buffer)
-    (define-key mindstream-map (kbd "C-c C-r h") #'mindstream-previous)
-    (define-key mindstream-map (kbd "C-c C-r l") #'mindstream-next)
     (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
     (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-file)
     (define-key mindstream-map (kbd "C-c C-r S") #'mindstream-save-session)
-    mindstream-map)
-  (if mindstream-mode
-      (mindstream-initialize)
-    (mindstream-disable)))
+    (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
+    mindstream-map))
 
-(defun mindstream--unique-session-name ()
-  "Unique name for a scratch buffer session."
-  (let ((time (current-time)))
-    (concat (format-time-string "%Y-%m-%d" time)
-            "-"
-            (sha1 (format "%s" time)))))
+;; TODO: should there be a distinct notion of "session" apart
+;;       from the scratch buffer?
+;; TODO: restore navigation backwards and forwards
+;; TODO: use first line of changeset as commit message?
+;; TODO: start with linearized navigation of versions,
+;;       i.e. modification of any prior state results
+;;       in a fresh commit on a single branch.
+;;       Later, support nonlinear navigation, i.e. modification
+;;       creates a commit on a fresh branch beginning there
+;; TODO: create a rigpa mode to navigate buffer states
+;; TODO: switching branch selects the latest commit on the branch
+;;       to avoid confusion
+;; TODO: test everything, especially the various entry points
+;;       from an ab initio state
+;; TODO: support operation in any buffer, but also provide a
+;;       (decoupled) scratch buffer framework
+;;       - it may make sense to tag the initial state so that
+;;         the session could be kept track of and e.g. squashed
+;;         when progress has been made.
+;;       - it could be even better to just start a branch when
+;;         a mindstream session is started, instead
+;; TODO: design feedback loops at scales other than module-level.
+;;       e.g. natural transitions from expression-level (REPL),
+;;       to module-level (scratch buffer) to application-level
+;;       (define an execution loop that is decoupled from the
+;;       current buffer)
 
-(defun mindstream-start-session ()
-  "Start a new session.
+(defun mindstream--commit ()
+  "Commit the current state as part of iteration."
+  (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
 
-This simply updates the current session name. The next time the scratch buffer
-is iterated, it will create a new folder to hold the scratch buffer stages
-for the new session."
-  (setq mindstream-session-name (mindstream--unique-session-name)))
-
-(cl-defun mindstream--session-path (&optional session)
-  "Path to the directory on disk containing SESSION."
-  (let ((session (or session mindstream-session-name)))
-    (concat (file-name-as-directory mindstream-path)
-            (file-name-as-directory session))))
-
-(cl-defun mindstream--session-max-index (&optional session)
-  "Max (latest) index for the current session."
-  (let* ((session (or session mindstream-session-name))
-         (path (mindstream--session-path session))
-         ;; note that non-numeric filenames are converted to
-         ;; index 0 by string-to-number. That shouldn't be
-         ;; relevant for our purposes since we're picking
-         ;; the largest, in any case.
-         (indices (seq-map
-                   ;; filter to only numbers and then sort them
-                   ;; as numbers
-                   (lambda (filespec) (string-to-number (car filespec)))
-                   (directory-files-and-attributes path))))
-    (apply #'max indices)))
-
-(cl-defun mindstream-write (&optional index)
-  "Write scratch buffer to disk with index INDEX.
+(defun mindstream--iterate ()
+  "Write scratch buffer to disk and increment the version.
 
 This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
-  (let* ((session (or mindstream-session-name
-                      (mindstream--unique-session-name)))
-         (base-path (mindstream--session-path session))
-         (index (or index 1)))
-    (unless (file-directory-p base-path)
-      (mkdir base-path t))
-    (let ((filename (concat base-path
-                            (format "%d" index)
-                            mindstream-file-extension)))
-      (if (file-exists-p filename)
-          ;; we don't expect this to happen and it would be a bug if it did
-          (error (format "Scratch file with requested index %d in session %s already exists!"
-                         index
-                         mindstream-session-name))
-        (write-file filename)))
-    (rename-buffer mindstream-buffer-name)
-    ;; store the current session as a buffer-local variable
-    ;; on the scratch buffer. This is used to reset the index
-    ;; to 1 when a new session is started.
-    (setq mindstream-session-name session)))
+  (let ((anonymous (mindstream-anonymous-scratch-buffer-p)))
+    (save-buffer)
+    ;; writing the file changes the buffer name to the filename,
+    ;; so we restore the original buffer name
+    (when anonymous
+      (rename-buffer mindstream-anonymous-buffer-name))
+    (mindstream--commit)))
 
-(defun mindstream--ensure-templates-exist ()
-  "Ensure that the templates directory exists and contains the default template."
-  ;; consider alternative: an initialization function to do this the first time
-  (unless (file-directory-p mindstream-template-path)
-    (mkdir mindstream-template-path t)
-    (let ((buf (generate-new-buffer "default-template")))
+(defun mindstream--end-session ()
+  "End the current anonymous session.
+
+This always affects the current anonymous session and does not affect
+a named session that you may happen to be visiting."
+  (let ((buf (mindstream--get-anonymous-scratch-buffer)))
+    (when buf
       (with-current-buffer buf
-        (insert "#lang racket\n\n")
-        (write-file (concat mindstream-template-path
-                            mindstream-default-template-name)))
-      (kill-buffer buf))))
+        ;; first write the existing scratch buffer
+        ;; if there are unsaved changes
+        (mindstream--iterate)
+        ;; then kill it
+        (kill-buffer)))))
 
-(defun mindstream--file-contents (filename)
-  "Get contents of FILENAME as a string."
-  (with-temp-buffer
-    (insert-file-contents filename)
-    (buffer-string)))
+(defun mindstream--new (template)
+  "Start a new scratch buffer using a specific TEMPLATE.
 
-(defun mindstream--buffer-contents (buffer)
-  "Get contents of BUFFER."
-  (with-current-buffer buffer
-    (buffer-string)))
-
-(defun mindstream--buffer-index (buffer)
-  "Get the index of the buffer in the current scratch session."
-  (string-to-number
-   (file-name-base
-    (buffer-file-name buffer))))
-
-(defun mindstream--buffer-session (buffer)
-  "Get the session of the BUFFER."
-  (with-current-buffer buffer
-    buffer-session))
-
-(defun mindstream--new-buffer-with-contents (contents)
-  "Create a new scratch buffer containing CONTENTS.
-
-This does not save the buffer.
-
-As a \"scratch\" buffer, its contents will be treated as
-disposable, and it will not prompt to save if it is closed or
-if Emacs is exited."
-  (let* ((buffer-name mindstream-buffer-name)
-         (buf (generate-new-buffer buffer-name))
-         (major-mode-to-use mindstream-major-mode))
+This also begins a new session."
+  ;; end the current anonymous session
+  (mindstream--end-session)
+  ;; start a new session (sessions always start anonymous)
+  (let ((buf (mindstream-start-session template)))
+    ;; (ab initio) iterate
     (with-current-buffer buf
-      (funcall major-mode-to-use)
-      (setq buffer-offer-save nil)
-      (setq-local buffer-session mindstream-session-name)
-      ;; Ignore whatever `racket-repl-buffer-name-function' just did to
-      ;; set `racket-repl-buffer-name' and give this its own REPL.
-      (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
-      (insert contents)
-      ;; place point at the end of the buffer
-      (goto-char (point-max)))
+      (mindstream-mode 1)
+      (mindstream--iterate))
     buf))
-
-(defun mindstream--new-buffer-from-template (template)
-  "Create a new (unsaved) buffer from TEMPLATE."
-  (mindstream--ensure-templates-exist)
-  (let* ((contents (mindstream--file-contents template))
-         (buf (mindstream--new-buffer-with-contents contents)))
-    (with-current-buffer buf
-      ;; store the template used as a buffer-local variable
-      ;; on the scratch buffer
-      (setq-local buffer-template template))
-    buf))
-
-(defun mindstream--new-buffer-copy (buffer)
-  "Create a new (unsaved) buffer using the contents of BUFFER."
-  (let* ((contents (mindstream--buffer-contents buffer))
-         (buf (mindstream--new-buffer-with-contents contents))
-         (template (with-current-buffer buffer
-                     buffer-template)))
-    (with-current-buffer buf
-      ;; copy over the template used as a buffer-local variable
-      ;; on the new scratch buffer
-      (setq-local buffer-template template))
-    buf))
-
-(defun mindstream--get-scratch-buffer ()
-  "Get the active scratch buffer, if it exists."
-  (let ((buffer-name mindstream-buffer-name))
-    (get-buffer buffer-name)))
-
-(defun mindstream--get-or-create-scratch-buffer ()
-  "Get the active scratch buffer or create a new one.
-
-If the scratch buffer doesn't exist, this creates a new one using
-the default configured template.
-
-This is a convenience utility for \"read only\" cases where we simply want to
-get the scratch buffer - whatever it may be. It is too connoted to be
-useful in features implementing the scratch buffer iteration model."
-  (or (mindstream--get-scratch-buffer)
-      (mindstream-new mindstream-default-template)))
-
-(defun mindstream-switch-to-scratch-buffer ()
-  "Switch to scratch buffer."
-  (interactive)
-  (let ((buf (mindstream--get-or-create-scratch-buffer)))
-    (switch-to-buffer buf)))
 
 (defun mindstream-new (template)
-  "Start a new scratch buffer using a specific template.
+  "Start a new scratch buffer using a specific TEMPLATE.
 
 This also begins a new session."
   (interactive (list (read-file-name "Which template? " mindstream-template-path)))
-  (mindstream-start-session) ; start a new session
-  (let ((buf (mindstream-iterate template)))
+  (let ((buf (mindstream--new template)))
     (switch-to-buffer buf)))
 
 (defun mindstream-clear ()
   "Start a new scratch buffer using a specific template."
   (interactive)
-  (let ((buf (mindstream-iterate buffer-template)))
-    (switch-to-buffer buf)))
-
-(defun mindstream--ab-initio-iterate ()
-  "Create a scratch buffer for the first time."
-  (let ((buf (mindstream--new-buffer-from-template mindstream-default-template)))
-    ;; now that it's created, save it
-    (with-current-buffer buf
-      (mindstream-write))
-    buf))
-
-(cl-defun mindstream-iterate (&optional template)
-  "Create a successor to the current scratch buffer.
-
-This uses the index of the current scratch buffer incremented by one
-as the index of the new file. If no scratch buffer exists, this starts
-the index at 1.  If a TEMPLATE is provided, it will be used as the
-contents of the new buffer, otherwise, the contents of the existing
-scratch buffer will be copied over to the new file. If no scratch
-buffer currently exists, then TEMPLATE is ignored."
-  (let ((buffer (mindstream--get-scratch-buffer)))
-    (if buffer
-        (let* ((session (mindstream--buffer-session buffer))
-               (index (mindstream--session-max-index session)))
-          (if template
-              (let ((buf (mindstream--new-buffer-from-template template)))
-                (with-current-buffer buffer
-                  ;; first save the existing scratch buffer
-                  (save-buffer)
-                  (kill-buffer))
-                ;; save and return the new one
-                (with-current-buffer buf
-                  (if (equal session mindstream-session-name)
-                      (mindstream-write (1+ index))
-                    (mindstream-write))) ; start numbering from 1 if new session
-                buf)
-            (with-current-buffer buffer
-              ;; save with the new filename, so that any mutations to
-              ;; the scratch buffer always get appended to the end
-              ;; as a fresh state, instead of being treated as mutations
-              ;; of an existing state.
-              (if (equal session mindstream-session-name)
-                  (mindstream-write (1+ index))
-                (mindstream-write))) ; start numbering from 1 if new session
-            buffer))
-      (mindstream--ab-initio-iterate))))
-
-(defun mindstream--navigate (fn)
-  "Go to an older or newer scratch buffer in the current session.
-
-FN is expected to be a function that accepts an index and returns a new
-index. Typically, FN will be either 1+ or 1-, to navigate forwards or
-backwards in the scratch buffer history."
-  (let* ((original-point (point))
-         (file (buffer-file-name))
-         (dir (file-name-directory file))
-         (ext (file-name-extension file))
-         (index (mindstream--buffer-index (current-buffer)))
-         (next-file (concat dir (number-to-string (funcall fn index)) "." ext)))
-    (when (file-exists-p next-file)
-      (erase-buffer)
-      (insert-file-contents next-file)
-      (set-visited-file-name next-file)
-      (set-buffer-modified-p nil)
-      (rename-buffer mindstream-buffer-name)
-      ;; TODO: avoid duplication of some of these vs mindstream--new-buffer-with-contents
-      ;; (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
-      (goto-char (if (> original-point (point-max))
-                     (point-max)
-                   original-point)))))
-
-(defun mindstream-next ()
-  "Go to a newer scratch buffer in the current session."
-  (interactive)
-  (mindstream--navigate #'1+))
-
-(defun mindstream-previous ()
-  "Go to an older scratch buffer in the current session."
-  (interactive)
-  (mindstream--navigate #'1-))
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
+  ;; first write the existing scratch buffer
+  ;; if there are unsaved changes
+  (mindstream--iterate)
+  ;; clear the buffer
+  (erase-buffer)
+  ;; if the buffer was originally created using a template,
+  ;; then insert the template contents
+  (when mindstream-template-used
+    (insert (mindstream--file-contents mindstream-template-used)))
+  ;; write the fresh state
+  (mindstream--iterate))
 
 ;;;###autoload
 (defun mindstream-initialize ()
@@ -319,17 +159,19 @@ backwards in the scratch buffer history."
   "Remove any advice for racket scratch buffers."
   (advice-remove #'racket-run #'mindstream-implicitly-iterate-advice))
 
-(defun mindstream-scratch-buffer-p ()
-  "Predicate to check if the current buffer is the Scratch buffer."
-  (equal mindstream-buffer-name (buffer-name)))
-
 (defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command.
 
 This only iterates the buffer if it is the current buffer and has been
-modified since the last persistent state. Otherwise, it takes no action."
-  (when (and (mindstream-scratch-buffer-p) (buffer-modified-p))
-    (mindstream-iterate))
+modified since the last persistent state.  Otherwise, it takes no
+action.
+
+ORIG-FN is the original function invoked, and ARGS are the arguments
+in that invocation."
+  (when (and mindstream-mode
+             (or (buffer-modified-p)
+                 (magit-anything-modified-p)))
+    (mindstream--iterate))
   (let ((result (apply orig-fn args)))
     result))
 
@@ -337,18 +179,73 @@ modified since the last persistent state. Otherwise, it takes no action."
   "Save the current scratch buffer to a file.
 
 This is for interactive use only, for saving the file to a persistent
-location of your choice. To just save the file to its existing (tmp)
-location, use a low-level utility like `save-buffer` or `write-file`
-directly."
+location of your choice (i.e. FILENAME).  To just save the file to its
+existing (tmp) location, use a low-level utility like `save-buffer` or
+`write-file` directly."
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
-  (write-file filename))
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
+  (write-file filename)
+  (mindstream-mode -1))
 
-(defun mindstream-save-session (dir)
-  "Save the current scratch session to a directory."
+(defun mindstream-save-session (dest-dir)
+  "Save the current scratch session to a directory.
+
+If DEST-DIR is a non-existent path, it will be used as the name of a
+new directory that will contain the session.  If it is an existing
+path, then the session will be saved at that path with its current
+name.
+
+It is advisable to use a descriptive name when saving a session, i.e.
+you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  ;; TODO: ideally, also be able to give it a name
-  (copy-directory (mindstream--session-path mindstream-session-name)
-                  dir))
+  (unless mindstream-mode
+    (error "Not a mindstream buffer!"))
+  ;; The chosen name of the directory becomes the name of the session.
+  (let ((original-session-name mindstream-session-name)
+        (named (not (file-directory-p dest-dir))))
+    (mindstream--iterate) ; ensure no unsaved changes
+    (copy-directory (file-name-directory (buffer-file-name))
+                    dest-dir)
+    (mindstream--end-session)
+    (if named
+        (mindstream-load-session dest-dir)
+      (mindstream-load-session (concat dest-dir original-session-name)))))
+
+(defun mindstream-load-session (dir)
+  "Load a session from a directory.
+
+DIR is the directory containing the session."
+  (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
+  ;; restore the old session
+  (let* ((session (file-name-nondirectory
+                   (string-trim dir "" "/")))
+         (filename (expand-file-name
+                    (concat mindstream-filename
+                            mindstream-file-extension)
+                    dir)))
+    (find-file filename)
+    (mindstream-mode 1)
+    (setq mindstream-session-name session)))
+
+(defun mindstream--get-or-create-scratch-buffer ()
+  "Get the active scratch buffer or create a new one.
+
+If the scratch buffer doesn't exist, this creates a new one using
+the default configured template.
+
+This is a convenience utility for \"read only\" cases where we simply
+want to get the scratch buffer - whatever it may be. It is too
+connoted to be useful in features implementing the scratch buffer
+iteration model."
+  (or (mindstream--get-anonymous-scratch-buffer)
+      (mindstream--new mindstream-default-template)))
+
+(defun mindstream-switch-to-scratch-buffer ()
+  "Switch to the anonymous scratch buffer."
+  (interactive)
+  (let ((buf (mindstream--get-or-create-scratch-buffer)))
+    (switch-to-buffer buf)))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here
