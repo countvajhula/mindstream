@@ -48,16 +48,9 @@
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
-;; TODO: saving a scratch buffer should switch focus to the newly
-;;       saved file but also preserve the scratch buffer (or clear it).
 ;; TODO: should there be a distinct notion of "session" apart
 ;;       from the scratch buffer?
 ;; TODO: restore navigation backwards and forwards
-;; TODO: test "save file" still works
-;; TODO: restore "save session" functionality (probably just
-;;       git-clone it to another path without setting an upstream)
-;; TODO: test that git-timemachine for read-only navigation
-;;       and magit for all the usual stuff work out of the box
 ;; TODO: use first line of changeset as commit message?
 ;; TODO: start with linearized navigation of versions,
 ;;       i.e. modification of any prior state results
