@@ -35,6 +35,11 @@
 (require 'mindstream-scratch)
 (require 'mindstream-util)
 
+;; These are customization or config variables defined elsewhere;
+;; explicitly declare them here to avoid byte compile warnings
+;; TODO: handle this via an explicit configuration step
+(declare-function racket-run "ext:racket-mode")
+
 ;;;###autoload
 (define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."

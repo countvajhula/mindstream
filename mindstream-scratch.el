@@ -32,6 +32,11 @@
 (require 'mindstream-custom)
 (require 'mindstream-util)
 
+;; These are customization or config variables defined elsewhere;
+;; explicitly declare them here to avoid byte compile warnings
+;; TODO: handle this via an explicit configuration step
+(defvar racket-repl-buffer-name)
+
 (defvar-local mindstream-session-name nil
   "The name of the mindstream session represented by the current buffer.
 
