@@ -53,33 +53,6 @@
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
-;; TODO: should there be a distinct notion of "session" apart
-;;       from the scratch buffer?
-;; TODO: restore navigation backwards and forwards
-;; TODO: use first line of changeset as commit message?
-;; TODO: start with linearized navigation of versions,
-;;       i.e. modification of any prior state results
-;;       in a fresh commit on a single branch.
-;;       Later, support nonlinear navigation, i.e. modification
-;;       creates a commit on a fresh branch beginning there
-;; TODO: create a rigpa mode to navigate buffer states
-;; TODO: switching branch selects the latest commit on the branch
-;;       to avoid confusion
-;; TODO: test everything, especially the various entry points
-;;       from an ab initio state
-;; TODO: support operation in any buffer, but also provide a
-;;       (decoupled) scratch buffer framework
-;;       - it may make sense to tag the initial state so that
-;;         the session could be kept track of and e.g. squashed
-;;         when progress has been made.
-;;       - it could be even better to just start a branch when
-;;         a mindstream session is started, instead
-;; TODO: design feedback loops at scales other than module-level.
-;;       e.g. natural transitions from expression-level (REPL),
-;;       to module-level (scratch buffer) to application-level
-;;       (define an execution loop that is decoupled from the
-;;       current buffer)
-
 (defun mindstream--commit ()
   "Commit the current state as part of iteration."
   (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
