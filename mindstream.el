@@ -63,7 +63,6 @@
 This assumes that the scratch buffer is the current buffer, so
 it should typically be run using `with-current-buffer`."
   (let ((anonymous (mindstream-anonymous-scratch-buffer-p)))
-    (save-buffer)
     ;; writing the file changes the buffer name to the filename,
     ;; so we restore the original buffer name
     (when anonymous
@@ -126,11 +125,11 @@ This also begins a new session."
 ;;;###autoload
 (defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
-  (advice-add #'racket-run :around #'mindstream-implicitly-iterate-advice))
+  (advice-add #'save-buffer :around #'mindstream-implicitly-iterate-advice))
 
 (defun mindstream-disable ()
   "Remove any advice for racket scratch buffers."
-  (advice-remove #'racket-run #'mindstream-implicitly-iterate-advice))
+  (advice-remove #'save-buffer #'mindstream-implicitly-iterate-advice))
 
 (defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command.
@@ -141,11 +140,10 @@ action.
 
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
-  (when (and mindstream-mode
-             (or (buffer-modified-p)
-                 (magit-anything-modified-p)))
-    (mindstream--iterate))
   (let ((result (apply orig-fn args)))
+    (when (and mindstream-mode
+               (magit-anything-modified-p))
+      (mindstream--iterate))
     result))
 
 (defun mindstream-save-file (filename)
@@ -158,6 +156,7 @@ existing (tmp) location, use a low-level utility like `save-buffer` or
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
   (unless mindstream-mode
     (error "Not a mindstream buffer!"))
+  (save-buffer)  ; ensure it saves any WIP
   (write-file filename)
   (mindstream-mode -1))
 
@@ -174,6 +173,7 @@ you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
   (unless mindstream-mode
     (error "Not a mindstream buffer!"))
+  (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
   (let ((original-session-name mindstream-session-name)
         (named (not (file-directory-p dest-dir))))
