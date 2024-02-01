@@ -108,15 +108,14 @@ New sessions always start anonymous."
 This sets the major mode and any other necessary attributes."
   ;; TODO: instead of hardcoding the major mode, just let Emacs
   ;; choose it based on the file extension
-  (let ((major-mode-to-use mindstream-major-mode))
-    (unless (eq major-mode major-mode-to-use)
-      (funcall major-mode-to-use))
-    (setq buffer-offer-save nil)
-    ;; Ignore whatever `racket-repl-buffer-name-function' just did to
-    ;; set `racket-repl-buffer-name' and give this its own REPL.
-    (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
-    ;; place point at the end of the buffer
-    (goto-char (point-max))))
+  (unless (eq major-mode mindstream-major-mode)
+    (funcall mindstream-major-mode))
+  (setq buffer-offer-save nil)
+  ;; Ignore whatever `racket-repl-buffer-name-function' just did to
+  ;; set `racket-repl-buffer-name' and give this its own REPL.
+  (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
+  ;; place point at the end of the buffer
+  (goto-char (point-max)))
 
 (defun mindstream--new-buffer-with-contents (contents)
   "Create a new scratch buffer containing CONTENTS.
