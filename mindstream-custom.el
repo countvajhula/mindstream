@@ -52,6 +52,11 @@
   :type 'string
   :group 'mindstream)
 
+(defcustom mindstream-triggers (list #'save-buffer)
+  "Functions that, when called, should implicitly iterate the mindstream buffer."
+  :type 'list
+  :group 'mindstream)
+
 (defcustom mindstream-major-mode 'racket-mode
   "Major mode to use in mindstream buffers."
   :type 'string

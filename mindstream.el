@@ -125,11 +125,13 @@ This also begins a new session."
 ;;;###autoload
 (defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
-  (advice-add #'save-buffer :around #'mindstream-implicitly-iterate-advice))
+  (dolist (fn mindstream-triggers)
+    (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-disable ()
   "Remove any advice for racket scratch buffers."
-  (advice-remove #'save-buffer #'mindstream-implicitly-iterate-advice))
+  (dolist (fn mindstream-triggers)
+    (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command.
