@@ -62,8 +62,10 @@ New sessions always start anonymous."
          (template (or template mindstream-default-template))
          (file-extension (file-name-extension template))
          (buf (mindstream--new-buffer-from-template template))
+         ;; TODO: use platform-independent path construction
          (filename (concat base-path
                            mindstream-filename
+                           "."
                            file-extension)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)

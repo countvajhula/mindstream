@@ -187,17 +187,20 @@ you would typically want to specify a new, non-existent folder."
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
   (let ((original-session-name (mindstream--session-name))
+        (buffer-file (buffer-file-name))
+        (filename (file-name-nondirectory (buffer-file-name)))
         (named (not (file-directory-p dest-dir))))
     ;; ensure no unsaved changes
     ;; note: this is a no-op if save-buffer is a trigger for iteration
     (mindstream--iterate)
     ;; TODO: verify behavior with existing vs non-existent containing folder
-    (copy-directory (file-name-directory (buffer-file-name))
+    (copy-directory (file-name-directory buffer-file)
                     dest-dir)
     (mindstream--end-anonymous-session)
+    ;; TODO: platform-independent paths
     (if named
-        (mindstream-load-session dest-dir)
-      (mindstream-load-session (concat dest-dir original-session-name)))))
+        (mindstream-load-session (concat dest-dir "/" filename))
+      (mindstream-load-session (concat dest-dir "/" original-session-name "/" filename)))))
 
 (defun mindstream-load-session (filename)
   "Load a session from a directory.
