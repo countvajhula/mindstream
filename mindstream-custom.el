@@ -57,11 +57,6 @@
   :type 'list
   :group 'mindstream)
 
-(defcustom mindstream-file-extension ".rkt"
-  "File extension to use for mindstream buffers."
-  :type 'string
-  :group 'mindstream)
-
 (defcustom mindstream-filename "scratch"
   "Filename to use for mindstream buffers."
   :type 'string
