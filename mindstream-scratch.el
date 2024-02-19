@@ -91,7 +91,7 @@ New sessions always start anonymous."
     (mkdir mindstream-template-path t)
     (let ((buf (generate-new-buffer "default-template")))
       (with-current-buffer buf
-        (insert "#lang racket\n\n")
+        (insert mindstream-default-template-contents)
         (write-file (concat mindstream-template-path
                             mindstream-default-template-name)))
       (kill-buffer buf))))

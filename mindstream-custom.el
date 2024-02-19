@@ -57,11 +57,6 @@
   :type 'list
   :group 'mindstream)
 
-(defcustom mindstream-major-mode 'racket-mode
-  "Major mode to use in mindstream buffers."
-  :type 'string
-  :group 'mindstream)
-
 (defcustom mindstream-file-extension ".rkt"
   "File extension to use for mindstream buffers."
   :type 'string
@@ -77,8 +72,13 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-default-template-name "racket.rkt"
+(defcustom mindstream-default-template-name "text.txt"
   "Name for the default template that will be created when no templates exist."
+  :type 'string
+  :group 'mindstream)
+
+(defcustom mindstream-default-template-contents "Welcome to Mindstream!\n\nOnce you're familiar with the basic functionality, you may want to modify this template to suit your needs, or add other templates of your own.\n\n"
+  "Contents of the default template that is created if none exist."
   :type 'string
   :group 'mindstream)
 
