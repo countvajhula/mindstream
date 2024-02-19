@@ -162,13 +162,22 @@ existing (tmp) location, use a low-level utility like `save-buffer` or
   (write-file filename)
   (mindstream-mode -1))
 
+(defun mindstream--session-name ()
+  "Name of the current session.
+
+This is simply the name of the containing folder."
+  (string-trim-left
+   (directory-file-name
+    (file-name-directory (buffer-file-name)))
+   "^.*/"))
+
 (defun mindstream-save-session (dest-dir)
   "Save the current scratch session to a directory.
 
 If DEST-DIR is a non-existent path, it will be used as the name of a
 new directory that will contain the session.  If it is an existing
-path, then the session will be saved at that path with its current
-name.
+path, then the session will be saved at that path using its current
+(e.g. randomly generated) name as the name of the saved session folder.
 
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
@@ -177,9 +186,12 @@ you would typically want to specify a new, non-existent folder."
     (error "Not a mindstream buffer!"))
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
-  (let ((original-session-name mindstream-session-name)
+  (let ((original-session-name (mindstream--session-name))
         (named (not (file-directory-p dest-dir))))
-    (mindstream--iterate) ; ensure no unsaved changes
+    ;; ensure no unsaved changes
+    ;; note: this is a no-op if save-buffer is a trigger for iteration
+    (mindstream--iterate)
+    ;; TODO: verify behavior with existing vs non-existent containing folder
     (copy-directory (file-name-directory (buffer-file-name))
                     dest-dir)
     (mindstream--end-session)
@@ -187,21 +199,14 @@ you would typically want to specify a new, non-existent folder."
         (mindstream-load-session dest-dir)
       (mindstream-load-session (concat dest-dir original-session-name)))))
 
-(defun mindstream-load-session (dir)
+(defun mindstream-load-session (filename)
   "Load a session from a directory.
 
-DIR is the directory containing the session."
-  (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
+FILENAME is the directory containing the session."
+  (interactive (list (read-file-name "Load session: " mindstream-save-session-path)))
   ;; restore the old session
-  (let* ((session (file-name-nondirectory
-                   (string-trim dir "" "/")))
-         (filename (expand-file-name
-                    (concat mindstream-filename
-                            mindstream-file-extension)
-                    dir)))
-    (find-file filename)
-    (mindstream-mode 1)
-    (setq mindstream-session-name session)))
+  (find-file filename)
+  (mindstream-mode 1))
 
 (defun mindstream--get-or-create-scratch-buffer ()
   "Get the active scratch buffer or create a new one.

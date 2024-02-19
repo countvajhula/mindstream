@@ -37,12 +37,6 @@
 ;; TODO: handle this via an explicit configuration step
 (defvar racket-repl-buffer-name)
 
-(defvar-local mindstream-session-name nil
-  "The name of the mindstream session represented by the current buffer.
-
-For anonymous sessions this is a randomly generated identifier, while
-for named sessions it's the name of the containing folder.")
-
 (defvar-local mindstream-template-used nil
   "The template used (if any) in creating the current buffer.
 
@@ -66,15 +60,15 @@ New sessions always start anonymous."
   (let* ((session (mindstream--unique-session-name))
          (base-path (mindstream--generate-anonymous-session-path session))
          (template (or template mindstream-default-template))
+         (file-extension (file-name-extension template))
          (buf (mindstream--new-buffer-from-template template))
          (filename (concat base-path
                            mindstream-filename
-                           mindstream-file-extension)))
+                           file-extension)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
       (mindstream--execute-shell-command "git init" base-path)
       (with-current-buffer buf
-        (setq mindstream-session-name session)
         (write-file filename)
         (rename-buffer mindstream-anonymous-buffer-name))
       buf)))
@@ -102,14 +96,12 @@ New sessions always start anonymous."
     (insert-file-contents filename)
     (buffer-string)))
 
-(defun mindstream--initialize-buffer ()
+(defun mindstream--initialize-buffer (major-mode-to-use)
   "Initialize a newly created buffer.
 
 This sets the major mode and any other necessary attributes."
-  ;; TODO: instead of hardcoding the major mode, just let Emacs
-  ;; choose it based on the file extension
-  (unless (eq major-mode mindstream-major-mode)
-    (funcall mindstream-major-mode))
+  (unless (eq major-mode major-mode-to-use)
+    (funcall major-mode-to-use))
   (setq buffer-offer-save nil)
   ;; Ignore whatever `racket-repl-buffer-name-function' just did to
   ;; set `racket-repl-buffer-name' and give this its own REPL.
@@ -117,7 +109,7 @@ This sets the major mode and any other necessary attributes."
   ;; place point at the end of the buffer
   (goto-char (point-max)))
 
-(defun mindstream--new-buffer-with-contents (contents)
+(defun mindstream--new-buffer-with-contents (contents major-mode-to-use)
   "Create a new scratch buffer containing CONTENTS.
 
 This does not save the buffer.
@@ -129,14 +121,24 @@ if Emacs is exited."
          (buf (generate-new-buffer buffer-name)))
     (with-current-buffer buf
       (insert contents)
-      (mindstream--initialize-buffer))
+      (mindstream--initialize-buffer major-mode-to-use))
     buf))
+
+(defun mindstream--infer-major-mode (file)
+  "Infer a major mode to use based on the file extension."
+  (let ((extension (file-name-extension file)))
+    ;; TODO: use `auto-mode-alist` instead?
+    (cond ((equal "rkt" extension) #'racket-mode)
+          ((equal "txt" extension) #'text-mode)
+          (t (error "Unknown template extension!")))))
 
 (defun mindstream--new-buffer-from-template (template)
   "Create a new (unsaved) buffer from TEMPLATE."
   (mindstream--ensure-templates-exist)
   (let* ((contents (mindstream--file-contents template))
-         (buf (mindstream--new-buffer-with-contents contents)))
+         (major-mode-to-use (mindstream--infer-major-mode template))
+         (buf (mindstream--new-buffer-with-contents contents
+                                                    major-mode-to-use)))
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
       ;; on the scratch buffer
