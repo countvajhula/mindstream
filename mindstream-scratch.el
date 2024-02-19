@@ -84,13 +84,15 @@ New sessions always start anonymous."
   "Ensure that the templates directory exists and contains the default template."
   ;; consider alternative: an initialization function to do this the first time
   (unless (file-directory-p mindstream-template-path)
-    (mkdir mindstream-template-path t)
-    (let ((buf (generate-new-buffer "default-template")))
-      (with-current-buffer buf
-        (insert mindstream-default-template-contents)
-        (write-file (concat mindstream-template-path
-                            mindstream-default-template-name)))
-      (kill-buffer buf))))
+    (mkdir mindstream-template-path t))
+  (let ((default-template-file (concat mindstream-template-path
+                                       mindstream-default-template-name)))
+    (unless (file-exists-p default-template-file)
+      (let ((buf (generate-new-buffer "default-template")))
+        (with-current-buffer buf
+          (insert mindstream-default-template-contents)
+          (write-file default-template-file))
+        (kill-buffer buf)))))
 
 (defun mindstream--file-contents (filename)
   "Get contents of FILENAME as a string."
