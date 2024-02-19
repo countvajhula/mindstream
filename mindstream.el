@@ -199,8 +199,11 @@ you would typically want to specify a new, non-existent folder."
     (mindstream--end-anonymous-session)
     ;; TODO: platform-independent paths
     (if named
-        (mindstream-load-session (concat dest-dir "/" filename))
-      (mindstream-load-session (concat dest-dir "/" original-session-name "/" filename)))))
+        (mindstream-load-session (concat (file-name-as-directory dest-dir)
+                                         filename))
+      (mindstream-load-session (concat (file-name-as-directory dest-dir)
+                                       (file-name-as-directory original-session-name)
+                                       filename)))))
 
 (defun mindstream-load-session (filename)
   "Load a session from a directory.
