@@ -69,7 +69,7 @@ it should typically be run using `with-current-buffer`."
       (rename-buffer mindstream-anonymous-buffer-name))
     (mindstream--commit)))
 
-(defun mindstream--end-session ()
+(defun mindstream--end-anonymous-session ()
   "End the current anonymous session.
 
 This always affects the current anonymous session and does not affect
@@ -88,7 +88,7 @@ a named session that you may happen to be visiting."
 
 This also begins a new session."
   ;; end the current anonymous session
-  (mindstream--end-session)
+  (mindstream--end-anonymous-session)
   ;; start a new session (sessions always start anonymous)
   (let ((buf (mindstream-start-session template)))
     ;; (ab initio) iterate
@@ -194,7 +194,7 @@ you would typically want to specify a new, non-existent folder."
     ;; TODO: verify behavior with existing vs non-existent containing folder
     (copy-directory (file-name-directory (buffer-file-name))
                     dest-dir)
-    (mindstream--end-session)
+    (mindstream--end-anonymous-session)
     (if named
         (mindstream-load-session dest-dir)
       (mindstream-load-session (concat dest-dir original-session-name)))))
