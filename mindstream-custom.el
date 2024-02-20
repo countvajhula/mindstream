@@ -32,7 +32,7 @@
   "A scratch buffer."
   :group 'Editing)
 
-(defcustom mindstream-path "/var/tmp/racket/" ; TODO: make platform-independent?
+(defcustom mindstream-path "/var/tmp/mindstream/" ; TODO: make platform-independent?
   "Directory path where mindstream buffers will be saved during development."
   :type 'string
   :group 'mindstream)
