@@ -67,20 +67,15 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-default-template-name "text.txt"
-  "Name for the default template that will be created when no templates exist."
+(defcustom mindstream-default-template "text.txt"
+  "Default template to use for new mindstream sessions.
+
+If no templates exist, this one will be created with the default template contents."
   :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-default-template-contents "Welcome to Mindstream!\n\nOnce you're familiar with the basic functionality, you may want to modify this template to suit your needs, or add other templates of your own.\n\n"
   "Contents of the default template that is created if none exist."
-  :type 'string
-  :group 'mindstream)
-
-(defcustom mindstream-default-template
-  (concat (file-name-as-directory mindstream-template-path)
-          mindstream-default-template-name)
-  "Default template to use for new mindstream sessions."
   :type 'string
   :group 'mindstream)
 
