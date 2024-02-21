@@ -133,6 +133,7 @@ if Emacs is exited."
   (let ((extension (file-name-extension file)))
     ;; TODO: use `auto-mode-alist` instead?
     (cond ((equal "rkt" extension) #'racket-mode)
+          ((equal "el" extension) #'emacs-lisp-mode)
           ((equal "txt" extension) #'text-mode)
           (t (error "Unknown template extension!")))))
 
