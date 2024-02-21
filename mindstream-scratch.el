@@ -80,13 +80,19 @@ New sessions always start anonymous."
   (concat (file-name-as-directory mindstream-path)
           (file-name-as-directory session)))
 
+(defun mindstream--template (&optional name)
+  "Path to template NAME.
+
+If NAME isn't provided, use the default template."
+  (concat (file-name-as-directory mindstream-template-path)
+          (or name mindstream-default-template)))
+
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   ;; consider alternative: an initialization function to do this the first time
   (unless (file-directory-p mindstream-template-path)
     (mkdir mindstream-template-path t))
-  (let ((default-template-file (concat mindstream-template-path
-                                       mindstream-default-template-name)))
+  (let ((default-template-file (mindstream--template)))
     (unless (file-exists-p default-template-file)
       (let ((buf (generate-new-buffer "default-template")))
         (with-current-buffer buf
@@ -127,6 +133,14 @@ if Emacs is exited."
       (insert contents)
       (mindstream--initialize-buffer major-mode-to-use))
     buf))
+
+(defun mindstream--infer-template ()
+  "Infer template to use based on current major mode."
+  ;; TODO: allow this to be customizable, a user-configured hash
+  (cond ((equal 'racket-mode major-mode) "racket.rkt")
+        ((equal 'emacs-lisp-mode major-mode) "elisp.el")
+        ((equal 'text-mode major-mode) "text.txt")
+        (t (error "Unknown major mode!"))))
 
 (defun mindstream--infer-major-mode (file)
   "Infer a major mode to use based on the file extension."

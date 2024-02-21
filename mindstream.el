@@ -225,7 +225,8 @@ want to get the scratch buffer - whatever it may be. It is too
 connoted to be useful in features implementing the scratch buffer
 iteration model."
   (or (mindstream--get-anonymous-scratch-buffer)
-      (mindstream--new mindstream-default-template)))
+      (mindstream--new (mindstream--template
+                        (mindstream--infer-template)))))
 
 (defun mindstream-switch-to-scratch-buffer ()
   "Switch to the anonymous scratch buffer."
