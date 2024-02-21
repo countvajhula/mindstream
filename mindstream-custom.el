@@ -62,8 +62,8 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-anonymous-buffer-name "*scratch - Mindstream*"
-  "The name of the mindstream scratch buffer."
+(defcustom mindstream-anonymous-buffer-prefix "scratch"
+  "The prefix to use in the name of a mindstream scratch buffer."
   :type 'string
   :group 'mindstream)
 

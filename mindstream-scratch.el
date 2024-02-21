@@ -49,7 +49,7 @@ This is a string representing a path to a file on disk.")
             "-"
             (sha1 (format "%s" time)))))
 
-(cl-defun mindstream-start-session (&optional template)
+(defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
 This creates a new directory and Git repository for the new session.
@@ -72,7 +72,7 @@ New sessions always start anonymous."
       (mindstream--execute-shell-command "git init" base-path)
       (with-current-buffer buf
         (write-file filename)
-        (rename-buffer mindstream-anonymous-buffer-name))
+        (rename-buffer (mindstream-anonymous-buffer-name)))
       buf)))
 
 (defun mindstream--generate-anonymous-session-path (session)
@@ -127,14 +127,14 @@ This does not save the buffer.
 As a \"scratch\" buffer, its contents will be treated as
 disposable, and it will not prompt to save if it is closed or
 if Emacs is exited."
-  (let* ((buffer-name mindstream-anonymous-buffer-name)
+  (let* ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use))
          (buf (generate-new-buffer buffer-name)))
     (with-current-buffer buf
       (insert contents)
       (mindstream--initialize-buffer major-mode-to-use))
     buf))
 
-(defun mindstream--infer-template ()
+(defun mindstream--infer-template (major-mode)
   "Infer template to use based on current major mode."
   ;; TODO: allow this to be customizable, a user-configured hash
   (cond ((equal 'racket-mode major-mode) "racket.rkt")
@@ -166,14 +166,35 @@ if Emacs is exited."
       (setq mindstream-template-used template))
     buf))
 
+(defun mindstream--mode-name (major-mode-to-use)
+  "Human readable name of MAJOR-MODE-TO-USE.
+
+If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is used."
+  (if major-mode-to-use
+      (string-trim-right
+       (capitalize
+        (substring
+         (symbol-name major-mode-to-use)
+         0 -5)))
+    mode-name))
+
+(defun mindstream-anonymous-buffer-name (&optional major-mode-to-use)
+  "Name of the anonymous session for the current major mode."
+  (concat "*"
+          mindstream-anonymous-buffer-prefix
+          " - "
+          (mindstream--mode-name major-mode-to-use)
+          "*"))
+
 (defun mindstream--get-anonymous-scratch-buffer ()
   "Get the active scratch buffer, if it exists."
-  (let ((buffer-name mindstream-anonymous-buffer-name))
+  (let ((buffer-name (mindstream-anonymous-buffer-name)))
     (get-buffer buffer-name)))
 
 (defun mindstream-anonymous-scratch-buffer-p ()
   "Predicate to check if the current buffer is the anonymous scratch buffer."
-  (equal mindstream-anonymous-buffer-name (buffer-name)))
+  ;; TODO: this is fairly weak
+  (string-match-p mindstream-anonymous-buffer-prefix (buffer-name)))
 
 (provide 'mindstream-scratch)
 ;;; mindstream-scratch.el ends here

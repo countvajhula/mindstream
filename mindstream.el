@@ -53,21 +53,12 @@
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
-(defun mindstream--commit ()
-  "Commit the current state as part of iteration."
-  (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
-
 (defun mindstream--iterate ()
-  "Write scratch buffer to disk and increment the version.
-
-This assumes that the scratch buffer is the current buffer, so
-it should typically be run using `with-current-buffer`."
-  (let ((anonymous (mindstream-anonymous-scratch-buffer-p)))
-    ;; writing the file changes the buffer name to the filename,
-    ;; so we restore the original buffer name
-    (when anonymous
-      (rename-buffer mindstream-anonymous-buffer-name))
-    (mindstream--commit)))
+  "Commit the current state as part of iteration."
+  (mindstream--execute-shell-command
+   (concat "git add -A"
+           " && "
+           "git commit -a --allow-empty-message -m ''")))
 
 (defun mindstream--end-anonymous-session ()
   "End the current anonymous session.
@@ -226,7 +217,7 @@ connoted to be useful in features implementing the scratch buffer
 iteration model."
   (or (mindstream--get-anonymous-scratch-buffer)
       (mindstream--new (mindstream--template
-                        (mindstream--infer-template)))))
+                        (mindstream--infer-template major-mode)))))
 
 (defun mindstream-switch-to-scratch-buffer ()
   "Switch to the anonymous scratch buffer."
