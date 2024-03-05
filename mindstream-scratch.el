@@ -140,6 +140,7 @@ if Emacs is exited."
   (cond ((equal 'racket-mode major-mode) "racket.rkt")
         ((equal 'emacs-lisp-mode major-mode) "elisp.el")
         ((equal 'text-mode major-mode) "text.txt")
+        ((equal 'python-mode major-mode) "python.py")
         (t (error "Unknown major mode!"))))
 
 (defun mindstream--infer-major-mode (file)
@@ -149,6 +150,7 @@ if Emacs is exited."
     (cond ((equal "rkt" extension) #'racket-mode)
           ((equal "el" extension) #'emacs-lisp-mode)
           ((equal "txt" extension) #'text-mode)
+          ((equal "py" extension) #'python-mode)
           (t (error "Unknown template extension!")))))
 
 (defun mindstream--new-buffer-from-template (template)
