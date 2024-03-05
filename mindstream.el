@@ -183,14 +183,25 @@ you would typically want to specify a new, non-existent folder."
                                        (file-name-as-directory original-session-name)
                                        filename)))))
 
-(defun mindstream-load-session (filename)
+(defun mindstream--session-file-p (file)
+  "Predicate to identify whether FILE is a Mindstream session file."
+  (string-match-p
+   (concat "^"
+           mindstream-filename)
+   file))
+
+(defun mindstream-load-session (dir)
   "Load a session from a directory.
 
-FILENAME is the directory containing the session."
-  (interactive (list (read-file-name "Load session: " mindstream-save-session-path)))
+DIR is the directory containing the session."
+  (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
   ;; restore the old session
-  (find-file filename)
-  (mindstream-mode 1))
+  (let ((filename (expand-file-name
+                   (seq-find #'mindstream--session-file-p
+				             (directory-files dir))
+                   dir)))
+    (find-file filename)
+    (mindstream-mode 1)))
 
 (defun mindstream--get-or-create-scratch-buffer ()
   "Get the active scratch buffer or create a new one.
