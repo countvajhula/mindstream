@@ -147,10 +147,9 @@ location of your choice (i.e. FILENAME).  To just save the file to its
 existing (tmp) location, use a low-level utility like `save-buffer` or
 `write-file` directly."
   (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
-  (unless mindstream-mode
-    (error "Not a mindstream buffer!"))
   (save-buffer)  ; ensure it saves any WIP
   (write-file filename)
+  ;; since it's a standalone file, there is no session and versioning (i.e. git)
   (mindstream-mode -1))
 
 (defun mindstream--session-name ()
