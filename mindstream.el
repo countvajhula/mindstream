@@ -48,8 +48,8 @@
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
-    (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-file)
-    (define-key mindstream-map (kbd "C-c C-r S") #'mindstream-save-session)
+    (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-session)
+    (define-key mindstream-map (kbd "C-c C-r C-s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
@@ -138,19 +138,6 @@ in that invocation."
                (magit-anything-modified-p))
       (mindstream--iterate))
     result))
-
-(defun mindstream-save-file (filename)
-  "Save the current scratch buffer to a file.
-
-This is for interactive use only, for saving the file to a persistent
-location of your choice (i.e. FILENAME).  To just save the file to its
-existing (tmp) location, use a low-level utility like `save-buffer` or
-`write-file` directly."
-  (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
-  (save-buffer)  ; ensure it saves any WIP
-  (write-file filename)
-  ;; since it's a standalone file, there is no session and versioning (i.e. git)
-  (mindstream-mode -1))
 
 (defun mindstream--session-name ()
   "Name of the current session.

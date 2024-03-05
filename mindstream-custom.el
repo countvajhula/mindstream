@@ -42,11 +42,6 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-save-file-path mindstream--user-home-directory
-  "Default directory path for saving mindstream buffers."
-  :type 'string
-  :group 'mindstream)
-
 (defcustom mindstream-save-session-path mindstream--user-home-directory
   "Default directory path for saving mindstream sessions."
   :type 'string
