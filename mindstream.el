@@ -103,6 +103,7 @@ This also begins a new session."
     (error "Not a mindstream buffer!"))
   ;; first write the existing scratch buffer
   ;; if there are unsaved changes
+  (save-buffer)
   (mindstream--iterate)
   ;; clear the buffer
   (erase-buffer)
