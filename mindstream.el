@@ -164,10 +164,10 @@ you would typically want to specify a new, non-existent folder."
     (error "Not a mindstream buffer!"))
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
-  (let ((original-session-name (mindstream--session-name))
-        (buffer-file (buffer-file-name))
-        (filename (file-name-nondirectory (buffer-file-name)))
-        (named (not (file-directory-p dest-dir))))
+  (let* ((original-session-name (mindstream--session-name))
+         (buffer-file (buffer-file-name))
+         (filename (file-name-nondirectory buffer-file))
+         (named (not (file-directory-p dest-dir))))
     ;; ensure no unsaved changes
     ;; note: this is a no-op if save-buffer is a trigger for iteration
     (mindstream--iterate)
@@ -177,11 +177,9 @@ you would typically want to specify a new, non-existent folder."
     (mindstream--end-anonymous-session)
     ;; TODO: platform-independent paths
     (if named
-        (mindstream-load-session (concat (file-name-as-directory dest-dir)
-                                         filename))
+        (mindstream-load-session dest-dir)
       (mindstream-load-session (concat (file-name-as-directory dest-dir)
-                                       (file-name-as-directory original-session-name)
-                                       filename)))))
+                                       original-session-name)))))
 
 (defun mindstream--session-file-p (file)
   "Predicate to identify whether FILE is a Mindstream session file."
