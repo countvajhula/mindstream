@@ -140,6 +140,7 @@ if Emacs is exited."
   (cond ((equal 'racket-mode major-mode) "racket.rkt")
         ((equal 'emacs-lisp-mode major-mode) "elisp.el")
         ((equal 'text-mode major-mode) "text.txt")
+        ((equal 'markdown-mode major-mode) "markdown.md")
         ((equal 'python-mode major-mode) "python.py")
         (t (error "Unknown major mode!"))))
 
@@ -150,6 +151,7 @@ if Emacs is exited."
     (cond ((equal "rkt" extension) #'racket-mode)
           ((equal "el" extension) #'emacs-lisp-mode)
           ((equal "txt" extension) #'text-mode)
+          ((equal "md" extension) #'markdown-mode)
           ((equal "py" extension) #'python-mode)
           (t (error "Unknown template extension!")))))
 
