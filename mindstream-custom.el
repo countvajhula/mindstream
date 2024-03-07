@@ -69,7 +69,7 @@ If no templates exist, this one will be created with the default template conten
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-default-template-contents "Welcome to Mindstream!\n\nOnce you're familiar with the basic functionality, you may want to modify this template to suit your needs, or add other templates of your own.\n\n"
+(defcustom mindstream-default-template-contents "The past is a memory, the future a dream, and now's a dance.\n"
   "Contents of the default template that is created if none exist."
   :type 'string
   :group 'mindstream)
