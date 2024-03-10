@@ -125,6 +125,46 @@ This also begins a new session."
   (dolist (fn mindstream-triggers)
     (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 
+(defun mindstream--call-live-trigger ()
+  "Call configured live trigger for major mode."
+  (when (and mindstream-mode (boundp 'mindstream-live-timer) mindstream-live-timer)
+    ;; TODO: have a way to configure these for each major mode
+    ;; and call the appropriate one from here
+    ;; it's currently hardcoded
+    (if (eq major-mode 'racket-mode)
+        (racket-run)
+      (save-buffer))))
+
+(defun mindstream--start-live-timer ()
+  "Start live timer."
+  (let ((timer (run-at-time mindstream-live-delay nil #'mindstream--call-live-trigger)))
+    (setq-local mindstream-live-timer timer)))
+
+(defun mindstream--cancel-live-timer ()
+  "Cancel live timer."
+  (let ((timer (and (boundp 'mindstream-live-timer) mindstream-live-timer)))
+    (when timer
+      (cancel-timer timer))))
+
+(defun mindstream--reset-live-timer (_beg _end _len)
+  "Reset the live timer."
+  (mindstream--cancel-live-timer)
+  (mindstream--start-live-timer))
+
+(defun mindstream-go-live ()
+  "Live mode ... ENGAGE."
+  (interactive)
+  (add-hook 'after-change-functions
+            #'mindstream--reset-live-timer
+            t t))
+
+(defun mindstream-go-offline ()
+  "Disable live mode."
+  (interactive)
+  (remove-hook 'after-change-functions
+               #'mindstream--reset-live-timer
+               t))
+
 (defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command.
 

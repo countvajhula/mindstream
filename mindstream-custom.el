@@ -52,6 +52,11 @@
   :type 'list
   :group 'mindstream)
 
+(defcustom mindstream-live-delay 1.5
+  "Delay in typing after which the session is iterated."
+  :type 'list
+  :group 'mindstream)
+
 (defcustom mindstream-filename "scratch"
   "Filename to use for mindstream buffers."
   :type 'string
