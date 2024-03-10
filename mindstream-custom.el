@@ -32,7 +32,7 @@
   "A scratch buffer."
   :group 'Editing)
 
-(defcustom mindstream-path "/var/tmp/racket/" ; TODO: make platform-independent?
+(defcustom mindstream-path "/var/tmp/mindstream/" ; TODO: make platform-independent?
   "Directory path where mindstream buffers will be saved during development."
   :type 'string
   :group 'mindstream)
@@ -42,24 +42,14 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-save-file-path mindstream--user-home-directory
-  "Default directory path for saving mindstream buffers."
-  :type 'string
-  :group 'mindstream)
-
 (defcustom mindstream-save-session-path mindstream--user-home-directory
   "Default directory path for saving mindstream sessions."
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-major-mode 'racket-mode
-  "Major mode to use in mindstream buffers."
-  :type 'string
-  :group 'mindstream)
-
-(defcustom mindstream-file-extension ".rkt"
-  "File extension to use for mindstream buffers."
-  :type 'string
+(defcustom mindstream-triggers (list #'save-buffer)
+  "Functions that, when called, should implicitly iterate the mindstream buffer."
+  :type 'list
   :group 'mindstream)
 
 (defcustom mindstream-filename "scratch"
@@ -67,20 +57,20 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-anonymous-buffer-name "*scratch - Racket*"
-  "The name of the mindstream scratch buffer."
+(defcustom mindstream-anonymous-buffer-prefix "scratch"
+  "The prefix to use in the name of a mindstream scratch buffer."
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-default-template-name "racket.rkt"
-  "Name for the default template that will be created when no templates exist."
+(defcustom mindstream-default-template "text.txt"
+  "Default template to use for new mindstream sessions.
+
+If no templates exist, this one will be created with the default template contents."
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-default-template
-  (concat (file-name-as-directory mindstream-template-path)
-          mindstream-default-template-name)
-  "Default template to use for new mindstream sessions."
+(defcustom mindstream-default-template-contents "The past is a memory, the future a dream, and now's a dance.\n"
+  "Contents of the default template that is created if none exist."
   :type 'string
   :group 'mindstream)
 

@@ -48,29 +48,19 @@
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
-    (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-file)
-    (define-key mindstream-map (kbd "C-c C-r S") #'mindstream-save-session)
+    (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-session)
+    (define-key mindstream-map (kbd "C-c C-r C-s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
 
-(defun mindstream--commit ()
-  "Commit the current state as part of iteration."
-  (mindstream--execute-shell-command "git add -A && git commit -a --allow-empty-message -m ''"))
-
 (defun mindstream--iterate ()
-  "Write scratch buffer to disk and increment the version.
+  "Commit the current state as part of iteration."
+  (mindstream--execute-shell-command
+   (concat "git add -A"
+           " && "
+           "git commit -a --allow-empty-message -m ''")))
 
-This assumes that the scratch buffer is the current buffer, so
-it should typically be run using `with-current-buffer`."
-  (let ((anonymous (mindstream-anonymous-scratch-buffer-p)))
-    (save-buffer)
-    ;; writing the file changes the buffer name to the filename,
-    ;; so we restore the original buffer name
-    (when anonymous
-      (rename-buffer mindstream-anonymous-buffer-name))
-    (mindstream--commit)))
-
-(defun mindstream--end-session ()
+(defun mindstream--end-anonymous-session ()
   "End the current anonymous session.
 
 This always affects the current anonymous session and does not affect
@@ -89,7 +79,7 @@ a named session that you may happen to be visiting."
 
 This also begins a new session."
   ;; end the current anonymous session
-  (mindstream--end-session)
+  (mindstream--end-anonymous-session)
   ;; start a new session (sessions always start anonymous)
   (let ((buf (mindstream-start-session template)))
     ;; (ab initio) iterate
@@ -113,6 +103,7 @@ This also begins a new session."
     (error "Not a mindstream buffer!"))
   ;; first write the existing scratch buffer
   ;; if there are unsaved changes
+  (save-buffer)
   (mindstream--iterate)
   ;; clear the buffer
   (erase-buffer)
@@ -126,11 +117,13 @@ This also begins a new session."
 ;;;###autoload
 (defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
-  (advice-add #'racket-run :around #'mindstream-implicitly-iterate-advice))
+  (dolist (fn mindstream-triggers)
+    (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-disable ()
   "Remove any advice for racket scratch buffers."
-  (advice-remove #'racket-run #'mindstream-implicitly-iterate-advice))
+  (dolist (fn mindstream-triggers)
+    (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
   "Implicitly iterate the scratch buffer upon execution of some command.
@@ -141,49 +134,59 @@ action.
 
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
-  (when (and mindstream-mode
-             (or (buffer-modified-p)
-                 (magit-anything-modified-p)))
-    (mindstream--iterate))
   (let ((result (apply orig-fn args)))
+    (when (and mindstream-mode
+               (magit-anything-modified-p))
+      (mindstream--iterate))
     result))
 
-(defun mindstream-save-file (filename)
-  "Save the current scratch buffer to a file.
+(defun mindstream--session-name ()
+  "Name of the current session.
 
-This is for interactive use only, for saving the file to a persistent
-location of your choice (i.e. FILENAME).  To just save the file to its
-existing (tmp) location, use a low-level utility like `save-buffer` or
-`write-file` directly."
-  (interactive (list (read-file-name "Save file as: " mindstream-save-file-path "")))
-  (unless mindstream-mode
-    (error "Not a mindstream buffer!"))
-  (write-file filename)
-  (mindstream-mode -1))
+This is simply the name of the containing folder."
+  (string-trim-left
+   (directory-file-name
+    (file-name-directory (buffer-file-name)))
+   "^.*/"))
 
 (defun mindstream-save-session (dest-dir)
   "Save the current scratch session to a directory.
 
 If DEST-DIR is a non-existent path, it will be used as the name of a
 new directory that will contain the session.  If it is an existing
-path, then the session will be saved at that path with its current
-name.
+path, then the session will be saved at that path using its current
+(e.g. randomly generated) name as the name of the saved session folder.
 
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
   (unless mindstream-mode
     (error "Not a mindstream buffer!"))
+  (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
-  (let ((original-session-name mindstream-session-name)
-        (named (not (file-directory-p dest-dir))))
-    (mindstream--iterate) ; ensure no unsaved changes
-    (copy-directory (file-name-directory (buffer-file-name))
+  (let* ((original-session-name (mindstream--session-name))
+         (buffer-file (buffer-file-name))
+         (filename (file-name-nondirectory buffer-file))
+         (named (not (file-directory-p dest-dir))))
+    ;; ensure no unsaved changes
+    ;; note: this is a no-op if save-buffer is a trigger for iteration
+    (mindstream--iterate)
+    ;; TODO: verify behavior with existing vs non-existent containing folder
+    (copy-directory (file-name-directory buffer-file)
                     dest-dir)
-    (mindstream--end-session)
+    (mindstream--end-anonymous-session)
+    ;; TODO: platform-independent paths
     (if named
         (mindstream-load-session dest-dir)
-      (mindstream-load-session (concat dest-dir original-session-name)))))
+      (mindstream-load-session (concat (file-name-as-directory dest-dir)
+                                       original-session-name)))))
+
+(defun mindstream--session-file-p (file)
+  "Predicate to identify whether FILE is a Mindstream session file."
+  (string-match-p
+   (concat "^"
+           mindstream-filename)
+   file))
 
 (defun mindstream-load-session (dir)
   "Load a session from a directory.
@@ -191,15 +194,12 @@ you would typically want to specify a new, non-existent folder."
 DIR is the directory containing the session."
   (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
   ;; restore the old session
-  (let* ((session (file-name-nondirectory
-                   (string-trim dir "" "/")))
-         (filename (expand-file-name
-                    (concat mindstream-filename
-                            mindstream-file-extension)
-                    dir)))
+  (let ((filename (expand-file-name
+                   (seq-find #'mindstream--session-file-p
+				             (directory-files dir))
+                   dir)))
     (find-file filename)
-    (mindstream-mode 1)
-    (setq mindstream-session-name session)))
+    (mindstream-mode 1)))
 
 (defun mindstream--get-or-create-scratch-buffer ()
   "Get the active scratch buffer or create a new one.
@@ -212,7 +212,8 @@ want to get the scratch buffer - whatever it may be. It is too
 connoted to be useful in features implementing the scratch buffer
 iteration model."
   (or (mindstream--get-anonymous-scratch-buffer)
-      (mindstream--new mindstream-default-template)))
+      (mindstream--new (mindstream--template
+                        (mindstream--infer-template major-mode)))))
 
 (defun mindstream-switch-to-scratch-buffer ()
   "Switch to the anonymous scratch buffer."

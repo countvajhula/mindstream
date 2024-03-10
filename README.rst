@@ -4,11 +4,11 @@
 mindstream
 ==========
 
-A rapid prototyping UX for Racket programming in Emacs, based on versioned and sessioned "scratch" buffers.
+Versioned and sessioned scratch buffers for freewriting text and exploratory programming in your favorite language, in Emacs.
 
-Every mindstream session is represented as a unique Git repository on disk. The Git repo contains commits representing the stages in your development process, bounded either by ``racket-run`` invocations, or by calls to ``mindstream-clear`` which restores the buffer to a "clear" state, i.e. to its original template form. You can save and load these sessions, too.
+Every mindstream session begins from a template you provide and evolves through the stages of your creative process. The session is stored as a unique Git repository on disk. The Git repo contains commits representing the stages in your development process bounded at natural points -- by default, the points at which your buffer is saved (whether explicitly by you or implicitly on running a command like ``racket-run`` or ``mindstream-clear``). You can save and load these sessions, too.
 
-In the future, this package may be generalized for use with other languages and in authoring settings in general.
+Typical uses of this package are for early stages of prototyping in a software project, or for exporatory programming to understand a new idea, tool, or technology. It's also great for just taking quick notes or freewriting blog posts or content in authoring settings in general.
 
 Installation
 ============
@@ -33,11 +33,25 @@ Usage
 If you'd like to try it out, follow these steps:
 
 1. Follow the installation instructions above to install this package using straight.el
-2. Ensure ``(mindstream-initialize)`` is somewhere in your config. This advises Racket Mode's ``racket-run`` to "iterate" the scratch buffer, providing implicit versioning for your Racket scratch buffer.
-3. Run ``mindstream-new`` to create a Racket scratch buffer.
-4. Hack away!
+2. Ensure ``(mindstream-initialize)`` is somewhere in your config. This advises "trigger" functions such as ``save-buffer`` to "iterate" the scratch buffer, providing implicit versioning for your session.
+3. Create a new template at ``~/.mindstream/templates/`` for your favorite programming language (or just plain text).
+4. Run ``mindstream-new`` to create a session.
+5. Hack away!
 
-You can also explore adding new templates in ``mindstream-template-path`` (default: ``"~/.mindstream/templates/"``) -- ordinary Racket files -- which will then be available as options in ``mindstream-new``. You can also save scratch buffers that you'd like to keep, or even entire scratch buffer sessions (which clones the mindstream Git repo to a location you specify).
+Adding New Session Templates
+----------------------------
+
+Mindstream doesn't include any templates out of the box, so you'll probably want to create some for standard scratch sessions you are likely to need, for instance, for programming in your favorite language (perhaps Racket?), or just freewriting some text for your next great novel, following in the keystrokes of Emacs octopuses like Neal Stephenson.
+
+You can add new templates in ``mindstream-template-path`` (default: ``"~/.mindstream/templates/"``) -- ordinary text files with any extension you like (e.g. ``.txt``, ``.rkt``, ``.el``, anything) -- which will then be available as options in ``mindstream-new``.
+
+Saving Sessions
+---------------
+
+You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-c C-r C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``/var/tmp/mindstream/``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
+
+Explore
+-------
 
 Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in a minor mode -- ``mindstream-mode`` -- which is enabled locally in scratch buffers.
 
@@ -46,7 +60,7 @@ Design
 
 Mindstream structures your workflow in sessions, which are version-controlled files. When you first start a session it begins as anonymous, meaning that it doesn't have a name. If the session develops into something worth keeping, you can save it to a preconfigured (or any) location on disk by giving the session a name. A session is stored as a version-controlled folder. You can also save just the file rather than the entire session. With that in mind, here are some properties of the design:
 
-1. There is only one anonymous scratch session active at any time.
+1. There is only one anonymous scratch session active at any time, per major mode.
 2. Saving an anonymous session turns it into a named session, and there is no active anonymous session at that point. Named sessions work the same as anonymous sessions aside from having a name and being in a permanent location on disk. A new anonymous session could be started at any time via `mindstream-new`.
 3. New sessions always begin as anonymous.
 4. Named sessions may be loaded without interfering with the active anonymous session.
@@ -65,7 +79,7 @@ Magit is useful to navigate the states in the session and see diffs representing
 Git-Timemachine
 ---------------
 
-The git-timemachine Emacs package is a great way to temporally navigate your session. Unlike the usual undo and redo operations which track edits with high granularity, mindstream sessions are bounded by ``racket-run`` invocations which tend to represent natural, distinct stages in your development. Mindstream doesn't include a built-in way to navigate these states, but you can use the git-timemachine package to do this (in read-only mode).
+The git-timemachine Emacs package is a great way to temporally navigate your session. Unlike the usual undo and redo operations which track edits with high granularity, mindstream sessions are bounded by ``save-buffer`` invocations which tend to represent natural, distinct stages in your development. Mindstream doesn't include a built-in way to navigate these states, but you can use the git-timemachine package to do this (in read-only mode).
 
 Acknowledgements
 ================

@@ -37,12 +37,6 @@
 ;; TODO: handle this via an explicit configuration step
 (defvar racket-repl-buffer-name)
 
-(defvar-local mindstream-session-name nil
-  "The name of the mindstream session represented by the current buffer.
-
-For anonymous sessions this is a randomly generated identifier, while
-for named sessions it's the name of the containing folder.")
-
 (defvar-local mindstream-template-used nil
   "The template used (if any) in creating the current buffer.
 
@@ -55,7 +49,7 @@ This is a string representing a path to a file on disk.")
             "-"
             (sha1 (format "%s" time)))))
 
-(cl-defun mindstream-start-session (&optional template)
+(defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
 This creates a new directory and Git repository for the new session.
@@ -66,17 +60,19 @@ New sessions always start anonymous."
   (let* ((session (mindstream--unique-session-name))
          (base-path (mindstream--generate-anonymous-session-path session))
          (template (or template mindstream-default-template))
+         (file-extension (file-name-extension template))
          (buf (mindstream--new-buffer-from-template template))
+         ;; TODO: use platform-independent path construction
          (filename (concat base-path
                            mindstream-filename
-                           mindstream-file-extension)))
+                           "."
+                           file-extension)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
       (mindstream--execute-shell-command "git init" base-path)
       (with-current-buffer buf
-        (setq mindstream-session-name session)
         (write-file filename)
-        (rename-buffer mindstream-anonymous-buffer-name))
+        (rename-buffer (mindstream-anonymous-buffer-name)))
       buf)))
 
 (defun mindstream--generate-anonymous-session-path (session)
@@ -84,17 +80,25 @@ New sessions always start anonymous."
   (concat (file-name-as-directory mindstream-path)
           (file-name-as-directory session)))
 
+(defun mindstream--template (&optional name)
+  "Path to template NAME.
+
+If NAME isn't provided, use the default template."
+  (concat (file-name-as-directory mindstream-template-path)
+          (or name mindstream-default-template)))
+
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   ;; consider alternative: an initialization function to do this the first time
   (unless (file-directory-p mindstream-template-path)
-    (mkdir mindstream-template-path t)
-    (let ((buf (generate-new-buffer "default-template")))
-      (with-current-buffer buf
-        (insert "#lang racket\n\n")
-        (write-file (concat mindstream-template-path
-                            mindstream-default-template-name)))
-      (kill-buffer buf))))
+    (mkdir mindstream-template-path t))
+  (let ((default-template-file (mindstream--template)))
+    (unless (file-exists-p default-template-file)
+      (let ((buf (generate-new-buffer "default-template")))
+        (with-current-buffer buf
+          (insert mindstream-default-template-contents)
+          (write-file default-template-file))
+        (kill-buffer buf)))))
 
 (defun mindstream--file-contents (filename)
   "Get contents of FILENAME as a string."
@@ -102,23 +106,20 @@ New sessions always start anonymous."
     (insert-file-contents filename)
     (buffer-string)))
 
-(defun mindstream--initialize-buffer ()
+(defun mindstream--initialize-buffer (major-mode-to-use)
   "Initialize a newly created buffer.
 
 This sets the major mode and any other necessary attributes."
-  ;; TODO: instead of hardcoding the major mode, just let Emacs
-  ;; choose it based on the file extension
-  (let ((major-mode-to-use mindstream-major-mode))
-    (unless (eq major-mode major-mode-to-use)
-      (funcall major-mode-to-use))
-    (setq buffer-offer-save nil)
-    ;; Ignore whatever `racket-repl-buffer-name-function' just did to
-    ;; set `racket-repl-buffer-name' and give this its own REPL.
-    (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
-    ;; place point at the end of the buffer
-    (goto-char (point-max))))
+  (unless (eq major-mode major-mode-to-use)
+    (funcall major-mode-to-use))
+  (setq buffer-offer-save nil)
+  ;; Ignore whatever `racket-repl-buffer-name-function' just did to
+  ;; set `racket-repl-buffer-name' and give this its own REPL.
+  (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
+  ;; place point at the end of the buffer
+  (goto-char (point-max)))
 
-(defun mindstream--new-buffer-with-contents (contents)
+(defun mindstream--new-buffer-with-contents (contents major-mode-to-use)
   "Create a new scratch buffer containing CONTENTS.
 
 This does not save the buffer.
@@ -126,18 +127,41 @@ This does not save the buffer.
 As a \"scratch\" buffer, its contents will be treated as
 disposable, and it will not prompt to save if it is closed or
 if Emacs is exited."
-  (let* ((buffer-name mindstream-anonymous-buffer-name)
+  (let* ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use))
          (buf (generate-new-buffer buffer-name)))
     (with-current-buffer buf
       (insert contents)
-      (mindstream--initialize-buffer))
+      (mindstream--initialize-buffer major-mode-to-use))
     buf))
+
+(defun mindstream--infer-template (major-mode)
+  "Infer template to use based on current major mode."
+  ;; TODO: allow this to be customizable, a user-configured hash
+  (cond ((equal 'racket-mode major-mode) "racket.rkt")
+        ((equal 'emacs-lisp-mode major-mode) "elisp.el")
+        ((equal 'text-mode major-mode) "text.txt")
+        ((equal 'markdown-mode major-mode) "markdown.md")
+        ((equal 'python-mode major-mode) "python.py")
+        (t (error "Unknown major mode!"))))
+
+(defun mindstream--infer-major-mode (file)
+  "Infer a major mode to use based on the file extension."
+  (let ((extension (file-name-extension file)))
+    ;; TODO: use `auto-mode-alist` instead?
+    (cond ((equal "rkt" extension) #'racket-mode)
+          ((equal "el" extension) #'emacs-lisp-mode)
+          ((equal "txt" extension) #'text-mode)
+          ((equal "md" extension) #'markdown-mode)
+          ((equal "py" extension) #'python-mode)
+          (t (error "Unknown template extension!")))))
 
 (defun mindstream--new-buffer-from-template (template)
   "Create a new (unsaved) buffer from TEMPLATE."
   (mindstream--ensure-templates-exist)
   (let* ((contents (mindstream--file-contents template))
-         (buf (mindstream--new-buffer-with-contents contents)))
+         (major-mode-to-use (mindstream--infer-major-mode template))
+         (buf (mindstream--new-buffer-with-contents contents
+                                                    major-mode-to-use)))
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
       ;; on the scratch buffer
@@ -146,14 +170,35 @@ if Emacs is exited."
       (setq mindstream-template-used template))
     buf))
 
+(defun mindstream--mode-name (major-mode-to-use)
+  "Human readable name of MAJOR-MODE-TO-USE.
+
+If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is used."
+  (if major-mode-to-use
+      (string-trim-right
+       (capitalize
+        (substring
+         (symbol-name major-mode-to-use)
+         0 -5)))
+    mode-name))
+
+(defun mindstream-anonymous-buffer-name (&optional major-mode-to-use)
+  "Name of the anonymous session for the current major mode."
+  (concat "*"
+          mindstream-anonymous-buffer-prefix
+          " - "
+          (mindstream--mode-name major-mode-to-use)
+          "*"))
+
 (defun mindstream--get-anonymous-scratch-buffer ()
   "Get the active scratch buffer, if it exists."
-  (let ((buffer-name mindstream-anonymous-buffer-name))
+  (let ((buffer-name (mindstream-anonymous-buffer-name)))
     (get-buffer buffer-name)))
 
 (defun mindstream-anonymous-scratch-buffer-p ()
   "Predicate to check if the current buffer is the anonymous scratch buffer."
-  (equal mindstream-anonymous-buffer-name (buffer-name)))
+  ;; TODO: this is fairly weak
+  (string-match-p mindstream-anonymous-buffer-prefix (buffer-name)))
 
 (provide 'mindstream-scratch)
 ;;; mindstream-scratch.el ends here
