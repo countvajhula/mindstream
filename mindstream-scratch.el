@@ -158,7 +158,12 @@ if Emacs is exited."
 (defun mindstream--new-buffer-from-template (template)
   "Create a new (unsaved) buffer from TEMPLATE."
   (mindstream--ensure-templates-exist)
-  (let* ((contents (mindstream--file-contents template))
+  (let* ((contents (condition-case nil
+                       (mindstream--file-contents template)
+                     (error
+                      (error
+                       (format "Template %s not found! Please create it and try again."
+                               template)))))
          (major-mode-to-use (mindstream--infer-major-mode template))
          (buf (mindstream--new-buffer-with-contents contents
                                                     major-mode-to-use)))
