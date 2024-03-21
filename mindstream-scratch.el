@@ -138,6 +138,7 @@ if Emacs is exited."
   "Infer template to use based on current major mode."
   ;; TODO: allow this to be customizable, a user-configured hash
   (cond ((equal 'racket-mode major-mode) "racket.rkt")
+        ((equal 'scribble-mode major-mode) "scribble.scrbl")
         ((equal 'emacs-lisp-mode major-mode) "elisp.el")
         ((equal 'text-mode major-mode) "text.txt")
         ((equal 'markdown-mode major-mode) "markdown.md")
@@ -149,6 +150,7 @@ if Emacs is exited."
   (let ((extension (file-name-extension file)))
     ;; TODO: use `auto-mode-alist` instead?
     (cond ((equal "rkt" extension) #'racket-mode)
+          ((equal "scrbl" extension) #'scribble-mode)
           ((equal "el" extension) #'emacs-lisp-mode)
           ((equal "txt" extension) #'text-mode)
           ((equal "md" extension) #'markdown-mode)
