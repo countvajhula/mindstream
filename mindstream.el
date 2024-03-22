@@ -60,12 +60,12 @@
            " && "
            "git commit -a --allow-empty-message -m ''")))
 
-(defun mindstream--end-anonymous-session ()
+(defun mindstream--end-anonymous-session (&optional major-mode)
   "End the current anonymous session.
 
 This always affects the current anonymous session and does not affect
 a named session that you may happen to be visiting."
-  (let ((buf (mindstream--get-anonymous-scratch-buffer)))
+  (let ((buf (mindstream--get-anonymous-scratch-buffer major-mode)))
     (when buf
       (with-current-buffer buf
         ;; first write the existing scratch buffer
@@ -78,8 +78,10 @@ a named session that you may happen to be visiting."
   "Start a new scratch buffer using a specific TEMPLATE.
 
 This also begins a new session."
-  ;; end the current anonymous session
-  (mindstream--end-anonymous-session)
+  ;; end the current anonymous session for the
+  ;; desired major mode
+  (mindstream--end-anonymous-session
+   (mindstream--infer-major-mode template))
   ;; start a new session (sessions always start anonymous)
   (let ((buf (mindstream-start-session template)))
     ;; (ab initio) iterate

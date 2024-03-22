@@ -145,9 +145,9 @@ if Emacs is exited."
         ((equal 'python-mode major-mode) "python.py")
         (t (error "Unknown major mode!"))))
 
-(defun mindstream--infer-major-mode (file)
+(defun mindstream--infer-major-mode (filename)
   "Infer a major mode to use based on the file extension."
-  (let ((extension (file-name-extension file)))
+  (let ((extension (file-name-extension filename)))
     ;; TODO: use `auto-mode-alist` instead?
     (cond ((equal "rkt" extension) #'racket-mode)
           ((equal "scrbl" extension) #'scribble-mode)
@@ -197,9 +197,9 @@ If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is us
           (mindstream--mode-name major-mode-to-use)
           "*"))
 
-(defun mindstream--get-anonymous-scratch-buffer ()
+(defun mindstream--get-anonymous-scratch-buffer (&optional major-mode)
   "Get the active scratch buffer, if it exists."
-  (let ((buffer-name (mindstream-anonymous-buffer-name)))
+  (let ((buffer-name (mindstream-anonymous-buffer-name major-mode)))
     (get-buffer buffer-name)))
 
 (defun mindstream-anonymous-scratch-buffer-p ()
