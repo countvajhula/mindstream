@@ -25,6 +25,7 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
       :host github
       :repo "countvajhula/mindstream")
     :config
+	(mindstream-global-mode)
     (mindstream-initialize))
 
 Usage
@@ -53,7 +54,10 @@ You can also save scratch sessions that you'd like to keep by using ``mindstream
 Explore
 -------
 
-Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in a minor mode -- ``mindstream-mode`` -- which is enabled locally in scratch buffers.
+Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in two minor modes:
+
+- ``mindstream-global-mode``, which allows you to enter a Mindstream session from anywhere.
+- ``mindstream-mode``, which contains useful commands for active sessions, like saving the session and clearing the buffer to restore a blank template.
 
 Design
 ======

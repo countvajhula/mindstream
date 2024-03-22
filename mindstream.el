@@ -46,12 +46,22 @@
   :lighter " mindstream"
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
-    (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
     (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c C-r C-s") #'mindstream-save-session)
-    (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     mindstream-map))
+
+;;;###autoload
+(define-minor-mode mindstream-global-mode
+  "Minor mode providing keybindings for mindstream mode."
+  :lighter " mindstream"
+  :global t
+  :keymap
+  (let ((mindstream-global-map (make-sparse-keymap)))
+    (define-key mindstream-global-map (kbd "C-c C-r n") #'mindstream-new)
+    (define-key mindstream-global-map (kbd "C-c C-r r") #'mindstream-load-session)
+    (define-key mindstream-global-map (kbd "C-c C-r b") #'mindstream-switch-to-scratch-buffer)
+    mindstream-global-map))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
