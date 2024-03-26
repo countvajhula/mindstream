@@ -25,8 +25,7 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
       :host github
       :repo "countvajhula/mindstream")
     :config
-	(mindstream-mode)
-    (mindstream-initialize))
+    (mindstream-mode))
 
 Usage
 =====
@@ -34,7 +33,7 @@ Usage
 If you'd like to try it out, follow these steps:
 
 1. Follow the installation instructions above to install this package using straight.el
-2. Ensure ``(mindstream-initialize)`` is somewhere in your config. This advises "trigger" functions such as ``save-buffer`` to "iterate" the scratch buffer, providing implicit versioning for your session.
+2. Ensure ``(mindstream-mode)`` is somewhere in your config (as in the example above). This provides keybindings (default prefix: ``C-c C-r``) for you to enter mindstream sessions and sets up triggers so that session buffers are implicitly versioned.
 3. Create a new template at ``~/.mindstream/templates/`` for your favorite programming language (or just plain text).
 4. Run ``mindstream-new`` to create a session.
 5. Hack away!
@@ -58,6 +57,8 @@ Try ``M-x mindstream- ...`` to see all the available interactive commands. These
 
 - ``mindstream-mode``, which allows you to enter a Mindstream session from anywhere.
 - ``mindstream-session-mode``, which contains useful commands for active sessions, like saving the session and clearing the buffer to restore a blank template.
+
+Mindstream commands are bound by default under the prefix ``C-c C-r``.
 
 Design
 ======
