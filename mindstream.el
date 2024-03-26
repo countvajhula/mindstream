@@ -61,7 +61,8 @@
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
     (define-key mindstream-map (kbd "C-c C-r b") #'mindstream-switch-to-scratch-buffer)
-    mindstream-map))
+    mindstream-map)
+  (mindstream-initialize))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
