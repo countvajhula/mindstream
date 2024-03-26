@@ -41,27 +41,27 @@
 (declare-function racket-run "ext:racket-mode")
 
 ;;;###autoload
-(define-minor-mode mindstream-mode
-  "Minor mode providing keybindings for mindstream mode."
+(define-minor-mode mindstream-session-mode
+  "Minor mode providing keybindings in active mindstream sessions."
   :lighter " mindstream"
   :keymap
-  (let ((mindstream-map (make-sparse-keymap)))
-    (define-key mindstream-map (kbd "C-c C-r c") #'mindstream-clear)
-    (define-key mindstream-map (kbd "C-c C-r s") #'mindstream-save-session)
-    (define-key mindstream-map (kbd "C-c C-r C-s") #'mindstream-save-session)
-    mindstream-map))
+  (let ((mindstream-session-map (make-sparse-keymap)))
+    (define-key mindstream-session-map (kbd "C-c C-r c") #'mindstream-clear)
+    (define-key mindstream-session-map (kbd "C-c C-r s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-c C-r C-s") #'mindstream-save-session)
+    mindstream-session-map))
 
 ;;;###autoload
-(define-minor-mode mindstream-global-mode
+(define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."
   :lighter " mindstream"
   :global t
   :keymap
-  (let ((mindstream-global-map (make-sparse-keymap)))
-    (define-key mindstream-global-map (kbd "C-c C-r n") #'mindstream-new)
-    (define-key mindstream-global-map (kbd "C-c C-r r") #'mindstream-load-session)
-    (define-key mindstream-global-map (kbd "C-c C-r b") #'mindstream-switch-to-scratch-buffer)
-    mindstream-global-map))
+  (let ((mindstream-map (make-sparse-keymap)))
+    (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
+    (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
+    (define-key mindstream-map (kbd "C-c C-r b") #'mindstream-switch-to-scratch-buffer)
+    mindstream-map))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
@@ -96,7 +96,7 @@ This also begins a new session."
   (let ((buf (mindstream-start-session template)))
     ;; (ab initio) iterate
     (with-current-buffer buf
-      (mindstream-mode 1)
+      (mindstream-session-mode 1)
       (mindstream--iterate))
     buf))
 
@@ -111,7 +111,7 @@ This also begins a new session."
 (defun mindstream-clear ()
   "Start a new scratch buffer using a specific template."
   (interactive)
-  (unless mindstream-mode
+  (unless mindstream-session-mode
     (error "Not a mindstream buffer!"))
   ;; first write the existing scratch buffer
   ;; if there are unsaved changes
@@ -139,7 +139,7 @@ This also begins a new session."
 
 (defun mindstream--call-live-trigger ()
   "Call configured live trigger for major mode."
-  (when (and mindstream-mode (boundp 'mindstream-live-timer) mindstream-live-timer)
+  (when (and mindstream-session-mode (boundp 'mindstream-live-timer) mindstream-live-timer)
     ;; TODO: have a way to configure these for each major mode
     ;; and call the appropriate one from here
     ;; it's currently hardcoded
@@ -187,7 +187,7 @@ action.
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
   (let ((result (apply orig-fn args)))
-    (when (and mindstream-mode
+    (when (and mindstream-session-mode
                (magit-anything-modified-p))
       (mindstream--iterate))
     result))
@@ -212,7 +212,7 @@ path, then the session will be saved at that path using its current
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  (unless mindstream-mode
+  (unless mindstream-session-mode
     (error "Not a mindstream buffer!"))
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
@@ -251,7 +251,7 @@ DIR is the directory containing the session."
 				             (directory-files dir))
                    dir)))
     (find-file filename)
-    (mindstream-mode 1)))
+    (mindstream-session-mode 1)))
 
 (defun mindstream--get-or-create-scratch-buffer ()
   "Get the active scratch buffer or create a new one.
