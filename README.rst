@@ -27,16 +27,17 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
     :config
     (mindstream-mode))
 
+Ensure ``(mindstream-mode)`` is somewhere in your config (as in the example above).
+
 Usage
 =====
 
 If you'd like to try it out, follow these steps:
 
 1. Follow the installation instructions above to install this package using straight.el
-2. Ensure ``(mindstream-mode)`` is somewhere in your config (as in the example above). This provides keybindings (default prefix: ``C-c C-r``) for you to enter mindstream sessions and sets up triggers so that session buffers are implicitly versioned.
-3. Create a new template at ``~/.mindstream/templates/`` for your favorite programming language (or just plain text).
-4. Run ``mindstream-new`` to create a session.
-5. Hack away!
+2. Create a new template at ``~/.mindstream/templates/`` for your favorite programming language (or just plain text).
+3. Run ``mindstream-new`` to start a session.
+4. Hack away!
 
 Adding New Session Templates
 ----------------------------
