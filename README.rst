@@ -58,7 +58,7 @@ Try ``M-x mindstream- ...`` to see all the available interactive commands. These
 - ``mindstream-mode``, which allows you to enter a Mindstream session from anywhere.
 - ``mindstream-session-mode``, which contains useful commands for active sessions, like saving the session and clearing the buffer to restore a blank template.
 
-Mindstream commands are bound by default under the prefix ``C-c C-r``.
+Mindstream commands are bound by default under the prefix ``C-c C-r``. You can also view all Mindstream commands by running Emacs's ``C-h`` introspection with this prefix, as in ``C-c C-r C-h``.
 
 Design
 ======
@@ -85,6 +85,27 @@ Git-Timemachine
 ---------------
 
 The git-timemachine Emacs package is a great way to temporally navigate your session. Unlike the usual undo and redo operations which track edits with high granularity, mindstream sessions are bounded by ``save-buffer`` invocations which tend to represent natural, distinct stages in your development. Mindstream doesn't include a built-in way to navigate these states, but you can use the git-timemachine package to do this (in read-only mode).
+
+About /var/tmp/
+---------------
+
+By default, Mindstream stores anonymous sessions at ``/var/tmp/mindstream`` under a randomly generated folder name. It's important to know that although ``/var/tmp`` is a standard path on Unix systems for holding temporary files, *there is no accepted convention* on its handling. Some systems clear its contents rarely or never, while others clear its contents *on every reboot*. As a primary use for Mindstream is for you to have a reliable place to capture your thoughts with very low overhead, it's important that you should feel relatively secure that if your system were to crash, you would still be able to recover any Mindstream sessions you may have been in the middle of.
+
+So check the contents of ``/var/tmp`` and refer to the documentation on your particular system to see how it handles this path. If that behavior isn't reliable enough for you, consider defining a new path in your home folder for this purpose (say ``~/tmp``) and use it in Mindstream in the ``:custom`` section of your ``use-package`` declaration, like so:
+
+```
+(mindstream-path
+ (concat (file-name-as-directory (getenv "HOME"))
+         "tmp/mindstream"))
+```
+
+Note that this path is for *anonymous sessions* only. If you decide to keep a session around and save it via ``mindstream-save`` (default binding: ``C-c C-r C-s``), it would be saved to ``mindstream-save-session-path`` which defaults to your home folder. You can customize this as well, of course:
+
+```
+(mindstream-save-session-path
+ (concat (file-name-as-directory (getenv "HOME"))
+         "some/path"))
+```
 
 Acknowledgements
 ================
