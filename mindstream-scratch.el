@@ -215,12 +215,12 @@ If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is us
           (mindstream--mode-name major-mode-to-use)
           "*"))
 
-(defun mindstream--get-anonymous-scratch-buffer (&optional major-mode)
+(defun mindstream--get-anonymous-session-buffer (&optional major-mode)
   "Get the active scratch buffer, if it exists."
   (let ((buffer-name (mindstream-anonymous-buffer-name major-mode)))
     (get-buffer buffer-name)))
 
-(defun mindstream-anonymous-scratch-buffer-p ()
+(defun mindstream-anonymous-session-buffer-p ()
   "Predicate to check if the current buffer is the anonymous scratch buffer."
   ;; TODO: this is fairly weak
   (string-match-p mindstream-anonymous-buffer-prefix (buffer-name)))

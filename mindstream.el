@@ -58,7 +58,7 @@
 
 This always affects the current anonymous session and does not affect
 a named session that you may happen to be visiting."
-  (let ((buf (mindstream--get-anonymous-scratch-buffer major-mode)))
+  (let ((buf (mindstream--get-anonymous-session-buffer major-mode)))
     (when buf
       (with-current-buffer buf
         ;; first write the existing scratch buffer
@@ -236,7 +236,7 @@ DIR is the directory containing the session."
     (find-file filename)
     (mindstream-session-mode 1)))
 
-(defun mindstream--get-or-create-scratch-buffer ()
+(defun mindstream--get-or-create-session ()
   "Get the active scratch buffer or create a new one.
 
 If the scratch buffer doesn't exist, this creates a new one using
@@ -246,14 +246,14 @@ This is a convenience utility for \"read only\" cases where we simply
 want to get the scratch buffer - whatever it may be. It is too
 connoted to be useful in features implementing the scratch buffer
 iteration model."
-  (or (mindstream--get-anonymous-scratch-buffer)
+  (or (mindstream--get-anonymous-session-buffer)
       (mindstream--new (mindstream--template
                         (mindstream--infer-template major-mode)))))
 
 (defun mindstream-enter-session ()
   "Switch to the anonymous scratch buffer."
   (interactive)
-  (let ((buf (mindstream--get-or-create-scratch-buffer)))
+  (let ((buf (mindstream--get-or-create-session)))
     (switch-to-buffer buf)))
 
 (provide 'mindstream)
