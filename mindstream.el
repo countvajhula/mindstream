@@ -32,7 +32,7 @@
 (require 'magit-git)
 
 (require 'mindstream-custom)
-(require 'mindstream-scratch)
+(require 'mindstream-session)
 (require 'mindstream-util)
 
 ;; These are customization or config variables defined elsewhere;

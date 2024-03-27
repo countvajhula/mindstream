@@ -1,4 +1,4 @@
-;;; mindstream-scratch.el --- A scratch buffer -*- lexical-binding: t -*-
+;;; mindstream-session.el --- A scratch buffer -*- lexical-binding: t -*-
 
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
@@ -225,5 +225,5 @@ If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is us
   ;; TODO: this is fairly weak
   (string-match-p mindstream-anonymous-buffer-prefix (buffer-name)))
 
-(provide 'mindstream-scratch)
-;;; mindstream-scratch.el ends here
+(provide 'mindstream-session)
+;;; mindstream-session.el ends here
