@@ -49,7 +49,7 @@
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
-    (define-key mindstream-map (kbd "C-c C-r b") #'mindstream-switch-to-scratch-buffer)
+    (define-key mindstream-map (kbd "C-c C-r b") #'mindstream-enter-session)
     mindstream-map)
   (mindstream-initialize))
 
@@ -250,7 +250,7 @@ iteration model."
       (mindstream--new (mindstream--template
                         (mindstream--infer-template major-mode)))))
 
-(defun mindstream-switch-to-scratch-buffer ()
+(defun mindstream-enter-session ()
   "Switch to the anonymous scratch buffer."
   (interactive)
   (let ((buf (mindstream--get-or-create-scratch-buffer)))
