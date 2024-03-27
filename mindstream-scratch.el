@@ -37,6 +37,17 @@
 ;; TODO: handle this via an explicit configuration step
 (defvar racket-repl-buffer-name)
 
+;;;###autoload
+(define-minor-mode mindstream-session-mode
+  "Minor mode providing keybindings in active mindstream sessions."
+  :lighter " mindstream"
+  :keymap
+  (let ((mindstream-session-map (make-sparse-keymap)))
+    (define-key mindstream-session-map (kbd "C-c C-r c") #'mindstream-clear)
+    (define-key mindstream-session-map (kbd "C-c C-r s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-c C-r C-s") #'mindstream-save-session)
+    mindstream-session-map))
+
 (defvar-local mindstream-template-used nil
   "The template used (if any) in creating the current buffer.
 
@@ -74,6 +85,13 @@ New sessions always start anonymous."
         (write-file filename)
         (rename-buffer (mindstream-anonymous-buffer-name)))
       buf)))
+
+(defun mindstream--iterate ()
+  "Commit the current state as part of iteration."
+  (mindstream--execute-shell-command
+   (concat "git add -A"
+           " && "
+           "git commit -a --allow-empty-message -m ''")))
 
 (defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."
