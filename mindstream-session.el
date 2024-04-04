@@ -40,7 +40,7 @@
 ;;;###autoload
 (define-minor-mode mindstream-session-mode
   "Minor mode providing keybindings in active mindstream sessions."
-  :lighter " mindstream"
+  :lighter " mindstream-session"
   :keymap
   (let ((mindstream-session-map (make-sparse-keymap)))
     (define-key mindstream-session-map (kbd "C-c C-r c") #'mindstream-clear)
