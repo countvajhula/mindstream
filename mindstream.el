@@ -112,6 +112,7 @@ This also begins a new session."
 ;;;###autoload
 (defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
+  (mindstream--ensure-templates-exist)
   (dolist (fn mindstream-triggers)
     (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
 
