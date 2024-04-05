@@ -205,7 +205,10 @@ If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is us
         (substring
          (symbol-name major-mode-to-use)
          0 -5)))
-    mode-name))
+    (if (stringp mode-name)
+        ;; on older versions of Emacs
+        mode-name
+      (car mode-name))))
 
 (defun mindstream-anonymous-buffer-name (&optional major-mode-to-use)
   "Name of the anonymous session for the current major mode."
