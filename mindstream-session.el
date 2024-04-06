@@ -30,7 +30,7 @@
 
 (require 'cl-lib)
 (require 'mindstream-custom)
-(require 'mindstream-util)
+(require 'mindstream-backend)
 
 ;; These are customization or config variables defined elsewhere;
 ;; explicitly declare them here to avoid byte compile warnings
@@ -80,7 +80,7 @@ New sessions always start anonymous."
                            file-extension)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
-      (mindstream--execute-shell-command "git init" base-path)
+      (mindstream-backend-initialize)
       (with-current-buffer buf
         (write-file filename)
         (rename-buffer (mindstream-anonymous-buffer-name)))
@@ -88,10 +88,7 @@ New sessions always start anonymous."
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
-  (mindstream--execute-shell-command
-   (concat "git add -A"
-           " && "
-           "git commit -a --allow-empty-message -m ''")))
+  (mindstream-backend-iterate))
 
 (defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."

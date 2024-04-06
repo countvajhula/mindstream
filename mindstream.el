@@ -33,7 +33,6 @@
 
 (require 'mindstream-custom)
 (require 'mindstream-session)
-(require 'mindstream-util)
 
 ;; These are customization or config variables defined elsewhere;
 ;; explicitly declare them here to avoid byte compile warnings

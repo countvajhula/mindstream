@@ -1,4 +1,4 @@
-;;; mindstream-util.el --- A scratch buffer -*- lexical-binding: t -*-
+;;; mindstream-backend.el --- A scratch buffer -*- lexical-binding: t -*-
 
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
@@ -34,6 +34,16 @@
                                (file-name-directory (buffer-file-name)))))
     (shell-command-to-string command)))
 
+(defun mindstream-backend-initialize ()
+  "Initialize the backend."
+  (mindstream--execute-shell-command "git init" base-path))
 
-(provide 'mindstream-util)
-;;; mindstream-util.el ends here
+(defun mindstream-backend-iterate ()
+  "Iterate using the backend (e.g. git)."
+  (mindstream--execute-shell-command
+   (concat "git add -A"
+           " && "
+           "git commit -a --allow-empty-message -m ''")))
+
+(provide 'mindstream-backend)
+;;; mindstream-backend.el ends here
