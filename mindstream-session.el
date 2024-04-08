@@ -46,6 +46,8 @@
     (define-key mindstream-session-map (kbd "C-c C-r c") #'mindstream-clear)
     (define-key mindstream-session-map (kbd "C-c C-r s") #'mindstream-save-session)
     (define-key mindstream-session-map (kbd "C-c C-r C-s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-c C-r C-l") #'mindstream-go-live)
+    (define-key mindstream-session-map (kbd "C-c C-r C-o") #'mindstream-go-offline)
     mindstream-session-map))
 
 (defvar-local mindstream-template-used nil

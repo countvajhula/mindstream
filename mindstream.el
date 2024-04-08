@@ -38,6 +38,7 @@
 ;; explicitly declare them here to avoid byte compile warnings
 ;; TODO: handle this via an explicit configuration step
 (declare-function racket-run "ext:racket-mode")
+(defvar mindstream-live-action-plist nil)
 
 ;;;###autoload
 (define-minor-mode mindstream-mode
@@ -120,19 +121,20 @@ This also begins a new session."
   (dolist (fn mindstream-triggers)
     (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 
-(defun mindstream--call-live-trigger ()
-  "Call configured live trigger for major mode."
-  (when (and mindstream-session-mode (boundp 'mindstream-live-timer) mindstream-live-timer)
-    ;; TODO: have a way to configure these for each major mode
-    ;; and call the appropriate one from here
-    ;; it's currently hardcoded
-    (if (eq major-mode 'racket-mode)
-        (racket-run)
-      (save-buffer))))
+(defun mindstream--call-live-action ()
+  "Call configured live action for major mode."
+  (when (and mindstream-session-mode
+             (boundp 'mindstream-live-timer)
+             mindstream-live-timer)
+    (let ((action (plist-get mindstream-live-action-plist
+                             major-mode)))
+      (if action
+          (funcall action)
+        (save-buffer)))))
 
 (defun mindstream--start-live-timer ()
   "Start live timer."
-  (let ((timer (run-at-time mindstream-live-delay nil #'mindstream--call-live-trigger)))
+  (let ((timer (run-at-time mindstream-live-delay nil #'mindstream--call-live-action)))
     (setq-local mindstream-live-timer timer)))
 
 (defun mindstream--cancel-live-timer ()
@@ -143,8 +145,9 @@ This also begins a new session."
 
 (defun mindstream--reset-live-timer (_beg _end _len)
   "Reset the live timer."
-  (mindstream--cancel-live-timer)
-  (mindstream--start-live-timer))
+  (when mindstream-session-mode
+    (mindstream--cancel-live-timer)
+    (mindstream--start-live-timer)))
 
 (defun mindstream-go-live ()
   "Live mode ... ENGAGE."

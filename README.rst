@@ -51,6 +51,24 @@ Saving Sessions
 
 You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-c C-r C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``/var/tmp/mindstream/``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
 
+Live Mode!
+----------
+
+Live mode configures Mindstream to automatically take some action that you indicate whenever there is a pause (by default, 1.5 seconds) in typing. Typically, this is used in programming settings to trigger evaluation of the buffer in an accompanying runtime environment.
+
+Live mode is configured by associating each major mode with a desired action to take for sessions in that mode.
+
+For example, use the following config to evaluate your buffer "live" while in Racket Mode:
+
+.. code-block:: elisp
+
+  (plist-put mindstream-live-action-plist
+             'racket-mode #'racket-run)
+
+You can "go live" in any Mindstream session with ``M-x mindstream-go-live`` (default: ``C-c C-r C-l``). If no live action is configured for the major mode, it will simply use the default action of saving the buffer.
+
+Go offline with ``M-x mindstream-go-offline`` (default: ``C-c C-r C-o``).
+
 Explore
 -------
 
@@ -112,6 +130,8 @@ Acknowledgements
 ================
 
 This package was conceived in `discussion with Greg Hendershott <https://github.com/greghendershott/racket-mode/issues/628>`_.
+
+"Live mode" was inspired by coding demos given by `Matthew Flatt <https://users.cs.utah.edu/~mflatt/>`_ using `DrRacket <https://docs.racket-lang.org/drracket/index.html>`_.
 
 Non-Ownership
 =============
