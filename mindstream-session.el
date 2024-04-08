@@ -32,11 +32,6 @@
 (require 'mindstream-custom)
 (require 'mindstream-backend)
 
-;; These are customization or config variables defined elsewhere;
-;; explicitly declare them here to avoid byte compile warnings
-;; TODO: handle this via an explicit configuration step
-(defvar racket-repl-buffer-name)
-
 ;;;###autoload
 (define-minor-mode mindstream-session-mode
   "Minor mode providing keybindings in active mindstream sessions."
@@ -130,9 +125,6 @@ This sets the major mode and any other necessary attributes."
   (unless (eq major-mode major-mode-to-use)
     (funcall major-mode-to-use))
   (setq buffer-offer-save nil)
-  ;; Ignore whatever `racket-repl-buffer-name-function' just did to
-  ;; set `racket-repl-buffer-name' and give this its own REPL.
-  (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")
   ;; place point at the end of the buffer
   (goto-char (point-max)))
 

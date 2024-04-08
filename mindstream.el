@@ -3,7 +3,7 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
-;; Package-Requires: ((emacs "25.1") (racket-mode "20210517.1613") (magit "3.3.0"))
+;; Package-Requires: ((emacs "25.1") (magit "3.3.0"))
 ;; Keywords: lisp, convenience, languages
 
 ;; This program is "part of the world," in the sense described at
@@ -34,10 +34,6 @@
 (require 'mindstream-custom)
 (require 'mindstream-session)
 
-;; These are customization or config variables defined elsewhere;
-;; explicitly declare them here to avoid byte compile warnings
-;; TODO: handle this via an explicit configuration step
-(declare-function racket-run "ext:racket-mode")
 (defvar mindstream-live-action-plist nil)
 
 ;;;###autoload
@@ -117,7 +113,7 @@ This also begins a new session."
     (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-disable ()
-  "Remove any advice for racket scratch buffers."
+  "Remove any advice for scratch buffers."
   (dolist (fn mindstream-triggers)
     (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 

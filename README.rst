@@ -18,7 +18,6 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
 .. code-block:: elisp
 
   (use-package mindstream
-    :after racket-mode
     :straight
     (mindstream
       :type git
@@ -36,13 +35,13 @@ If you'd like to try it out, follow these steps:
 
 1. Follow the installation instructions above to install this package using straight.el
 2. Create a new template at ``~/.mindstream/templates/`` for your favorite programming language (or just plain text).
-3. Run ``mindstream-new`` to start a session.
+3. Run ``mindstream-new`` (default: ``C-c C-r n``) to start a session.
 4. Hack away!
 
 Adding New Session Templates
 ----------------------------
 
-Mindstream doesn't include any templates out of the box, so you'll probably want to create some for standard scratch sessions you are likely to need, for instance, for programming in your favorite language (perhaps Racket?), or just freewriting some text for your next great novel, following in the keystrokes of Emacs octopuses like Neal Stephenson.
+Mindstream doesn't include any templates out of the box, so you'll probably want to create some for standard scratch sessions you are likely to need, for instance, for programming in your favorite language (perhaps `Racket <https://racket-lang.org/>`_?), or just freewriting some text for your next great novel, following in the keystrokes of Emacs octopuses like Neal Stephenson.
 
 You can add new templates in ``mindstream-template-path`` (default: ``"~/.mindstream/templates/"``) -- ordinary text files with any extension you like (e.g. ``.txt``, ``.rkt``, ``.el``, anything) -- which will then be available as options in ``mindstream-new``.
 
@@ -78,6 +77,18 @@ Try ``M-x mindstream- ...`` to see all the available interactive commands. These
 - ``mindstream-session-mode``, which contains useful commands for active sessions, like saving the session and clearing the buffer to restore a blank template.
 
 Mindstream commands are bound by default under the prefix ``C-c C-r``. You can also view all Mindstream commands by running Emacs's ``C-h`` introspection with this prefix, as in ``C-c C-r C-h``.
+
+Customization
+=============
+
+Mindstream is a general tool that can be customized for each major mode as you see fit. For instance, one common workflow is to use it as a freewrite buffer with Racket Mode. Racket Mode users often like to have a dedicated REPL to view the output of code they write in a particular buffer, instead of reusing a REPL shared across all buffers. If this is a workflow you'd like, put this in your config (e.g. in `:config`):
+
+.. code-block:: elisp
+
+  (advice-add 'mindstream-start-session
+              :after
+              (lambda (&rest _args)
+                (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")))
 
 Design
 ======
