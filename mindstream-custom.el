@@ -32,12 +32,14 @@
   "A scratch buffer."
   :group 'Editing)
 
-(defcustom mindstream-path "/var/tmp/mindstream/" ; TODO: make platform-independent?
+(defcustom mindstream-path (concat (file-name-as-directory user-emacs-directory)
+                                   "mindstream/anon")  ; TODO: make platform-independent?
   "Directory path where mindstream buffers will be saved during development."
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-template-path "~/.mindstream/templates/"  ; TODO: make platform-independent?
+(defcustom mindstream-template-path (concat (file-name-as-directory user-emacs-directory)
+                                            "mindstream/templates")  ; TODO: make platform-independent?
   "Directory path where mindstream will look for templates."
   :type 'string
   :group 'mindstream)

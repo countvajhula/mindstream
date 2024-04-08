@@ -14,7 +14,7 @@ Mindstream is a lightweight tool that leaves most of the heavy lifting to other 
 
 Every mindstream session begins from a template (an ordinary file) that you provide, and evolves through the stages of your creative process. The session itself is stored as an ordinary file in a unique Git repository at a temporary location on disk. This repository is versioned by commits representing your writing process bounded at natural points -- by default, the points at which your buffer is saved (whether explicitly by you or implicitly on running a command like `racket-run <https://racket-mode.com/#racket_002drun>`_ or ``mindstream-clear``). You can save and load these sessions, too, and pick up right where you left off, allowing quick freewriting sessions to organically grow into robust creative works.
 
-Typical uses of this package are for early stages of prototyping in a software project, or for exporatory programming to understand a new idea, tool, or technology. It's also great for just taking quick notes or freewriting blog posts or content in authoring settings in general.
+Typical uses of this package are for early stages of prototyping in a software project, or for exploratory programming to understand a new idea, tool, or technology. It's also great for just taking quick notes or freewriting blog posts or content in authoring settings in general.
 
 Installation
 ============
@@ -114,7 +114,7 @@ Mindstream structures your workflow in sessions, which are version-controlled fi
 2. Saving an anonymous session turns it into a named session, and there is no active anonymous session at that point. Named sessions work the same as anonymous sessions aside from having a name and being in a permanent location on disk. A new anonymous session could be started at any time via `mindstream-new`.
 3. New sessions always begin as anonymous.
 4. Named sessions may be loaded without interfering with the active anonymous session.
-5. Any number of named sessions could be active at the same time. There is no global state, so that named sessions are self-contained and independent.
+5. Any number of named sessions could be active at the same time. There is no global state, so that sessions are self-contained and independent.
 
 Tips
 ====
@@ -138,12 +138,33 @@ Quick feedback loops are the engines of creative progress. With this in mind, fo
 
 This tip is not about Mindstream specifically but more about a good workflow to develop with the major mode you're using. For instance, with Racket Mode, it would be advisable to bind the command ``racket-run`` so that you can quickly see the output of your code. This command also saves the buffer so that the session history would represent natural points at which you felt the code was worth trying out. Similarly, if you're writing Markdown or reStructuredText, you should explore the features provided by the relevant major modes that would allow you to preview the produced documentation in HTML form with the right keybinding incantation.
 
-About /var/tmp/
----------------
+Choosing a Session Path
+-----------------------
 
-By default, Mindstream stores anonymous sessions at ``/var/tmp/mindstream`` under a randomly generated folder name. It's important to know that although ``/var/tmp`` is a standard path on Unix systems for holding temporary files, *there is no accepted convention* on its handling. Some systems clear its contents rarely or never, while others clear its contents *on every reboot*. As a primary use for Mindstream is for you to have a reliable place to capture your thoughts with very low overhead, it's important that you should feel relatively secure that if your system were to crash, you would still be able to recover any Mindstream sessions you may have been in the middle of.
+Mindstream stores anonymous sessions under a randomly generated folder name. This allows you to enter a freewriting session without worrying about the messy details of naming and storing files. As a result, it's likely that you will work on dozens, hundreds, or thousands of such sessions over time, of which you will keep only a small minority as saved, named sessions. For the anonymous sessions you don't save, you may prefer to just delete them from time to time rather than have them accumulate. Many operating systems provide standard ways to do this kind of thing -- *temp folders*, usually named ``tmp`` -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
 
-So check the contents of ``/var/tmp`` and refer to the documentation on your particular system to see how it handles this path. If that behavior isn't reliable enough for you, consider defining a new path in your home folder for this purpose (say ``~/tmp``) and use it in Mindstream in the ``:custom`` section of your ``use-package`` declaration, like so:
+Your Emacs Folder
+~~~~~~~~~~~~~~~~~
+
+By default, anonymous sessions are placed in the ``mindstream/anon`` folder in your Emacs directory (e.g. ``.emacs.d``). This is a safe default, as it is entirely under your control and you can clear this folder (if you wish to) or leave it to its own devices, as you see fit. If you retain this default behavior, you may want to add ``mindstream/anon`` to your ``.gitignore`` for your Emacs directory (assuming you keep your Emacs config versioned and publicly hosted, as many Emacs users do), so that these freewrite sessions aren't publicly visible.
+
+``/var/tmp``
+~~~~~~~~~~~~
+
+``/var/tmp`` is a standard path on Unix systems for holding temporary files. Unfortunately, *there is no accepted convention* on its handling. Some systems clear its contents rarely or never, while others clear its contents *on every reboot*. As a primary use for Mindstream is for you to have a reliable place to capture your thoughts with very low overhead, it's important that you should feel relatively secure that if your system were to crash, you would still be able to recover any (anonymous) Mindstream sessions you may have been in the middle of.
+
+So if you'd like to use ``/var/tmp``, first check the contents of this folder and refer to the documentation on your particular system to see how it handles this path. If that behavior is predictable enough for you (e.g. say the folder is cleared only on OS upgrades), then you can use it like this:
+
+.. code-block:: elisp
+
+  :custom
+  ...
+  (mindstream-path "/var/tmp/mindstream")
+
+Home/tmp
+~~~~~~~~
+
+Another option that's similar to this one but more predictable is to define a new path in your home folder for this purpose (say ``~/tmp``), that you are at liberty to periodically clear yourself, and which you could share across all applications for this purpose. If you go with this option, you can use this path in Mindstream like so:
 
 .. code-block:: elisp
 
@@ -153,7 +174,7 @@ So check the contents of ``/var/tmp`` and refer to the documentation on your par
    (concat (file-name-as-directory (getenv "HOME"))
            "tmp/mindstream"))
 
-Note that this path is for *anonymous sessions* only. If you decide to keep a session around and save it via ``mindstream-save`` (default binding: ``C-c C-r C-s``), it would be saved to ``mindstream-save-session-path`` which defaults to your home folder. You can customize this as well, of course:
+Remember that the path we are configuring here is for *anonymous sessions* only. If you decide to keep a session around and save it via ``mindstream-save`` (default binding: ``C-c C-r C-s``), it would be saved to ``mindstream-save-session-path`` which defaults to your home folder. You can customize this as well, of course:
 
 .. code-block:: elisp
 
@@ -161,7 +182,7 @@ Note that this path is for *anonymous sessions* only. If you decide to keep a se
   ...
   (mindstream-save-session-path
    (concat (file-name-as-directory (getenv "HOME"))
-           "some/path"))
+           "my/mindstream/sessions/path"))
 
 Acknowledgements
 ================
