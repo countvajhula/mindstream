@@ -77,7 +77,7 @@ New sessions always start anonymous."
                            file-extension)))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
-      (mindstream-backend-initialize)
+      (mindstream-backend-initialize base-path)
       (with-current-buffer buf
         (write-file filename)
         (rename-buffer (mindstream-anonymous-buffer-name)))

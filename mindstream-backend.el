@@ -34,7 +34,7 @@
                                (file-name-directory (buffer-file-name)))))
     (shell-command-to-string command)))
 
-(defun mindstream-backend-initialize ()
+(defun mindstream-backend-initialize (base-path)
   "Initialize the backend."
   (mindstream--execute-shell-command "git init" base-path))
 
