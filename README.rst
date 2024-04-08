@@ -112,19 +112,19 @@ By default, Mindstream stores anonymous sessions at ``/var/tmp/mindstream`` unde
 
 So check the contents of ``/var/tmp`` and refer to the documentation on your particular system to see how it handles this path. If that behavior isn't reliable enough for you, consider defining a new path in your home folder for this purpose (say ``~/tmp``) and use it in Mindstream in the ``:custom`` section of your ``use-package`` declaration, like so:
 
-```
-(mindstream-path
- (concat (file-name-as-directory (getenv "HOME"))
-         "tmp/mindstream"))
-```
+.. code-block:: elisp
+
+  (mindstream-path
+   (concat (file-name-as-directory (getenv "HOME"))
+           "tmp/mindstream"))
 
 Note that this path is for *anonymous sessions* only. If you decide to keep a session around and save it via ``mindstream-save`` (default binding: ``C-c C-r C-s``), it would be saved to ``mindstream-save-session-path`` which defaults to your home folder. You can customize this as well, of course:
 
-```
-(mindstream-save-session-path
- (concat (file-name-as-directory (getenv "HOME"))
-         "some/path"))
-```
+.. code-block:: elisp
+
+  (mindstream-save-session-path
+   (concat (file-name-as-directory (getenv "HOME"))
+           "some/path"))
 
 Acknowledgements
 ================
