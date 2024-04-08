@@ -4,9 +4,15 @@
 mindstream
 ==========
 
-Versioned and sessioned scratch buffers for freewriting text and exploratory programming in your favorite language, in Emacs.
+If you've ever created throwaway files named ``1.txt`` or ``blah.py`` or ``test3.rkt`` to quickly write down some thoughts, try out a new idea, or prototype a new software tool, then you've already experienced the inconvenience of having to first come up with a name for these throwaway files, a small obstruction that is sometimes enough to snuff out that momentary creative spark that could have become a worthy conflagration. You've also probably experienced the cost of not creating such files, when just as the quick and anonymous freewriting session started to grow into something you'd want to keep around, an application error or computer crash caused you to lose it all and be more discouraged than when you began.
 
-Every mindstream session begins from a template you provide and evolves through the stages of your creative process. The session is stored as a unique Git repository on disk. The Git repo contains commits representing the stages in your development process bounded at natural points -- by default, the points at which your buffer is saved (whether explicitly by you or implicitly on running a command like ``racket-run`` or ``mindstream-clear``). You can save and load these sessions, too.
+Regardless of what you're trying to do, it begins with writing. Writing text, writing code, writing thoughts. Writing isn't just a way to express yourself, but a way to think.
+
+Mindstream removes the barriers so that you can start writing immediately, and so that you can feel secure enough to play with the things you write, knowing that you won't ever lose anything you care about, and at the same time, never have to think again about the things that have served their purpose in the moment.
+
+Mindstream is a lightweight tool that leaves most of the heavy lifting to other packages (including major modes) and technologies (such as Git). It simply uses these together to augment your existing workflows to fill an unmet need.
+
+Every mindstream session begins from a template (an ordinary file) that you provide, and evolves through the stages of your creative process. The session itself is stored as an ordinary file in a unique Git repository at a temporary location on disk. This repository is versioned by commits representing your writing process bounded at natural points -- by default, the points at which your buffer is saved (whether explicitly by you or implicitly on running a command like `racket-run <https://racket-mode.com/#racket_002drun>`_ or ``mindstream-clear``). You can save and load these sessions, too, and pick up right where you left off, allowing quick freewriting sessions to organically grow into robust creative works.
 
 Typical uses of this package are for early stages of prototyping in a software project, or for exporatory programming to understand a new idea, tool, or technology. It's also great for just taking quick notes or freewriting blog posts or content in authoring settings in general.
 
@@ -26,17 +32,15 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
     :config
     (mindstream-mode))
 
-Ensure ``(mindstream-mode)`` is somewhere in your config (as in the example above).
+``(mindstream-mode)`` here initializes the package, providing global keybindings that allow you to enter Mindstream sessions from anywhere.
 
 Usage
 =====
 
-If you'd like to try it out, follow these steps:
+Before you can use it the first time, you will need to create at least one template at ``~/.mindstream/templates/`` (see below for how to do that). Once you've done that, using Mindstream is as easy as:
 
-1. Follow the installation instructions above to install this package using straight.el
-2. Create a new template at ``~/.mindstream/templates/`` for your favorite programming language (or just plain text).
-3. Run ``mindstream-new`` (default: ``C-c C-r n``) to start a session.
-4. Hack away!
+1. Run ``mindstream-new`` (default: ``C-c C-r n``) to start a session.
+2. Write!
 
 Adding New Session Templates
 ----------------------------
@@ -49,6 +53,13 @@ Saving Sessions
 ---------------
 
 You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-c C-r C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``/var/tmp/mindstream/``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
+
+Entering Sessions Even More Quickly
+-----------------------------------
+
+``mindstream-switch-to-session-buffer`` (default: ``C-c C-r b``) will take you immediately to a new anonymous session buffer for the current major mode (if you've provided a template for it), without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one.
+
+See "Design" below to learn more about anonymous sessions.
 
 Live Mode!
 ----------
@@ -81,7 +92,11 @@ Mindstream commands are bound by default under the prefix ``C-c C-r``. You can a
 Customization
 =============
 
-Mindstream is a general tool that can be customized for each major mode as you see fit. For instance, one common workflow is to use it as a freewrite buffer with Racket Mode. Racket Mode users often like to have a dedicated REPL to view the output of code they write in a particular buffer, instead of reusing a REPL shared across all buffers. If this is a workflow you'd like, put this in your config (e.g. in `:config`):
+As each Mindstream session uses a specific major mode, it inherits all of the customizations you already have (and any that you decide to add) for that mode. There is typically nothing special you need to do beyond this for Mindstream to work seamlessly with all of your workflows when using these modes.
+
+For instance, one common use of Mindstream is as a scratch buffer with Racket Mode. Racket Mode users sometimes `like to have a dedicated REPL <https://racket-mode.com/#Edit-buffers-and-REPL-buffers>`__ to view the output of code they write in a particular buffer, instead of reusing a REPL shared across all buffers. If you're a Racket Mode user, whatever customization you've chosen here would apply to Mindstream session buffers just as they would any buffer, and your Racket Mode sessions may or may not have a dedicated REPL depending on how you've customized this for Racket Mode generally.
+
+But if you happen to want to use a different customization for Mindstream session buffers in a certain major mode than you prefer generally for that major mode, advising the ``mindstream-start-session`` function could be one way to achieve that. For instance, for the customization we have been talking about:
 
 .. code-block:: elisp
 
@@ -116,6 +131,13 @@ Git-Timemachine
 
 The git-timemachine Emacs package is a great way to temporally navigate your session. Unlike the usual undo and redo operations which track edits with high granularity, mindstream sessions are bounded by ``save-buffer`` invocations which tend to represent natural, distinct stages in your development. Mindstream doesn't include a built-in way to navigate these states, but you can use the git-timemachine package to do this (in read-only mode).
 
+Previewing
+----------
+
+Quick feedback loops are the engines of creative progress. With this in mind, for whatever you're writing, it's valuable to have a way to preview what you've produced in output form. For instance, if you're writing documentation, you should have a keybinding to quickly build the file into HTML or a PDF, or render it within the buffer itself (as LaTeX modes sometimes allow), for you to review as you go. Likewise, if you're writing code, you should have a way to quickly evaluate the contents of your buffer and see the result.
+
+This tip is not about Mindstream specifically but more about a good workflow to develop with the major mode you're using. For instance, with Racket Mode, it would be advisable to bind the command ``racket-run`` so that you can quickly see the output of your code. This command also saves the buffer so that the session history would represent natural points at which you felt the code was worth trying out. Similarly, if you're writing Markdown or reStructuredText, you should explore the features provided by the relevant major modes that would allow you to preview the produced documentation in HTML form with the right keybinding incantation.
+
 About /var/tmp/
 ---------------
 
@@ -125,6 +147,8 @@ So check the contents of ``/var/tmp`` and refer to the documentation on your par
 
 .. code-block:: elisp
 
+  :custom
+  ...
   (mindstream-path
    (concat (file-name-as-directory (getenv "HOME"))
            "tmp/mindstream"))
@@ -133,6 +157,8 @@ Note that this path is for *anonymous sessions* only. If you decide to keep a se
 
 .. code-block:: elisp
 
+  :custom
+  ...
   (mindstream-save-session-path
    (concat (file-name-as-directory (getenv "HOME"))
            "some/path"))
