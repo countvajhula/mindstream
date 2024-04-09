@@ -43,9 +43,9 @@
   :global t
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
-    (define-key mindstream-map (kbd "C-c C-r n") #'mindstream-new)
-    (define-key mindstream-map (kbd "C-c C-r r") #'mindstream-load-session)
-    (define-key mindstream-map (kbd "C-c C-r b") #'mindstream-enter-session)
+    (define-key mindstream-map (kbd "C-; n") #'mindstream-new)
+    (define-key mindstream-map (kbd "C-; r") #'mindstream-load-session)
+    (define-key mindstream-map (kbd "C-; b") #'mindstream-enter-session)
     mindstream-map)
   (mindstream-initialize))
 

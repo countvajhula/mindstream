@@ -38,11 +38,11 @@
   :lighter " mindstream-session"
   :keymap
   (let ((mindstream-session-map (make-sparse-keymap)))
-    (define-key mindstream-session-map (kbd "C-c C-r c") #'mindstream-clear)
-    (define-key mindstream-session-map (kbd "C-c C-r s") #'mindstream-save-session)
-    (define-key mindstream-session-map (kbd "C-c C-r C-s") #'mindstream-save-session)
-    (define-key mindstream-session-map (kbd "C-c C-r C-l") #'mindstream-go-live)
-    (define-key mindstream-session-map (kbd "C-c C-r C-o") #'mindstream-go-offline)
+    (define-key mindstream-session-map (kbd "C-; c") #'mindstream-clear)
+    (define-key mindstream-session-map (kbd "C-; s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-; C-s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-; C-l") #'mindstream-go-live)
+    (define-key mindstream-session-map (kbd "C-; C-o") #'mindstream-go-offline)
     mindstream-session-map))
 
 (defvar-local mindstream-template-used nil
