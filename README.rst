@@ -57,7 +57,7 @@ You can also save scratch sessions that you'd like to keep by using ``mindstream
 Entering Sessions Even More Quickly
 -----------------------------------
 
-``mindstream-switch-to-session-buffer`` (default: ``C-; b``) will take you immediately to a new anonymous session buffer for the current major mode (if you've provided a template for it), without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one.
+``mindstream-enter-session`` (default: ``C-; b``) will take you immediately to a new anonymous session buffer for the current major mode (if you've provided a template for it), without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one.
 
 See "Design" below to learn more about anonymous sessions.
 
