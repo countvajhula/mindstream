@@ -26,6 +26,8 @@
 
 ;;; Code:
 
+(require 'mindstream-util)
+
 (defvar mindstream--user-home-directory (getenv "HOME"))
 
 (defgroup mindstream nil
@@ -34,22 +36,18 @@
 
 (defcustom mindstream-path
   ;; platform-independent ~/.emacs.d/mindstream/anon
-  (expand-file-name
-   "anon"
-   (expand-file-name
-    "mindstream"
-    (file-name-as-directory user-emacs-directory)))
+  (mindstream--joindirs user-emacs-directory
+                        "mindstream"
+                        "anon")
   "Directory path where mindstream buffers will be saved during development."
   :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-template-path
   ;; platform-independent ~/.emacs.d/mindstream/templates
-  (expand-file-name
-   "templates"
-   (expand-file-name
-    "mindstream"
-    (file-name-as-directory user-emacs-directory)))
+  (mindstream--joindirs user-emacs-directory
+                        "mindstream"
+                        "templates")
   "Directory path where mindstream will look for templates."
   :type 'string
   :group 'mindstream)

@@ -31,6 +31,7 @@
 (require 'cl-lib)
 (require 'mindstream-custom)
 (require 'mindstream-backend)
+(require 'mindstream-util)
 
 ;;;###autoload
 (define-minor-mode mindstream-session-mode
@@ -70,11 +71,8 @@ New sessions always start anonymous."
          (template (or template mindstream-default-template))
          (file-extension (file-name-extension template))
          (buf (mindstream--new-buffer-from-template template))
-         ;; TODO: use platform-independent path construction
-         (filename (concat base-path
-                           mindstream-filename
-                           "."
-                           file-extension)))
+         (filename (mindstream--joindirs base-path
+                                         (concat mindstream-filename "." file-extension))))
     (unless (file-directory-p base-path)
       (mkdir base-path t)
       (mindstream-backend-initialize base-path)
@@ -89,15 +87,15 @@ New sessions always start anonymous."
 
 (defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."
-  (concat (file-name-as-directory mindstream-path)
-          (file-name-as-directory session)))
+  (mindstream--joindirs mindstream-path
+                        session))
 
 (defun mindstream--template (&optional name)
   "Path to template NAME.
 
 If NAME isn't provided, use the default template."
-  (concat (file-name-as-directory mindstream-template-path)
-          (or name mindstream-default-template)))
+  (mindstream--joindirs mindstream-template-path
+                        (or name mindstream-default-template)))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."

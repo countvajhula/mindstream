@@ -33,6 +33,7 @@
 
 (require 'mindstream-custom)
 (require 'mindstream-session)
+(require 'mindstream-util)
 
 (defvar mindstream-live-action-plist nil)
 
@@ -212,8 +213,9 @@ you would typically want to specify a new, non-existent folder."
     ;; TODO: platform-independent paths
     (if named
         (mindstream-load-session dest-dir)
-      (mindstream-load-session (concat (file-name-as-directory dest-dir)
-                                       original-session-name)))))
+      (mindstream-load-session
+       (mindstream--joindirs dest-dir
+                             original-session-name)))))
 
 (defun mindstream--session-file-p (file)
   "Predicate to identify whether FILE is a Mindstream session file."
