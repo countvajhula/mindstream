@@ -90,6 +90,17 @@ You can "go live" in any Mindstream session with ``M-x mindstream-go-live`` (def
 
 Go offline with ``M-x mindstream-go-offline`` (default: ``C-c , C-o``).
 
+Mindstream Anywhere
+-------------------
+
+If you have an existing, ordinary file that you were working on at some point, and if you want to continue working on it in a mindstream session, that's easy enough to do. Simply follow these steps:
+
+1. Create a new folder (give it a representative name, as you would any Mindstream session) and move the file(s) into it.
+2. At the command line in that folder, run ``git init``.
+3. Open the file in Emacs in the usual way and ``M-x mindstream-session-mode``
+
+Mindstream sessions are just ordinary Git repositories. If you wanted to, you could use Mindstream in any Git repo simply by ``M-x mindstream-session-mode`` after opening a file in the repo, but this isn't a well-supported use case for the moment.
+
 Explore
 -------
 
