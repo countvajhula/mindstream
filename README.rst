@@ -72,8 +72,9 @@ For example, use the following config to evaluate your buffer "live" while in Ra
 
 .. code-block:: elisp
 
-  (plist-put mindstream-live-action-plist
-             'racket-mode #'racket-run)
+  :custom
+  ...
+  (mindstream-live-action '(racket-mode racket-run))
 
 You can "go live" in any Mindstream session with ``M-x mindstream-go-live`` (default: ``C-; C-l``). If no live action is configured for the major mode, it will simply use the default action of saving the buffer.
 

@@ -121,7 +121,7 @@ This also begins a new session."
   (when (and mindstream-session-mode
              (boundp 'mindstream-live-timer)
              mindstream-live-timer)
-    (let ((action (plist-get mindstream-live-action-plist
+    (let ((action (plist-get mindstream-live-action
                              major-mode)))
       (if action
           (funcall action)

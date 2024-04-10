@@ -67,7 +67,7 @@
   :type 'list
   :group 'mindstream)
 
-(defcustom mindstream-live-action-plist nil
+(defcustom mindstream-live-action nil
   "Periodic action to take while in 'live mode'."
   :type '(plist :key-type symbol
                 :value-type function)
