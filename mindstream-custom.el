@@ -73,6 +73,19 @@
                 :value-type function)
   :group 'mindstream)
 
+(defcustom mindstream-preferred-template nil
+  "The preferred template for each major mode.
+
+In cases where you don't indicate a template (e.g.
+`mindstream-enter-session`), we search the templates folder for a
+template that has an extension recognizable to the major mode, and use
+the first one we find. But if you have many templates that share the
+same extension, you may prefer to indicate which one is \"preferred\"
+for the major mode so that it would be selected."
+  :type '(plist :key-type symbol
+                :value-type function)
+  :group 'mindstream)
+
 (defcustom mindstream-filename "scratch"
   "Filename to use for mindstream buffers."
   :type 'string

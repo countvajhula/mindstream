@@ -142,8 +142,8 @@ if Emacs is exited."
       (mindstream--initialize-buffer))
     buf))
 
-(defun mindstream--infer-template (major-mode)
-  "Infer template to use based on current major mode."
+(defun mindstream--find-template-for-mode (major-mode)
+  "Search the templates folder for a template recognizable to MAJOR-MODE."
   (catch 'return
     (dolist (assoc auto-mode-alist)
       (pcase-let ((`(,ext . ,mode) assoc))
@@ -155,6 +155,13 @@ if Emacs is exited."
     (error
      (format "Template not found for %s! Please create one and try again."
              major-mode))))
+
+(defun mindstream--infer-template (major-mode)
+  "Infer template to use based on current major mode."
+  (let ((template (plist-get mindstream-preferred-template
+                             major-mode)))
+    (or template
+        (mindstream--find-template-for-mode major-mode))))
 
 (defun mindstream--infer-major-mode (filename)
   "Infer a major mode to use based on the file extension."

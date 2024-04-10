@@ -57,7 +57,15 @@ You can also save scratch sessions that you'd like to keep by using ``mindstream
 Entering Sessions Even More Quickly
 -----------------------------------
 
-``mindstream-enter-session`` (default: ``C-; b``) will take you immediately to a new anonymous session buffer for the current major mode (if you've provided a template for it), without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one.
+``mindstream-enter-session`` (default: ``C-; b``) will take you immediately to a new anonymous session buffer for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
+
+If you've got more than one template for a particular major mode, you may want to indicate which one is preferred rather than leave it to chance or accidents of alphabetical order. You can do this by associating each major mode with the name of the preferred template. For example:
+
+.. code-block:: elisp
+
+  :custom
+  ...
+  (mindstream-preferred-template '(racket-mode "racket.rkt"))
 
 See "Design" below to learn more about anonymous sessions.
 
