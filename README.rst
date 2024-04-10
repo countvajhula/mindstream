@@ -67,6 +67,8 @@ If you've got more than one template for a particular major mode, you may want t
   ...
   (mindstream-preferred-template '(racket-mode "racket.rkt"))
 
+This customization is only relevant when using `mindstream-enter-session`, as you would select the template yourself when using `mindstream-new`.
+
 See "Design" below to learn more about anonymous sessions.
 
 Live Mode!
