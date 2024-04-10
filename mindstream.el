@@ -82,7 +82,11 @@ This also begins a new session."
   "Start a new scratch buffer using a specific TEMPLATE.
 
 This also begins a new session."
-  (interactive (list (read-file-name "Which template? " mindstream-template-path)))
+  (interactive (list (read-file-name "Which template? "
+                                     mindstream-template-path
+                                     nil
+                                     t
+                                     "")))
   (let ((buf (mindstream--new template)))
     (switch-to-buffer buf)))
 
