@@ -39,7 +39,7 @@ Usage
 
 Before you can use it the first time, you will need to create at least one template at ``~/.mindstream/templates/`` (see below for how to do that). Once you've done that, using Mindstream is as easy as:
 
-1. Run ``mindstream-new`` (default: ``C-; n``) to start a session.
+1. Run ``mindstream-new`` (default: ``C-c , n``) to start a session.
 2. Write!
 
 Adding New Session Templates
@@ -52,12 +52,12 @@ You can add new templates in ``mindstream-template-path`` (default: ``"~/.mindst
 Saving Sessions
 ---------------
 
-You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-; C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``/var/tmp/mindstream/``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
+You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-c , C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``/var/tmp/mindstream/``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
 
 Entering Sessions Even More Quickly
 -----------------------------------
 
-``mindstream-enter-session`` (default: ``C-; b``) will take you immediately to a new anonymous session buffer for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
+``mindstream-enter-session`` (default: ``C-c , b``) will take you immediately to a new anonymous session buffer for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
 
 If you've got more than one template for a particular major mode, you may want to indicate which one is preferred rather than leave it to chance or accidents of alphabetical order. You can do this by associating each major mode with the name of the preferred template. For example:
 
@@ -84,9 +84,9 @@ For example, use the following config to evaluate your buffer "live" while in Ra
   ...
   (mindstream-live-action '(racket-mode racket-run))
 
-You can "go live" in any Mindstream session with ``M-x mindstream-go-live`` (default: ``C-; C-l``). If no live action is configured for the major mode, it will simply use the default action of saving the buffer.
+You can "go live" in any Mindstream session with ``M-x mindstream-go-live`` (default: ``C-c , C-l``). If no live action is configured for the major mode, it will simply use the default action of saving the buffer.
 
-Go offline with ``M-x mindstream-go-offline`` (default: ``C-; C-o``).
+Go offline with ``M-x mindstream-go-offline`` (default: ``C-c , C-o``).
 
 Explore
 -------
@@ -96,7 +96,7 @@ Try ``M-x mindstream- ...`` to see all the available interactive commands. These
 - ``mindstream-mode``, which allows you to enter a Mindstream session from anywhere.
 - ``mindstream-session-mode``, which contains useful commands for active sessions, like saving the session and clearing the buffer to restore a blank template.
 
-Mindstream commands are bound by default under the prefix ``C-;``. You can also view all Mindstream commands by running Emacs's ``C-h`` introspection with this prefix, as in ``C-; C-h``.
+Mindstream commands are bound by default under the prefix ``C-c ,``. You can also view all Mindstream commands by running Emacs's ``C-h`` introspection with this prefix, as in ``C-c , C-h``.
 
 Customization
 =============
@@ -183,7 +183,7 @@ Another option that's similar to this one but more predictable is to define a ne
    (concat (file-name-as-directory (getenv "HOME"))
            "tmp/mindstream"))
 
-Remember that the path we are configuring here is for *anonymous sessions* only. If you decide to keep a session around and save it via ``mindstream-save`` (default binding: ``C-; C-s``), it would be saved to ``mindstream-save-session-path`` which defaults to your home folder. You can customize this as well, of course:
+Remember that the path we are configuring here is for *anonymous sessions* only. If you decide to keep a session around and save it via ``mindstream-save`` (default binding: ``C-c , C-s``), it would be saved to ``mindstream-save-session-path`` which defaults to your home folder. You can customize this as well, of course:
 
 .. code-block:: elisp
 
