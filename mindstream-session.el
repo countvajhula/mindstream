@@ -51,8 +51,8 @@
 
 This is a string representing a path to a file on disk.")
 
-(defun mindstream--unique-session-name ()
-  "Unique name for a scratch buffer session."
+(defun mindstream--unique-name ()
+  "Generate a unique name."
   (let ((time (current-time)))
     (concat (format-time-string "%F" time)
             "-"
@@ -66,7 +66,7 @@ It populates the empty buffer with the contents of TEMPLATE if one is
 specified.  Otherwise, it uses the configured default template.
 
 New sessions always start anonymous."
-  (let* ((session (mindstream--unique-session-name))
+  (let* ((session (mindstream--unique-name))
          (base-path (mindstream--generate-anonymous-session-path session))
          (template (or template mindstream-default-template))
          (file-extension (file-name-extension template))
@@ -77,6 +77,9 @@ New sessions always start anonymous."
       (mkdir base-path t)
       (mindstream-backend-initialize base-path)
       (with-current-buffer buf
+        ;; looks like writing an unsaved buffer automatically sets
+        ;; the appropriate major mode based on the file extension
+        ;; so there is no need for us to do that
         (write-file filename)
         (rename-buffer (mindstream-anonymous-buffer-name)))
       buf)))
@@ -116,17 +119,13 @@ If NAME isn't provided, use the default template."
     (insert-file-contents filename)
     (buffer-string)))
 
-(defun mindstream--initialize-buffer (major-mode-to-use)
-  "Initialize a newly created buffer.
-
-This sets the major mode and any other necessary attributes."
-  (unless (eq major-mode major-mode-to-use)
-    (funcall major-mode-to-use))
+(defun mindstream--initialize-buffer ()
+  "Initialize a newly created buffer."
   (setq buffer-offer-save nil)
   ;; place point at the end of the buffer
   (goto-char (point-max)))
 
-(defun mindstream--new-buffer-with-contents (contents major-mode-to-use)
+(defun mindstream--new-buffer-with-contents (contents)
   "Create a new scratch buffer containing CONTENTS.
 
 This does not save the buffer.
@@ -134,35 +133,35 @@ This does not save the buffer.
 As a \"scratch\" buffer, its contents will be treated as
 disposable, and it will not prompt to save if it is closed or
 if Emacs is exited."
-  (let* ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use))
-         (buf (generate-new-buffer buffer-name)))
+  (let ((buf (generate-new-buffer
+              ;; will be renamed later, after it is written to disk
+              ;; so the name here doesn't matter
+              (mindstream--unique-name))))
     (with-current-buffer buf
       (insert contents)
-      (mindstream--initialize-buffer major-mode-to-use))
+      (mindstream--initialize-buffer))
     buf))
 
 (defun mindstream--infer-template (major-mode)
   "Infer template to use based on current major mode."
-  ;; TODO: allow this to be customizable, a user-configured hash
-  (cond ((equal 'racket-mode major-mode) "racket.rkt")
-        ((equal 'scribble-mode major-mode) "scribble.scrbl")
-        ((equal 'emacs-lisp-mode major-mode) "elisp.el")
-        ((equal 'text-mode major-mode) "text.txt")
-        ((equal 'markdown-mode major-mode) "markdown.md")
-        ((equal 'python-mode major-mode) "python.py")
-        (t (error "Unknown major mode!"))))
+  (catch 'return
+    (dolist (assoc auto-mode-alist)
+      (pcase-let ((`(,ext . ,mode) assoc))
+        (when (eq mode major-mode)
+          (let ((template (mindstream--file-with-extension ext
+                                                           mindstream-template-path)))
+            (when template
+              (throw 'return template))))))
+    (error
+     (format "Template not found for %s! Please create one and try again."
+             major-mode))))
 
 (defun mindstream--infer-major-mode (filename)
   "Infer a major mode to use based on the file extension."
-  (let ((extension (file-name-extension filename)))
-    ;; TODO: use `auto-mode-alist` instead?
-    (cond ((equal "rkt" extension) #'racket-mode)
-          ((equal "scrbl" extension) #'scribble-mode)
-          ((equal "el" extension) #'emacs-lisp-mode)
-          ((equal "txt" extension) #'text-mode)
-          ((equal "md" extension) #'markdown-mode)
-          ((equal "py" extension) #'python-mode)
-          (t (error "Unknown template extension!")))))
+  (let ((extension (concat "." (file-name-extension filename))))
+    (let ((mode (mindstream--major-mode-for-file-extension extension)))
+      (or mode
+          (error "No major modes recognize the template extension '%s'!" extension)))))
 
 (defun mindstream--new-buffer-from-template (template)
   "Create a new (unsaved) buffer from TEMPLATE."
@@ -173,9 +172,7 @@ if Emacs is exited."
                       (error
                        (format "Template %s not found! Please create it and try again."
                                template)))))
-         (major-mode-to-use (mindstream--infer-major-mode template))
-         (buf (mindstream--new-buffer-with-contents contents
-                                                    major-mode-to-use)))
+         (buf (mindstream--new-buffer-with-contents contents)))
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
       ;; on the scratch buffer

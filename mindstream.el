@@ -210,7 +210,6 @@ you would typically want to specify a new, non-existent folder."
     (copy-directory (file-name-directory buffer-file)
                     dest-dir)
     (mindstream--end-anonymous-session)
-    ;; TODO: platform-independent paths
     (if named
         (mindstream-load-session dest-dir)
       (mindstream-load-session

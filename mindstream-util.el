@@ -28,6 +28,22 @@
 
 ;;; Code:
 
+(defun mindstream--file-with-extension (extension path)
+  "Return the first file with EXTENSION at PATH."
+  (let ((files (directory-files path nil extension)))
+    (when files
+      (car files))))
+
+(defun mindstream--major-mode-for-file-extension (extension)
+  "Appropriate major mode for the given file EXTENSION.
+
+This consults Emacs's auto-mode-alist."
+  (catch 'return
+    (dolist (assoc auto-mode-alist)
+      (pcase-let ((`(,ext . ,mode) assoc))
+        (when (string-match-p ext extension)
+          (throw 'return mode))))))
+
 ;; From: https://stackoverflow.com/a/13473856/323874
 (defun mindstream--joindirs (root &rest dirs)
   "Joins a series of directories together, like Python's os.path.join,
