@@ -35,8 +35,6 @@
 (require 'mindstream-session)
 (require 'mindstream-util)
 
-(defvar mindstream-live-action-plist nil)
-
 ;;;###autoload
 (define-minor-mode mindstream-mode
   "Minor mode providing keybindings for mindstream mode."

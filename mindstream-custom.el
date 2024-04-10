@@ -67,6 +67,12 @@
   :type 'list
   :group 'mindstream)
 
+(defcustom mindstream-live-action-plist nil
+  "Periodic action to take while in 'live mode'."
+  :type '(plist :key-type symbol
+                :value-type function)
+  :group 'mindstream)
+
 (defcustom mindstream-filename "scratch"
   "Filename to use for mindstream buffers."
   :type 'string
