@@ -37,7 +37,7 @@
 
 ;;;###autoload
 (define-minor-mode mindstream-mode
-  "Minor mode providing keybindings for mindstream mode."
+  "Minor mode providing global keybindings for mindstream mode."
   :lighter " mindstream"
   :global t
   :keymap
@@ -46,7 +46,9 @@
     (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
     (define-key mindstream-map (kbd "C-c , b") #'mindstream-enter-session)
     mindstream-map)
-  (mindstream-initialize))
+  (if mindstream-mode
+      (mindstream-initialize)
+    (mindstream-disable)))
 
 (defun mindstream--end-anonymous-session (&optional major-mode)
   "End the current anonymous session.
