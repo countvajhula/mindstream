@@ -102,7 +102,6 @@ If NAME isn't provided, use the default template."
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
-  ;; consider alternative: an initialization function to do this the first time
   (unless (file-directory-p mindstream-template-path)
     (mkdir mindstream-template-path t))
   (let ((default-template-file (mindstream--template)))
@@ -172,7 +171,6 @@ if Emacs is exited."
 
 (defun mindstream--new-buffer-from-template (template)
   "Create a new (unsaved) buffer from TEMPLATE."
-  (mindstream--ensure-templates-exist)
   (let* ((contents (condition-case nil
                        (mindstream--file-contents template)
                      (error
