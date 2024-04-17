@@ -108,7 +108,6 @@ This also begins a new session."
   ;; write the fresh state
   (mindstream--iterate))
 
-;;;###autoload
 (defun mindstream-initialize ()
   "Advise any functions that should implicitly cause the scratch buffer to iterate."
   (mindstream--ensure-templates-exist)
