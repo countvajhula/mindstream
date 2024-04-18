@@ -85,7 +85,7 @@ This also begins a new session."
 
 This creates a new scratch buffer using the specified TEMPLATE, and
 begins a new session that records a new version every time you save
-the buffer. The session is anonymous so you don't have to name it up
+the buffer.  The session is anonymous so you don't have to name it up
 front, and if you decide you want to keep it around, you can save the
 session at any time and give it a name then.
 
@@ -137,8 +137,8 @@ session."
   "Do any setup that's necessary for Mindstream.
 
 This advises any functions that should implicitly cause the session to
-iterate. By default, this is just `save-buffer', so that the session
-is iterated every time the buffer is saved. This is the recommended
+iterate.  By default, this is just `save-buffer', so that the session
+is iterated every time the buffer is saved.  This is the recommended
 usage, intended to capture \"natural\" points at which the session is
 meaningful.
 
@@ -192,9 +192,9 @@ session iteration."
   "Live mode ... ENGAGE.
 
 This invokes an action you indicate every time there is a pause in
-typing. Typically, you might use this in programming settings to \"run\" the
-buffer and generate its output, or some other such action to give you
-quick feedback on the results of your changes.
+typing.  Typically, you might use this in programming settings to
+\"run\" the buffer and generate its output, or some other such action
+to give you quick feedback on the results of your changes.
 
 The action is customized via `mindstream-live-action', and the delay before invoking it is customized via `mindstream-live-delay'."
   (interactive)
@@ -213,7 +213,7 @@ The action is customized via `mindstream-live-action', and the delay before invo
   "Implicitly iterate the session upon execution of some command.
 
 This only iterates the session if there have been changes since
-the last persistent state. Otherwise, it takes no action.
+the last persistent state.  Otherwise, it takes no action.
 
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
