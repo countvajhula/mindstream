@@ -141,9 +141,8 @@ if Emacs is exited."
   (let* ((contents (condition-case nil
                        (mindstream--file-contents template)
                      (error
-                      (error
-                       (format "Template %s not found! Please create it and try again."
-                               template)))))
+                      (error "Template %s not found! Please create it and try again."
+                             template))))
          (buf (mindstream--new-buffer-with-contents contents)))
     (with-current-buffer buf
       ;; store the template used as a buffer-local variable
@@ -165,9 +164,8 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
                                                            mindstream-template-path)))
             (when template
               (throw 'return template))))))
-    (error
-     (format "Template not found for %s! Please create one and try again."
-             major-mode-to-use))))
+    (error "Template not found for %s! Please create one and try again."
+           major-mode-to-use)))
 
 (defun mindstream--infer-template (major-mode-to-use)
   "Infer template to use based on MAJOR-MODE-TO-USE."
@@ -189,7 +187,8 @@ file extension by consulting Emacs."
 (defun mindstream--mode-name (major-mode-to-use)
   "Human readable name of MAJOR-MODE-TO-USE.
 
-If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is used."
+If MAJOR-MODE-TO-USE is not provided, the major mode of the current
+buffer is used."
   (if major-mode-to-use
       (string-trim-right
        (capitalize

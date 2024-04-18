@@ -55,6 +55,7 @@ can be retrieved and canceled when you leave live mode.")
   "Minor mode providing global keybindings for mindstream mode."
   :lighter " mindstream"
   :global t
+  :group 'mindstream
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c , n") #'mindstream-new)
@@ -224,7 +225,8 @@ typing.  Typically, you might use this in programming settings to
 \"run\" the buffer and generate its output, or some other such action
 to give you quick feedback on the results of your changes.
 
-The action is customized via `mindstream-live-action', and the delay before invoking it is customized via `mindstream-live-delay'."
+The action is customized via `mindstream-live-action', and the delay
+before invoking it is customized via `mindstream-live-delay'."
   (interactive)
   (add-hook 'after-change-functions
             #'mindstream--reset-live-timer

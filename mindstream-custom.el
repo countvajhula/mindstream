@@ -48,7 +48,7 @@
   (mindstream--joindirs user-emacs-directory
                         "mindstream"
                         "anon")
-  "Directory path where anonymous mindstream sessions will be stored during development."
+  "Directory where anonymous mindstream sessions will be stored."
   :type 'string
   :group 'mindstream)
 
@@ -77,7 +77,7 @@
   :group 'mindstream)
 
 (defcustom mindstream-live-action nil
-  "Periodic action to take while in 'live mode'."
+  "Periodic action to take while in \"live mode\"."
   :type '(plist :key-type symbol
                 :value-type function)
   :group 'mindstream)
@@ -108,7 +108,8 @@ for the major mode so that it would be selected."
 (defcustom mindstream-default-template "text.txt"
   "Default template to use for new mindstream sessions.
 
-If no templates exist, this one will be created with the default template contents."
+If no templates exist, this one will be created with the default
+template contents."
   :type 'string
   :group 'mindstream)
 
