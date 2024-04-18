@@ -1,4 +1,4 @@
-;;; mindstream-backend.el --- A scratch buffer -*- lexical-binding: t -*-
+;;; mindstream-backend.el --- Scratch buffer sessions -*- lexical-binding: t -*-
 
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
@@ -24,18 +24,18 @@
 
 ;;; Commentary:
 
-;; A scratch buffer.
+;; Backend (e.g. Git) abstraction for Mindstream
 
 ;;; Code:
 
 (defun mindstream--execute-shell-command (command &optional directory)
-  "Execute COMMAND at DIRECTORY and return its output."
+  "Execute shell COMMAND at DIRECTORY and return its output."
   (let ((default-directory (or directory
                                (file-name-directory (buffer-file-name)))))
     (shell-command-to-string command)))
 
 (defun mindstream-backend-initialize (base-path)
-  "Initialize the backend."
+  "Initialize the backend at the path BASE-PATH."
   (mindstream--execute-shell-command "git init" base-path))
 
 (defun mindstream-backend-iterate ()

@@ -1,4 +1,4 @@
-;;; mindstream.el --- A scratch buffer -*- lexical-binding: t -*-
+;;; mindstream.el --- Scratch buffer sessions -*- lexical-binding: t -*-
 
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; A scratch buffer.
+;; Start writing, stay focused, don't worry.
 
 ;;; Code:
 
@@ -53,8 +53,8 @@
 (defun mindstream--end-anonymous-session (&optional major-mode)
   "End the current anonymous session.
 
-This always affects the current anonymous session and does not affect
-a named session that you may happen to be visiting."
+This ends the current anonymous session for MAJOR-MODE and does not
+affect a named session that you may happen to be visiting."
   (let ((buf (mindstream--get-anonymous-session-buffer major-mode)))
     (when buf
       (with-current-buffer buf
@@ -65,7 +65,7 @@ a named session that you may happen to be visiting."
         (kill-buffer)))))
 
 (defun mindstream--new (template)
-  "Start a new scratch buffer using a specific TEMPLATE.
+  "Start a new anonymous session using a specific TEMPLATE.
 
 This also begins a new session."
   ;; end the current anonymous session for the
@@ -81,9 +81,18 @@ This also begins a new session."
     buf))
 
 (defun mindstream-new (template)
-  "Start a new scratch buffer using a specific TEMPLATE.
+  "Start a new anonymous session.
 
-This also begins a new session."
+This creates a new scratch buffer using the specified TEMPLATE, and
+begins a new session that records a new version every time you save
+the buffer. The session is anonymous so you don't have to name it up
+front, and if you decide you want to keep it around, you can save the
+session at any time and give it a name then.
+
+Even though you don't name the session when you begin, it is
+still saved on disk from the beginning, with a randomly-generated
+name, in a dedicated Git version-controlled folder at
+`mindstream-path', which you can customize."
   (interactive (list (read-file-name "Which template? "
                                      mindstream-template-path
                                      nil
@@ -93,7 +102,21 @@ This also begins a new session."
     (switch-to-buffer buf)))
 
 (defun mindstream-clear ()
-  "Start a new scratch buffer using a specific template."
+  "Clear the current buffer.
+
+Rather than clear it completely, this restores the buffer's contents
+to the original template it was created from.
+
+Clearing the buffer is intended for use when you just want a clean
+slate but are still engaged in doing the same work. That way, you
+don't need to have the buffer retain the clutter of the various stages
+of your thought process (the session already contains that in the
+version history!) and you can just focus on what you want to do right
+now.
+
+If you are about to start something new and unrelated to what you were
+doing before, consider `mindstream-new' instead, which starts a new
+session."
   (interactive)
   (unless mindstream-session-mode
     (error "Not a mindstream buffer!"))
@@ -111,13 +134,29 @@ This also begins a new session."
   (mindstream--iterate))
 
 (defun mindstream-initialize ()
-  "Advise any functions that should implicitly cause the scratch buffer to iterate."
+  "Do any setup that's necessary for Mindstream.
+
+This advises any functions that should implicitly cause the session to
+iterate. By default, this is just `save-buffer', so that the session
+is iterated every time the buffer is saved. This is the recommended
+usage, intended to capture \"natural\" points at which the session is
+meaningful.
+
+While it doesn't make sense to iterate the session if the buffer
+has *not* been saved (there would be no changes to record a fresh
+version for!), it's possible that you might want to iterate the
+session at a coarser granularity than every save. In that case, you
+can customize `mindstream-triggers' and add the function(s) that
+should trigger session iteration (and remove `save-buffer')."
   (mindstream--ensure-templates-exist)
   (dolist (fn mindstream-triggers)
     (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-disable ()
-  "Remove any advice for scratch buffers."
+  "Cleanup actions on exiting `mindstream-mode'.
+
+This removes any advice (e.g. on `save-buffer') that was added for
+session iteration."
   (dolist (fn mindstream-triggers)
     (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 
@@ -150,7 +189,14 @@ This also begins a new session."
     (mindstream--start-live-timer)))
 
 (defun mindstream-go-live ()
-  "Live mode ... ENGAGE."
+  "Live mode ... ENGAGE.
+
+This invokes an action you indicate every time there is a pause in
+typing. Typically, you might use this in programming settings to \"run\" the
+buffer and generate its output, or some other such action to give you
+quick feedback on the results of your changes.
+
+The action is customized via `mindstream-live-action', and the delay before invoking it is customized via `mindstream-live-delay'."
   (interactive)
   (add-hook 'after-change-functions
             #'mindstream--reset-live-timer
@@ -164,11 +210,10 @@ This also begins a new session."
                t))
 
 (defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
-  "Implicitly iterate the scratch buffer upon execution of some command.
+  "Implicitly iterate the session upon execution of some command.
 
-This only iterates the buffer if it is the current buffer and has been
-modified since the last persistent state.  Otherwise, it takes no
-action.
+This only iterates the session if there have been changes since
+the last persistent state. Otherwise, it takes no action.
 
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
@@ -193,7 +238,7 @@ This is simply the name of the containing folder."
 If DEST-DIR is a non-existent path, it will be used as the name of a
 new directory that will contain the session.  If it is an existing
 path, then the session will be saved at that path using its current
-(e.g. randomly generated) name as the name of the saved session folder.
+\(e.g. randomly generated) name as the name of the saved session folder.
 
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
@@ -227,7 +272,7 @@ you would typically want to specify a new, non-existent folder."
    file))
 
 (defun mindstream-load-session (dir)
-  "Load a session from a directory.
+  "Load a previously saved session.
 
 DIR is the directory containing the session."
   (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
@@ -240,21 +285,24 @@ DIR is the directory containing the session."
     (mindstream-session-mode 1)))
 
 (defun mindstream--get-or-create-session ()
-  "Get the active scratch buffer or create a new one.
+  "Get the anonymous session buffer or create a new one.
 
-If the scratch buffer doesn't exist, this creates a new one using
-the default configured template.
+If an anonymous buffer doesn't exist, this creates a new one using the
+default configured template.
 
 This is a convenience utility for \"read only\" cases where we simply
-want to get the scratch buffer - whatever it may be. It is too
-connoted to be useful in features implementing the scratch buffer
-iteration model."
+want to get a session buffer for the current major mode, without
+worrying about how that happens. It is too connoted to be useful in
+features implementing the session iteration model."
   (or (mindstream--get-anonymous-session-buffer)
       (mindstream--new (mindstream--template
                         (mindstream--infer-template major-mode)))))
 
 (defun mindstream-enter-session ()
-  "Switch to the anonymous scratch buffer."
+  "Enter an anonymous session buffer.
+
+This enters an existing anonymous session if one is present,
+otherwise, it creates a new anonymous session and enters it."
   (interactive)
   (let ((buf (mindstream--get-or-create-session)))
     (switch-to-buffer buf)))

@@ -1,4 +1,4 @@
-;;; mindstream-util.el --- A scratch buffer -*- lexical-binding: t -*-
+;;; mindstream-util.el --- Scratch buffer sessions -*- lexical-binding: t -*-
 
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
@@ -24,7 +24,7 @@
 
 ;;; Commentary:
 
-;; A scratch buffer.
+;; General utilities for Mindstream
 
 ;;; Code:
 
@@ -37,7 +37,7 @@
 (defun mindstream--major-mode-for-file-extension (extension)
   "Appropriate major mode for the given file EXTENSION.
 
-This consults Emacs's auto-mode-alist."
+This consults Emacs's `auto-mode-alist'."
   (catch 'return
     (dolist (assoc auto-mode-alist)
       (pcase-let ((`(,ext . ,mode) assoc))
@@ -46,7 +46,11 @@ This consults Emacs's auto-mode-alist."
 
 ;; From: https://stackoverflow.com/a/13473856/323874
 (defun mindstream--joindirs (root &rest dirs)
-  "Joins a series of directories together, like Python's os.path.join,
+  "Joins a series of directories together, like Python's os.path.join.
+
+This concatenates the ROOT path with the sequence of DIRS in the
+platform-appropriate way.
+
   (mindstream--joindirs \"/tmp\" \"a\" \"b\" \"c\") => /tmp/a/b/c"
 
   (if (not dirs)

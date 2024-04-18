@@ -1,4 +1,4 @@
-;;; mindstream-custom.el --- A scratch buffer -*- lexical-binding: t -*-
+;;; mindstream-custom.el --- Scratch buffer sessions -*- lexical-binding: t -*-
 
 ;; URL: https://github.com/countvajhula/mindstream
 
@@ -21,7 +21,7 @@
 
 ;;; Commentary:
 ;;
-;; User customizations
+;; User customizations for Mindstream
 ;;
 
 ;;; Code:
@@ -39,7 +39,7 @@
   (mindstream--joindirs user-emacs-directory
                         "mindstream"
                         "anon")
-  "Directory path where mindstream buffers will be saved during development."
+  "Directory path where anonymous mindstream sessions will be stored during development."
   :type 'string
   :group 'mindstream)
 
@@ -79,7 +79,7 @@
 In cases where you don't indicate a template (e.g.
 `mindstream-enter-session`), we search the templates folder for a
 template that has an extension recognizable to the major mode, and use
-the first one we find. But if you have many templates that share the
+the first one we find.  But if you have many templates that share the
 same extension, you may prefer to indicate which one is \"preferred\"
 for the major mode so that it would be selected."
   :type '(plist :key-type symbol
