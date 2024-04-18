@@ -3,7 +3,7 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
-;; Keywords: lisp, convenience, languages
+;; Keywords: convenience, files, languages, outlines, tools, vc, wp
 
 ;; This program is "part of the world," in the sense described at
 ;; https://drym.org.  From your perspective, this is no different than

@@ -4,7 +4,7 @@
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 0.0
 ;; Package-Requires: ((emacs "25.1") (magit "3.3.0"))
-;; Keywords: lisp, convenience, languages
+;; Keywords: convenience, files, languages, outlines, tools, vc, wp
 
 ;; This program is "part of the world," in the sense described at
 ;; https://drym.org.  From your perspective, this is no different than
