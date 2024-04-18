@@ -117,7 +117,7 @@ Rather than clear it completely, this restores the buffer's contents
 to the original template it was created from.
 
 Clearing the buffer is intended for use when you just want a clean
-slate but are still engaged in doing the same work. That way, you
+slate but are still engaged in doing the same work.  That way, you
 don't need to have the buffer retain the clutter of the various stages
 of your thought process (the session already contains that in the
 version history!) and you can just focus on what you want to do right
