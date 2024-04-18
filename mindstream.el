@@ -44,6 +44,12 @@
 (require 'mindstream-session)
 (require 'mindstream-util)
 
+(defvar-local mindstream-live-timer nil
+  "A timer used to execute a periodic action in \"live mode\".
+
+This is stored as a local variable in the session buffer so that it
+can be retrieved and canceled when you leave live mode.")
+
 ;;;###autoload
 (define-minor-mode mindstream-mode
   "Minor mode providing global keybindings for mindstream mode."
