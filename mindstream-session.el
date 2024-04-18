@@ -141,7 +141,7 @@ if Emacs is exited."
   (let* ((contents (condition-case nil
                        (mindstream--file-contents template)
                      (error
-                      (error "Template %s not found! Please create it and try again."
+                      (error "Template %s not found! Please create it and try again"
                              template))))
          (buf (mindstream--new-buffer-with-contents contents)))
     (with-current-buffer buf
@@ -164,7 +164,7 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
                                                            mindstream-template-path)))
             (when template
               (throw 'return template))))))
-    (error "Template not found for %s! Please create one and try again."
+    (error "Template not found for %s! Please create one and try again"
            major-mode-to-use)))
 
 (defun mindstream--infer-template (major-mode-to-use)
