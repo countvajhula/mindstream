@@ -59,6 +59,19 @@
       (mindstream-initialize)
     (mindstream-disable)))
 
+;;;###autoload
+(define-minor-mode mindstream-session-mode
+  "Minor mode providing keybindings in active mindstream sessions."
+  :lighter " mindstream-session"
+  :keymap
+  (let ((mindstream-session-map (make-sparse-keymap)))
+    (define-key mindstream-session-map (kbd "C-c , c") #'mindstream-clear)
+    (define-key mindstream-session-map (kbd "C-c , s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-c , C-s") #'mindstream-save-session)
+    (define-key mindstream-session-map (kbd "C-c , C-l") #'mindstream-go-live)
+    (define-key mindstream-session-map (kbd "C-c , C-o") #'mindstream-go-offline)
+    mindstream-session-map))
+
 (defun mindstream--end-anonymous-session (&optional major-mode)
   "End the current anonymous session.
 
