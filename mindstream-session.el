@@ -154,26 +154,28 @@ if Emacs is exited."
       (setq mindstream-template-used template))
     buf))
 
-(defun mindstream--find-template-for-mode (major-mode)
-  "Search the templates folder for a template recognizable to MAJOR-MODE."
+(defun mindstream--find-template-for-mode (major-mode-to-use)
+  "Find an appropriate template to use for a major mode.
+
+Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
   (catch 'return
     (dolist (assoc auto-mode-alist)
       (pcase-let ((`(,ext . ,mode) assoc))
-        (when (eq mode major-mode)
+        (when (eq mode major-mode-to-use)
           (let ((template (mindstream--file-with-extension ext
                                                            mindstream-template-path)))
             (when template
               (throw 'return template))))))
     (error
      (format "Template not found for %s! Please create one and try again."
-             major-mode))))
+             major-mode-to-use))))
 
-(defun mindstream--infer-template (major-mode)
-  "Infer template to use based on current MAJOR-MODE."
+(defun mindstream--infer-template (major-mode-to-use)
+  "Infer template to use based on MAJOR-MODE-TO-USE."
   (let ((template (plist-get mindstream-preferred-template
-                             major-mode)))
+                             major-mode-to-use)))
     (or template
-        (mindstream--find-template-for-mode major-mode))))
+        (mindstream--find-template-for-mode major-mode-to-use))))
 
 (defun mindstream--infer-major-mode (filename)
   "Infer a major mode to use.
@@ -208,9 +210,9 @@ If MAJOR-MODE-TO-USE is not provided, the major mode of the current buffer is us
           (mindstream--mode-name major-mode-to-use)
           "*"))
 
-(defun mindstream--get-anonymous-session-buffer (&optional major-mode)
-  "Get the active anonymous session buffer for MAJOR-MODE, if it exists."
-  (let ((buffer-name (mindstream-anonymous-buffer-name major-mode)))
+(defun mindstream--get-anonymous-session-buffer (&optional major-mode-to-use)
+  "Get the active anonymous session buffer for MAJOR-MODE-TO-USE, if it exists."
+  (let ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use)))
     (get-buffer buffer-name)))
 
 (defun mindstream-anonymous-session-buffer-p ()

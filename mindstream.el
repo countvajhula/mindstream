@@ -78,12 +78,12 @@ can be retrieved and canceled when you leave live mode.")
     (define-key mindstream-session-map (kbd "C-c , C-o") #'mindstream-go-offline)
     mindstream-session-map))
 
-(defun mindstream--end-anonymous-session (&optional major-mode)
+(defun mindstream--end-anonymous-session (&optional major-mode-to-use)
   "End the current anonymous session.
 
-This ends the current anonymous session for MAJOR-MODE and does not
+This ends the current anonymous session for MAJOR-MODE-TO-USE and does not
 affect a named session that you may happen to be visiting."
-  (let ((buf (mindstream--get-anonymous-session-buffer major-mode)))
+  (let ((buf (mindstream--get-anonymous-session-buffer major-mode-to-use)))
     (when buf
       (with-current-buffer buf
         ;; first write the existing scratch buffer
