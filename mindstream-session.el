@@ -37,7 +37,6 @@
 
 ;;; Code:
 
-(require 'cl-lib)
 (require 'mindstream-custom)
 (require 'mindstream-backend)
 (require 'mindstream-util)
