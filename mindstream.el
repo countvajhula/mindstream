@@ -277,7 +277,6 @@ you would typically want to specify a new, non-existent folder."
   ;; The chosen name of the directory becomes the name of the session.
   (let* ((original-session-name (mindstream--session-name))
          (buffer-file (buffer-file-name))
-         (filename (file-name-nondirectory buffer-file))
          (named (not (file-directory-p dest-dir))))
     ;; ensure no unsaved changes
     ;; note: this is a no-op if save-buffer is a trigger for iteration
