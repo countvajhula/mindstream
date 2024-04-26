@@ -38,21 +38,36 @@
 ;;; Code:
 
 (defun mindstream--execute-shell-command (command &optional directory)
-  "Execute shell COMMAND at DIRECTORY and return its output."
-  (let ((default-directory (or directory
-                               (file-name-directory (buffer-file-name)))))
-    (shell-command-to-string command)))
+  "Execute shell COMMAND at DIRECTORY.
+
+COMMAND is expected to be a list of strings, the first element of
+which is the command itself, and the remaining elements are the flags
+and arguments that are to be supplied to the command."
+  (let ((cmd (car command))
+        (args (cdr command))
+        (default-directory (or directory
+                               (and (buffer-file-name)
+                                    (file-name-directory
+                                     (buffer-file-name)))
+                               default-directory)))
+    (let ((exit-code (apply #'call-process cmd nil nil nil args)))
+      (when (zerop exit-code)
+        (message "WARNING: nonzero exit code %d from %s"
+                 exit-code
+                 (apply #'string-join command " " nil)))
+      exit-code)))
 
 (defun mindstream-backend-initialize (base-path)
   "Initialize the backend at the path BASE-PATH."
-  (mindstream--execute-shell-command "git init" base-path))
+  (mindstream--execute-shell-command (list "git" "init")
+                                     base-path))
 
 (defun mindstream-backend-iterate ()
   "Iterate using the backend (e.g. git)."
   (mindstream--execute-shell-command
-   (concat "git add -A"
-           " && "
-           "git commit -a --allow-empty-message -m ''")))
+   (list "git" "add" "-A"))
+  (mindstream--execute-shell-command
+   (list "git" "commit" "-a" "--allow-empty-message" "-m" "")))
 
 (provide 'mindstream-backend)
 ;;; mindstream-backend.el ends here
