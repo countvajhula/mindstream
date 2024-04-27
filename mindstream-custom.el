@@ -105,6 +105,11 @@ for the major mode so that it would be selected."
   :type 'string
   :group 'mindstream)
 
+(defcustom mindstream-add-everything t
+  "Whether to add all files to the index before commiting on each iteration."
+  :type 'boolean
+  :group 'mindstream)
+
 (defcustom mindstream-default-template "text.txt"
   "Default template to use for new mindstream sessions.
 

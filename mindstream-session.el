@@ -81,6 +81,10 @@ New sessions always start anonymous."
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
+  ;; always add the current file (where mindstream-session-mode
+  ;; should be active) to the backend index before iteration
+  (mindstream-backend-add-file
+   (file-name-nondirectory (buffer-file-name)))
   (mindstream-backend-iterate))
 
 (defun mindstream--generate-anonymous-session-path (session)

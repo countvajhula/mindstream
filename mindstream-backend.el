@@ -60,10 +60,19 @@ and arguments that are to be supplied to the command."
 
 (defun mindstream-backend-iterate ()
   "Iterate using the backend (e.g. git)."
-  (mindstream--execute-shell-command
-   (list "git" "add" "-A"))
+  (when mindstream-add-everything
+    ;; if this is configured, then add all files
+    ;; in the repo that aren't gitignored, even
+    ;; if they aren't being visited right now
+    (mindstream--execute-shell-command
+     (list "git" "add" "-A")))
   (mindstream--execute-shell-command
    (list "git" "commit" "-a" "--allow-empty-message" "-m" "")))
+
+(defun mindstream-backend-add-file (file)
+  "Add FILE to the Git index."
+  (mindstream--execute-shell-command
+   (list "git" "add" file)))
 
 (provide 'mindstream-backend)
 ;;; mindstream-backend.el ends here
