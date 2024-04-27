@@ -248,8 +248,7 @@ the last persistent state.  Otherwise, it takes no action.
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
   (let ((result (apply orig-fn args)))
-    (when (and mindstream-session-mode
-               (magit-anything-modified-p))
+    (when mindstream-session-mode
       (mindstream--iterate))
     result))
 

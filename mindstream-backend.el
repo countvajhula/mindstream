@@ -51,10 +51,6 @@ and arguments that are to be supplied to the command."
                                      (buffer-file-name)))
                                default-directory)))
     (let ((exit-code (apply #'call-process cmd nil nil nil args)))
-      (unless (zerop exit-code)
-        (message "WARNING: nonzero exit code %d from %s"
-                 exit-code
-                 (apply #'string-join command " " nil)))
       exit-code)))
 
 (defun mindstream-backend-initialize (base-path)
