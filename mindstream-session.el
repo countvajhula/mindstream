@@ -53,6 +53,41 @@ This is a string representing a path to a file on disk.")
             "-"
             (sha1 (format "%s" time)))))
 
+(defun mindstream--session-file-for-template (template)
+  "Get the name of the session file for TEMPLATE.
+
+This defaults to `mindstream-filename' but can be overridden by
+indicating a file for the template in `mindstream-starting-file'."
+  (let ((template-name (file-name-nondirectory
+                        (directory-file-name
+                         (file-name-directory
+                          template)))))
+    (let ((session-file
+           (or (lax-plist-get mindstream-starting-file
+                              template-name)
+               (seq-find #'mindstream--session-file-p
+                         (directory-files template
+                                          nil
+                                          directory-files-no-dot-files-regexp))
+               ;; list all files in the template dir
+               ;; that aren't special or hidden
+               (let ((files (seq-filter (lambda (x)
+                                          ;; e.g. .gitignore
+                                          (not (string-match-p "^\\." x)))
+                                        (directory-files template
+                                                         nil))))
+                 ;; if there's only one file, use it
+                 (and files (= 1 (length files)) (car files)))
+               (error
+                ;; We must either raise an error here or support
+                ;; more than one anonymous session per major mode
+                ;; and have `mindstream-enter-session' use MRU.
+                ;; For now, raise an error.
+                (concat "More than one file present in template. "
+                        "Please indicate a starting file for the session "
+                        " by customizing `mindstream-starting-file'.")))))
+      session-file)))
+
 (defun mindstream-start-session (&optional template)
   "Start a new anonymous session.
 
@@ -63,21 +98,16 @@ specified.  Otherwise, it uses the configured default template.
 New sessions always start anonymous."
   (let* ((session (mindstream--unique-name))
          (base-path (mindstream--generate-anonymous-session-path session))
-         (template (or template mindstream-default-template))
-         (file-extension (file-name-extension template))
-         (buf (mindstream--new-buffer-from-template template))
-         (filename (mindstream--joindirs base-path
-                                         (concat mindstream-filename "." file-extension))))
+         (template (or template mindstream-default-template)))
     (unless (file-directory-p base-path)
-      (mkdir base-path t)
+      (copy-directory template base-path)
       (mindstream-backend-initialize base-path)
-      (with-current-buffer buf
-        ;; looks like writing an unsaved buffer automatically sets
-        ;; the appropriate major mode based on the file extension
-        ;; so there is no need for us to do that
-        (write-file filename)
-        (rename-buffer (mindstream-anonymous-buffer-name)))
-      buf)))
+      (let ((filename (mindstream--session-file-for-template template)))
+        (find-file
+         (expand-file-name filename
+                           base-path))
+        (mindstream--initialize-buffer)
+        (rename-buffer (mindstream-anonymous-buffer-name))))))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
@@ -102,14 +132,17 @@ If NAME isn't provided, use the default template."
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   (unless (file-directory-p mindstream-template-path)
-    (mkdir mindstream-template-path t))
-  (let ((default-template-file (mindstream--template)))
-    (unless (file-exists-p default-template-file)
-      (let ((buf (generate-new-buffer "default-template")))
-        (with-current-buffer buf
-          (insert mindstream-default-template-contents)
-          (write-file default-template-file))
-        (kill-buffer buf)))))
+    (let ((default-template-dir (mindstream--template)))
+      (mkdir default-template-dir t)
+      (let ((template-file
+             (mindstream--joindirs default-template-dir
+                                   (concat mindstream-anonymous-buffer-prefix
+                                           ".txt"))))
+        (let ((buf (generate-new-buffer "default-template")))
+          (with-current-buffer buf
+            (insert mindstream-default-template-contents)
+            (write-file template-file))
+          (kill-buffer buf))))))
 
 (defun mindstream--file-contents (filename)
   "Get contents of FILENAME as a string."

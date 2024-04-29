@@ -84,6 +84,7 @@ can be retrieved and canceled when you leave live mode.")
 
 This ends the current anonymous session for MAJOR-MODE-TO-USE and does not
 affect a named session that you may happen to be visiting."
+  ;; TODO: may want to also kill any other open buffers at the same base path
   (let ((buf (mindstream--get-anonymous-session-buffer major-mode-to-use)))
     (when buf
       (with-current-buffer buf
@@ -93,6 +94,12 @@ affect a named session that you may happen to be visiting."
         ;; then kill it
         (kill-buffer)))))
 
+(defun mindstream--infer-major-mode-for-template (template)
+  "Infer the starting major mode for the TEMPLATE."
+  (let ((session-file
+         (mindstream--session-file-for-template template)))
+    (mindstream--infer-major-mode session-file)))
+
 (defun mindstream--new (template)
   "Start a new anonymous session using a specific TEMPLATE.
 
@@ -100,7 +107,7 @@ This also begins a new session."
   ;; end the current anonymous session for the
   ;; desired major mode
   (mindstream--end-anonymous-session
-   (mindstream--infer-major-mode template))
+   (mindstream--infer-major-mode-for-template template))
   ;; start a new session (sessions always start anonymous)
   (let ((buf (mindstream-start-session template)))
     ;; (ab initio) iterate
@@ -122,11 +129,11 @@ Even though you don't name the session when you begin, it is
 still saved on disk from the beginning, with a randomly-generated
 name, in a dedicated Git version-controlled folder at
 `mindstream-path', which you can customize."
-  (interactive (list (read-file-name "Which template? "
-                                     mindstream-template-path
-                                     nil
-                                     t
-                                     "")))
+  (interactive (list (read-directory-name "Which template? "
+                                          mindstream-template-path
+                                          nil
+                                          t
+                                          "")))
   (let ((buf (mindstream--new template)))
     (switch-to-buffer buf)))
 
@@ -303,7 +310,11 @@ you would typically want to specify a new, non-existent folder."
   "Load a previously saved session.
 
 DIR is the directory containing the session."
-  (interactive (list (read-directory-name "Load session: " mindstream-save-session-path)))
+  (interactive (list (read-directory-name "Load session: "
+                                          mindstream-save-session-path
+                                          nil
+                                          t
+                                          "")))
   ;; restore the old session
   (let ((filename (expand-file-name
                    (seq-find #'mindstream--session-file-p
