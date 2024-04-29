@@ -68,5 +68,14 @@ platform-appropriate way.
            (expand-file-name (car dirs) root)
            (cdr dirs))))
 
+(defun mindstream--directory-files (dir)
+  "List files in DIR that aren't hidden or special."
+  ;; TODO: exclude files that aren't versioned by Git
+  (seq-filter (lambda (x)
+                ;; e.g. .gitignore
+                (not (string-match-p "^\\." x)))
+              (directory-files dir
+                               nil)))
+
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here

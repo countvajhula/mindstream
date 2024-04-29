@@ -315,11 +315,15 @@ DIR is the directory containing the session."
                                           nil
                                           t
                                           "")))
-  ;; restore the old session
-  (let ((filename (expand-file-name
-                   (seq-find #'mindstream--session-file-p
-				             (directory-files dir))
-                   dir)))
+  (let* ((files (mindstream--directory-files dir))
+         (filename (if (and files (= 1 (length files)))
+                       (expand-file-name (car files)
+                                         dir)
+                     (read-file-name "Which file? "
+                                     dir
+                                     nil
+                                     t
+                                     ""))))
     (find-file filename)
     (mindstream-session-mode 1)))
 

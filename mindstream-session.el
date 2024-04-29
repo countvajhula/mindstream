@@ -69,13 +69,7 @@ indicating a file for the template in `mindstream-starting-file'."
                          (directory-files template
                                           nil
                                           directory-files-no-dot-files-regexp))
-               ;; list all files in the template dir
-               ;; that aren't special or hidden
-               (let ((files (seq-filter (lambda (x)
-                                          ;; e.g. .gitignore
-                                          (not (string-match-p "^\\." x)))
-                                        (directory-files template
-                                                         nil))))
+               (let ((files (mindstream--directory-files template)))
                  ;; if there's only one file, use it
                  (and files (= 1 (length files)) (car files)))
                (error
