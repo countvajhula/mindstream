@@ -72,7 +72,6 @@ can be retrieved and canceled when you leave live mode.")
   :lighter " mindstream-session"
   :keymap
   (let ((mindstream-session-map (make-sparse-keymap)))
-    (define-key mindstream-session-map (kbd "C-c , c") #'mindstream-clear)
     (define-key mindstream-session-map (kbd "C-c , s") #'mindstream-save-session)
     (define-key mindstream-session-map (kbd "C-c , C-s") #'mindstream-save-session)
     (define-key mindstream-session-map (kbd "C-c , C-l") #'mindstream-go-live)
@@ -136,38 +135,6 @@ name, in a dedicated Git version-controlled folder at
                                           "")))
   (let ((buf (mindstream--new template)))
     (switch-to-buffer buf)))
-
-(defun mindstream-clear ()
-  "Clear the current buffer.
-
-Rather than clear it completely, this restores the buffer's contents
-to the original template it was created from.
-
-Clearing the buffer is intended for use when you just want a clean
-slate but are still engaged in doing the same work.  That way, you
-don't need to have the buffer retain the clutter of the various stages
-of your thought process (the session already contains that in the
-version history!) and you can just focus on what you want to do right
-now.
-
-If you are about to start something new and unrelated to what you were
-doing before, consider `mindstream-new' instead, which starts a new
-session."
-  (interactive)
-  (unless mindstream-session-mode
-    (error "Not a mindstream buffer!"))
-  ;; first write the existing scratch buffer
-  ;; if there are unsaved changes
-  (save-buffer)
-  (mindstream--iterate)
-  ;; clear the buffer
-  (erase-buffer)
-  ;; if the buffer was originally created using a template,
-  ;; then insert the template contents
-  (when mindstream-template-used
-    (insert (mindstream--file-contents mindstream-template-used)))
-  ;; write the fresh state
-  (mindstream--iterate))
 
 (defun mindstream-initialize ()
   "Do any setup that's necessary for Mindstream.

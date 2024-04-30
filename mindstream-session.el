@@ -41,11 +41,6 @@
 (require 'mindstream-backend)
 (require 'mindstream-util)
 
-(defvar-local mindstream-template-used nil
-  "The template used (if any) in creating the current buffer.
-
-This is a string representing a path to a file on disk.")
-
 (defun mindstream--unique-name ()
   "Generate a unique name."
   (let ((time (current-time)))
@@ -138,50 +133,11 @@ If NAME isn't provided, use the default template."
             (write-file template-file))
           (kill-buffer buf))))))
 
-(defun mindstream--file-contents (filename)
-  "Get contents of FILENAME as a string."
-  (with-temp-buffer
-    (insert-file-contents filename)
-    (buffer-string)))
-
 (defun mindstream--initialize-buffer ()
   "Initialize a newly created buffer."
   (setq buffer-offer-save nil)
   ;; place point at the end of the buffer
   (goto-char (point-max)))
-
-(defun mindstream--new-buffer-with-contents (contents)
-  "Create a new scratch buffer containing CONTENTS.
-
-This does not save the buffer.
-
-As a \"scratch\" buffer, its contents will be treated as
-disposable, and it will not prompt to save if it is closed or
-if Emacs is exited."
-  (let ((buf (generate-new-buffer
-              ;; will be renamed later, after it is written to disk
-              ;; so the name here doesn't matter
-              (mindstream--unique-name))))
-    (with-current-buffer buf
-      (insert contents)
-      (mindstream--initialize-buffer))
-    buf))
-
-(defun mindstream--new-buffer-from-template (template)
-  "Create a new (unsaved) buffer from TEMPLATE."
-  (let* ((contents (condition-case nil
-                       (mindstream--file-contents template)
-                     (error
-                      (error "Template %s not found! Please create it and try again"
-                             template))))
-         (buf (mindstream--new-buffer-with-contents contents)))
-    (with-current-buffer buf
-      ;; store the template used as a buffer-local variable
-      ;; on the scratch buffer
-      ;; and also declare/document it so we know it's a fully
-      ;; qualified path
-      (setq mindstream-template-used template))
-    buf))
 
 (defun mindstream--find-template-for-mode (major-mode-to-use)
   "Find an appropriate template to use for a major mode.
