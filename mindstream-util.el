@@ -38,8 +38,10 @@
 ;;; Code:
 
 (defun mindstream--file-with-extension (extension path)
-  "Return the first file with EXTENSION at PATH."
-  (let ((files (directory-files path nil extension)))
+  "Return the first file with EXTENSION at PATH.
+
+This searches PATH recursively."
+  (let ((files (directory-files-recursively path extension)))
     (when files
       (car files))))
 
@@ -76,6 +78,13 @@ platform-appropriate way.
                 (not (string-match-p "^\\." x)))
               (directory-files dir
                                nil)))
+
+(defun mindstream--directory-name (path)
+  "The name of the directory at PATH."
+  (file-name-nondirectory
+   (directory-file-name
+    (file-name-directory
+     path))))
 
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here

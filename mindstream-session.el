@@ -53,10 +53,7 @@
 
 This defaults to `mindstream-filename' but can be overridden by
 indicating a file for the template in `mindstream-starting-file'."
-  (let ((template-name (file-name-nondirectory
-                        (directory-file-name
-                         (file-name-directory
-                          template)))))
+  (let ((template-name (mindstream--directory-name template)))
     (let ((session-file
            (or (let ((file (lax-plist-get mindstream-starting-file
                                           template-name)))
@@ -154,18 +151,18 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
     (dolist (assoc auto-mode-alist)
       (pcase-let ((`(,ext . ,mode) assoc))
         (when (eq mode major-mode-to-use)
-          (let ((template (mindstream--file-with-extension ext
-                                                           mindstream-template-path)))
-            (when template
-              (throw 'return template))))))
+          (let ((file (mindstream--file-with-extension ext
+                                                       mindstream-template-path)))
+            (when file
+              (throw 'return (mindstream--directory-name file)))))))
     (error "Template not found for %s! Please create one and try again"
            major-mode-to-use)))
 
 (defun mindstream--infer-template (major-mode-to-use)
   "Infer template to use based on MAJOR-MODE-TO-USE."
-  (let ((template (plist-get mindstream-preferred-template
-                             major-mode-to-use)))
-    (or template
+  (let ((template-name (plist-get mindstream-preferred-template
+                                  major-mode-to-use)))
+    (or template-name
         (mindstream--find-template-for-mode major-mode-to-use))))
 
 (defun mindstream--infer-major-mode (filename)

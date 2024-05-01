@@ -312,7 +312,7 @@ features implementing the session iteration model."
   "Enter an anonymous session buffer.
 
 This enters an existing anonymous session if one is present,
-otherwise, it creates a new anonymous session and enters it."
+otherwise, it creates a new one and enters it."
   (interactive)
   (let ((buf (mindstream--get-or-create-session)))
     (switch-to-buffer buf)))
