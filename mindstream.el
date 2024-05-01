@@ -60,7 +60,7 @@ can be retrieved and canceled when you leave live mode.")
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c , n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
-    (define-key mindstream-map (kbd "C-c , b") #'mindstream-enter-session)
+    (define-key mindstream-map (kbd "C-c , b") #'mindstream-enter-anonymous-session)
     mindstream-map)
   (if mindstream-mode
       (mindstream-initialize)
@@ -308,7 +308,7 @@ features implementing the session iteration model."
       (mindstream--new (mindstream--template
                         (mindstream--infer-template major-mode)))))
 
-(defun mindstream-enter-session ()
+(defun mindstream-enter-anonymous-session ()
   "Enter an anonymous session buffer.
 
 This enters an existing anonymous session if one is present,

@@ -94,7 +94,7 @@ If no file is specified for a template, defaults to `mindstream-file'."
   "The preferred template for each major mode.
 
 In cases where you don't indicate a template (e.g.
-`mindstream-enter-session'), we search the templates folder for a
+`mindstream-enter-anonymous-session'), we search the templates folder for a
 template that has an extension recognizable to the major mode, and use
 the first one we find.  But if you have many templates that share the
 same extension, you may prefer to indicate which one is \"preferred\"

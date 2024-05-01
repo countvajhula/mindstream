@@ -77,7 +77,7 @@ indicating a file for the template in `mindstream-starting-file'."
                (error
                 ;; We must either raise an error here or support
                 ;; more than one anonymous session per major mode
-                ;; and have `mindstream-enter-session' use MRU.
+                ;; and have `mindstream-enter-anonymous-session' use MRU.
                 ;; For now, raise an error.
                 (concat "More than one file present in template. "
                         "Please indicate a starting file for the session "

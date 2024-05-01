@@ -57,7 +57,7 @@ You can also save scratch sessions that you'd like to keep by using ``mindstream
 Entering Sessions Even More Quickly
 -----------------------------------
 
-``mindstream-enter-session`` (default: ``C-c , b``) will take you immediately to a new anonymous session buffer for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
+``mindstream-enter-anonymous-session`` (default: ``C-c , b``) will take you immediately to a new anonymous session buffer for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
 
 If you've got more than one template for a particular major mode, you may want to indicate which one is preferred rather than leave it to chance or accidents of alphabetical order. You can do this by associating each major mode with the name of the preferred template. For example:
 
@@ -67,7 +67,7 @@ If you've got more than one template for a particular major mode, you may want t
   ...
   (mindstream-preferred-template '(racket-mode "racket.rkt"))
 
-This customization is only relevant when using ``mindstream-enter-session``, as you would select the template yourself when using ``mindstream-new``.
+This customization is only relevant when using ``mindstream-enter-anonymous-session``, as you would select the template yourself when using ``mindstream-new``.
 
 See "Design" below to learn more about anonymous sessions.
 
