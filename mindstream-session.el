@@ -58,8 +58,15 @@ indicating a file for the template in `mindstream-starting-file'."
                          (file-name-directory
                           template)))))
     (let ((session-file
-           (or (lax-plist-get mindstream-starting-file
-                              template-name)
+           (or (let ((file (lax-plist-get mindstream-starting-file
+                                          template-name)))
+                 (when file
+                   (unless (file-exists-p (expand-file-name file
+                                                            template))
+                     (error "Starting file %s for %s template not found"
+                            file
+                            template-name))
+                   file))
                (seq-find #'mindstream--session-file-p
                          (directory-files template
                                           nil
