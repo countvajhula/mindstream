@@ -37,27 +37,29 @@ This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a p
 Usage
 =====
 
-Before you can use it the first time, you will need to create at least one template at ``~/.mindstream/templates/`` (see below for how to do that). Once you've done that, using Mindstream is as easy as:
-
 1. Run ``mindstream-new`` (default: ``C-c , n``) to start a session.
 2. Write!
+
+Save the file at your regular cadence after making a few changes to it. If you pull up a Magit window, you'll notice that there is a distinct commit recorded in the underlying Git repo for your session each time that you saved the file. You can also create new files at the same path, and changes to any of them would also be similarly tracked.
+
+You may notice that there is only one template available to use for your first session. This is because Mindstream creates a simple text template at ``~/.mindstream/templates/`` if it doesn't find any there. You may want to add more templates that are relevant for you. Let's see how to do that.
 
 Adding New Session Templates
 ----------------------------
 
-Mindstream doesn't include any templates out of the box, so you'll probably want to create some for standard scratch sessions you are likely to need, for instance, for programming in your favorite language (perhaps `Racket <https://racket-lang.org/>`_?), or just freewriting some text for your next great novel, following in the keystrokes of Emacs octopuses like Neal Stephenson.
+Mindstream doesn't include any templates out of the box, so you'll probably want to create some for standard sessions you are likely to need, for instance, for programming in your favorite language (perhaps `Racket <https://racket-lang.org/>`_?), or just freewriting some text for your next great novel, following in the keystrokes of Emacs octopuses like Neal Stephenson.
 
-You can add new templates in ``mindstream-template-path`` (default: ``"~/.mindstream/templates/"``) -- ordinary text files with any extension you like (e.g. ``.txt``, ``.rkt``, ``.el``, anything) -- which will then be available as options in ``mindstream-new``.
+To add a new template, visit ``mindstream-template-path`` (default: ``"~/.mindstream/templates/"``) in your filemanager of choice (e.g. Emacs's ``dired``, or just a command line), and create a folder there with the name of your template (e.g. ``racket``). The folder should contain an ordinary file (or multiple files) with the appropriate extension (e.g. ``.rkt`` -- it could be anything at all that you typically use Emacs to edit). This template will now be available as an option in ``mindstream-new``.
 
 Saving Sessions
 ---------------
 
-You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-c , C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``/var/tmp/mindstream/``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
+You can also save scratch sessions that you'd like to keep by using ``mindstream-save-session`` (default binding: ``C-c , C-s``). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to ``<your-emacs.d-path>/mindstream/anon``), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
 
 Entering Sessions Even More Quickly
 -----------------------------------
 
-``mindstream-enter-anonymous-session`` (default: ``C-c , b``) will take you immediately to a new anonymous session buffer for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
+``mindstream-enter-anonymous-session`` (default: ``C-c , b``) will take you immediately to a new anonymous session for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
 
 If you've got more than one template for a particular major mode, you may want to indicate which one is preferred rather than leave it to chance or accidents of alphabetical order. You can do this by associating each major mode with the name of the preferred template. For example:
 
@@ -88,28 +90,27 @@ For example, use the following config to evaluate your buffer "live" while in Ra
 
 You can "go live" in any Mindstream session with ``M-x mindstream-go-live`` (default: ``C-c , C-l``). If no live action is configured for the major mode, it will simply use the default action of saving the buffer.
 
+Currently, live mode is only supported for individual buffers rather than for the session as a whole, so you would need to "go live" in each session buffer individually.
+
 Go offline with ``M-x mindstream-go-offline`` (default: ``C-c , C-o``).
 
 Mindstream Anywhere
 -------------------
 
-If you have an existing, ordinary file that you were working on at some point, and if you want to continue working on it in a mindstream session, that's easy enough to do. Simply follow these steps:
+If you have an existing, ordinary file or directory that you were working on at some point, and if you want to continue working on it in a mindstream session, that's easy enough to do. Simply follow these steps:
 
 1. Create a new folder (give it a representative name, as you would any Mindstream session) and move the file(s) into it.
 2. At the command line in that folder, run ``git init``.
-3. Open the file in Emacs in the usual way and ``M-x mindstream-session-mode``
+3. Open the file in Emacs in the usual way and ``M-x mindstream-begin-session``
 
-Mindstream sessions are just ordinary Git repositories. If you wanted to, you could use Mindstream in any Git repo simply by ``M-x mindstream-session-mode`` after opening a file in the repo, but this isn't a well-supported use case for the moment.
+Mindstream sessions are just ordinary Git repositories. If you wanted to, you could use Mindstream in any Git repo simply by ``M-x mindstream-begin-session`` after opening a file in the repo, but this isn't a well-supported use case for the moment (e.g. it would result in a lot of commits, and you would most likely want to manually squash them).
 
 Explore
 -------
 
-Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in two minor modes:
+Try ``M-x mindstream- ...`` to see all the available interactive commands. These are also included as keybindings in a minor mode, ``mindstream-mode``, which allows you to enter a Mindstream session from anywhere, and contains useful commands for active sessions like saving the session, "going live," and so on.
 
-- ``mindstream-mode``, which allows you to enter a Mindstream session from anywhere.
-- ``mindstream-session-mode``, which contains useful commands for active sessions, like saving the session and clearing the buffer to restore a blank template.
-
-Mindstream commands are bound by default under the prefix ``C-c ,``. You can also view all Mindstream commands by running Emacs's ``C-h`` introspection with this prefix, as in ``C-c , C-h``.
+Mindstream commands are bound by default under the prefix ``C-c ,``. You can view all Mindstream commands by using Emacs's ``C-h`` introspection with this prefix, as in ``C-c , C-h``.
 
 Customization
 =============
@@ -118,11 +119,11 @@ As each Mindstream session uses a specific major mode, it inherits all of the cu
 
 For instance, one common use of Mindstream is as a scratch buffer with Racket Mode. Racket Mode users sometimes `like to have a dedicated REPL <https://racket-mode.com/#Edit-buffers-and-REPL-buffers>`__ to view the output of code they write in a particular buffer, instead of reusing a REPL shared across all buffers. If you're a Racket Mode user, whatever customization you've chosen here would apply to Mindstream session buffers just as they would any buffer, and your Racket Mode sessions may or may not have a dedicated REPL depending on how you've customized this for Racket Mode generally.
 
-But if you happen to want to use a different customization for Mindstream session buffers in a certain major mode than you prefer generally for that major mode, advising the ``mindstream-start-anonymous-session`` function could be one way to achieve that. For instance, for the customization we have been talking about:
+But if you happen to want to use a different customization for Mindstream session buffers in a certain major mode than you prefer generally for that major mode, advising the ``mindstream-new`` function could be one way to achieve that. For instance, for the customization we have been talking about:
 
 .. code-block:: elisp
 
-  (advice-add 'mindstream-start-anonymous-session
+  (advice-add 'mindstream-new
               :after
               (lambda (&rest _args)
                 (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")))
@@ -136,7 +137,7 @@ Mindstream structures your workflow in sessions, which are version-controlled fi
 2. Saving an anonymous session turns it into a named session, and there is no active anonymous session at that point. Named sessions work the same as anonymous sessions aside from having a name and being in a permanent location on disk. A new anonymous session could be started at any time via `mindstream-new`.
 3. New sessions always begin as anonymous.
 4. Named sessions may be loaded without interfering with the active anonymous session.
-5. Any number of named sessions could be active at the same time. There is no global state, so that sessions are self-contained and independent.
+5. Any number of named sessions could be active at the same time. Sessions are self-contained and independent.
 
 Tips
 ====
