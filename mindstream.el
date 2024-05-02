@@ -111,7 +111,6 @@ This also begins a new session."
   (let ((buf (mindstream-start-anonymous-session template)))
     ;; (ab initio) iterate
     (with-current-buffer buf
-      (mindstream-session-mode 1)
       (mindstream--iterate))
     buf))
 
@@ -292,7 +291,7 @@ DIR is the directory containing the session."
                                      t
                                      ""))))
     (find-file filename)
-    (mindstream-session-mode 1)))
+    (mindstream-begin-session)))
 
 (defun mindstream--get-or-create-session ()
   "Get the anonymous session buffer or create a new one.

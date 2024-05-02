@@ -81,6 +81,16 @@ indicating a file for the template in `mindstream-starting-file'."
                         " by customizing `mindstream-starting-file'.")))))
       session-file)))
 
+(defun mindstream-begin-session ()
+  "Begin a session at the current path."
+  (interactive)
+  (mindstream-session-mode 1))
+
+(defun mindstream-end-session ()
+  "Begin a session at the current path."
+  (interactive)
+  (mindstream-session-mode 1))
+
 (defun mindstream-start-anonymous-session (&optional template)
   "Start a new anonymous session.
 
@@ -100,7 +110,9 @@ New sessions always start anonymous."
          (expand-file-name filename
                            base-path))
         (mindstream--initialize-buffer)
-        (rename-buffer (mindstream-anonymous-buffer-name))))))
+        (rename-buffer (mindstream-anonymous-buffer-name))
+        (mindstream-begin-session)
+        (current-buffer)))))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
