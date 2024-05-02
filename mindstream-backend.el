@@ -37,6 +37,8 @@
 
 ;;; Code:
 
+(require 'mindstream-custom)
+
 (defun mindstream--execute-shell-command (command &optional directory)
   "Execute shell COMMAND at DIRECTORY.
 
