@@ -44,6 +44,17 @@
 (require 'mindstream-session)
 (require 'mindstream-util)
 
+(defvar mindstream-active-sessions nil
+  "A set of active sessions.
+
+Sessions are just paths to git repos. A path being an \"active
+session\" means that any and all changes made at that path to
+git-tracked files will be versioned if they pull any
+`mindstream-triggers`.
+
+For now, this is implemented as a list for simplicity, since the
+number of active sessions is likely to be small.")
+
 (defvar-local mindstream-live-timer nil
   "A timer used to execute a periodic action in \"live mode\".
 
@@ -59,24 +70,19 @@ can be retrieved and canceled when you leave live mode.")
   :keymap
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c , n") #'mindstream-new)
-    (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
     (define-key mindstream-map (kbd "C-c , b") #'mindstream-enter-anonymous-session)
+    (define-key mindstream-map (kbd "C-c , m") #'mindstream-begin-session)
+    (define-key mindstream-map (kbd "C-c , q") #'mindstream-end-session)
+    (define-key mindstream-map (kbd "C-c , s") #'mindstream-save-session)
+    (define-key mindstream-map (kbd "C-c , C-s") #'mindstream-save-session)
+    (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
+    (define-key mindstream-map (kbd "C-c , C-l") #'mindstream-go-live)
+    (define-key mindstream-map (kbd "C-c , C-o") #'mindstream-go-offline)
+
     mindstream-map)
   (if mindstream-mode
       (mindstream-initialize)
     (mindstream-disable)))
-
-;;;###autoload
-(define-minor-mode mindstream-session-mode
-  "Minor mode providing keybindings in active mindstream sessions."
-  :lighter " mindstream-session"
-  :keymap
-  (let ((mindstream-session-map (make-sparse-keymap)))
-    (define-key mindstream-session-map (kbd "C-c , s") #'mindstream-save-session)
-    (define-key mindstream-session-map (kbd "C-c , C-s") #'mindstream-save-session)
-    (define-key mindstream-session-map (kbd "C-c , C-l") #'mindstream-go-live)
-    (define-key mindstream-session-map (kbd "C-c , C-o") #'mindstream-go-offline)
-    mindstream-session-map))
 
 (defun mindstream--end-anonymous-session (&optional major-mode-to-use)
   "End the current anonymous session.
@@ -91,7 +97,9 @@ affect a named session that you may happen to be visiting."
         ;; if there are unsaved changes
         (mindstream--iterate)
         ;; then kill it
-        (kill-buffer)))))
+        (kill-buffer)
+        ;; end the anonymous session
+        (mindstream-end-session)))))
 
 (defun mindstream--infer-major-mode-for-template (template)
   "Infer the starting major mode for the TEMPLATE."
@@ -164,7 +172,7 @@ session iteration."
 
 (defun mindstream--call-live-action ()
   "Call configured live action for major mode."
-  (when (and mindstream-session-mode
+  (when (and (mindstream-session-p)
              (boundp 'mindstream-live-timer)
              mindstream-live-timer)
     (let ((action (plist-get mindstream-live-action
@@ -186,7 +194,7 @@ session iteration."
 
 (defun mindstream--reset-live-timer (_beg _end _len)
   "Reset the live timer."
-  (when mindstream-session-mode
+  (when (mindstream-session-p)
     (mindstream--cancel-live-timer)
     (mindstream--start-live-timer)))
 
@@ -221,7 +229,7 @@ the last persistent state.  Otherwise, it takes no action.
 ORIG-FN is the original function invoked, and ARGS are the arguments
 in that invocation."
   (let ((result (apply orig-fn args)))
-    (when mindstream-session-mode
+    (when (mindstream-session-p)
       (mindstream--iterate))
     result))
 
@@ -245,7 +253,7 @@ path, then the session will be saved at that path using its current
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  (unless mindstream-session-mode
+  (unless (mindstream-session-p)
     (error "Not a mindstream buffer!"))
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.

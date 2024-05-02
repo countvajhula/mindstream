@@ -84,12 +84,18 @@ indicating a file for the template in `mindstream-starting-file'."
 (defun mindstream-begin-session ()
   "Begin a session at the current path."
   (interactive)
-  (mindstream-session-mode 1))
+  (push default-directory mindstream-active-sessions))
 
 (defun mindstream-end-session ()
   "Begin a session at the current path."
   (interactive)
-  (mindstream-session-mode 1))
+  (setq mindstream-active-sessions
+        (remove default-directory mindstream-active-sessions)))
+
+(defun mindstream-session-p (&optional path)
+  "Predicate to check whether PATH is an active session."
+  (let ((path (or path default-directory)))
+    (member path mindstream-active-sessions)))
 
 (defun mindstream-start-anonymous-session (&optional template)
   "Start a new anonymous session.
