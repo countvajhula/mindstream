@@ -118,11 +118,11 @@ As each Mindstream session uses a specific major mode, it inherits all of the cu
 
 For instance, one common use of Mindstream is as a scratch buffer with Racket Mode. Racket Mode users sometimes `like to have a dedicated REPL <https://racket-mode.com/#Edit-buffers-and-REPL-buffers>`__ to view the output of code they write in a particular buffer, instead of reusing a REPL shared across all buffers. If you're a Racket Mode user, whatever customization you've chosen here would apply to Mindstream session buffers just as they would any buffer, and your Racket Mode sessions may or may not have a dedicated REPL depending on how you've customized this for Racket Mode generally.
 
-But if you happen to want to use a different customization for Mindstream session buffers in a certain major mode than you prefer generally for that major mode, advising the ``mindstream-start-session`` function could be one way to achieve that. For instance, for the customization we have been talking about:
+But if you happen to want to use a different customization for Mindstream session buffers in a certain major mode than you prefer generally for that major mode, advising the ``mindstream-start-anonymous-session`` function could be one way to achieve that. For instance, for the customization we have been talking about:
 
 .. code-block:: elisp
 
-  (advice-add 'mindstream-start-session
+  (advice-add 'mindstream-start-anonymous-session
               :after
               (lambda (&rest _args)
                 (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")))

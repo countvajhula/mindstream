@@ -108,7 +108,7 @@ This also begins a new session."
   (mindstream--end-anonymous-session
    (mindstream--infer-major-mode-for-template template))
   ;; start a new session (sessions always start anonymous)
-  (let ((buf (mindstream-start-session template)))
+  (let ((buf (mindstream-start-anonymous-session template)))
     ;; (ab initio) iterate
     (with-current-buffer buf
       (mindstream-session-mode 1)
