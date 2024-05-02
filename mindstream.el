@@ -258,20 +258,21 @@ you would typically want to specify a new, non-existent folder."
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.
   (let* ((original-session-name (mindstream--session-name))
-         (buffer-file (buffer-file-name))
+         (file (file-name-nondirectory (buffer-file-name)))
+         (dir (file-name-directory (buffer-file-name)))
          (named (not (file-directory-p dest-dir))))
     ;; ensure no unsaved changes
     ;; note: this is a no-op if save-buffer is a trigger for iteration
     (mindstream--iterate)
     ;; TODO: verify behavior with existing vs non-existent containing folder
-    (copy-directory (file-name-directory buffer-file)
-                    dest-dir)
+    (copy-directory dir dest-dir)
     (mindstream--end-anonymous-session)
     (if named
-        (mindstream-load-session dest-dir)
+        (mindstream-load-session dest-dir file)
       (mindstream-load-session
        (mindstream--joindirs dest-dir
-                             original-session-name)))))
+                             original-session-name)
+       file))))
 
 (defun mindstream--session-file-p (file)
   "Predicate to identify whether FILE is a Mindstream session file."
@@ -280,25 +281,30 @@ you would typically want to specify a new, non-existent folder."
            mindstream-filename)
    file))
 
-(defun mindstream-load-session (dir)
+(defun mindstream-load-session (dir &optional file)
   "Load a previously saved session.
 
-DIR is the directory containing the session."
+DIR is the directory containing the session. If FILE is specified, it
+will be opened upon loading the session. Otherwise, follow the default
+protocol for selecting a file, including, if necessary, prompting for
+the file to be opened."
   (interactive (list (read-directory-name "Load session: "
                                           mindstream-save-session-path
                                           nil
                                           t
                                           "")))
-  (let* ((files (mindstream--directory-files dir))
-         (filename (if (and files (= 1 (length files)))
-                       (expand-file-name (car files)
-                                         dir)
-                     (read-file-name "Which file? "
-                                     dir
-                                     nil
-                                     t
-                                     ""))))
-    (find-file filename)
+  (let ((file (if file
+                  (expand-file-name file dir)
+                (let* ((files (mindstream--directory-files dir))
+                       (file (if (and files (= 1 (length files)))
+                                 (expand-file-name (car files)
+                                                   dir)
+                               (read-file-name "Which file? "
+                                               dir
+                                               nil
+                                               t
+                                               ""))))))))
+    (find-file file)
     (mindstream-begin-session)))
 
 (defun mindstream--get-or-create-session ()
