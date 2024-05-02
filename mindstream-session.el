@@ -59,6 +59,13 @@ number of active sessions is likely to be small.")
             "-"
             (sha1 (format "%s" time)))))
 
+(defun mindstream--session-file-p (file)
+  "Predicate to identify whether FILE is a Mindstream session file."
+  (string-match-p
+   (concat "^"
+           mindstream-filename)
+   file))
+
 (defun mindstream--session-file-for-template (template)
   "Get the name of the session file for TEMPLATE.
 

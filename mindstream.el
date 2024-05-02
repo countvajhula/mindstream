@@ -263,13 +263,6 @@ you would typically want to specify a new, non-existent folder."
                              original-session-name)
        file))))
 
-(defun mindstream--session-file-p (file)
-  "Predicate to identify whether FILE is a Mindstream session file."
-  (string-match-p
-   (concat "^"
-           mindstream-filename)
-   file))
-
 (defun mindstream-load-session (dir &optional file)
   "Load a previously saved session.
 
