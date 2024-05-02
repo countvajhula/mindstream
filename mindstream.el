@@ -284,15 +284,15 @@ the file to be opened."
                                           "")))
   (let ((file (if file
                   (expand-file-name file dir)
-                (let* ((files (mindstream--directory-files dir))
-                       (file (if (and files (= 1 (length files)))
-                                 (expand-file-name (car files)
-                                                   dir)
-                               (read-file-name "Which file? "
-                                               dir
-                                               nil
-                                               t
-                                               ""))))))))
+                (let ((files (mindstream--directory-files dir)))
+                  (if (and files (= 1 (length files)))
+                      (expand-file-name (car files)
+                                        dir)
+                    (read-file-name "Which file? "
+                                    dir
+                                    nil
+                                    t
+                                    ""))))))
     (find-file file)
     (mindstream-begin-session)))
 
