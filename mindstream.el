@@ -44,17 +44,6 @@
 (require 'mindstream-session)
 (require 'mindstream-util)
 
-(defvar mindstream-active-sessions nil
-  "A set of active sessions.
-
-Sessions are just paths to git repos. A path being an \"active
-session\" means that any and all changes made at that path to
-git-tracked files will be versioned if they pull any
-`mindstream-triggers`.
-
-For now, this is implemented as a list for simplicity, since the
-number of active sessions is likely to be small.")
-
 (defvar-local mindstream-live-timer nil
   "A timer used to execute a periodic action in \"live mode\".
 

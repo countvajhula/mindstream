@@ -41,6 +41,17 @@
 (require 'mindstream-backend)
 (require 'mindstream-util)
 
+(defvar mindstream-active-sessions nil
+  "A set of active sessions.
+
+Sessions are just paths to git repos. A path being an \"active
+session\" means that any and all changes made at that path to
+git-tracked files will be versioned if they pull any
+`mindstream-triggers`.
+
+For now, this is implemented as a list for simplicity, since the
+number of active sessions is likely to be small.")
+
 (defun mindstream--unique-name ()
   "Generate a unique name."
   (let ((time (current-time)))
