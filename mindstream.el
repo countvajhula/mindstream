@@ -114,9 +114,9 @@ This also begins a new session."
 (defun mindstream-new (template)
   "Start a new anonymous session.
 
-This creates a new scratch buffer using the specified TEMPLATE, and
-begins a new session that records a new version every time you save
-the buffer.  The session is anonymous so you don't have to name it up
+This creates a new directory using the specified TEMPLATE, and begins
+a new session that records a new version every time you save the
+buffer.  The session is anonymous so you don't have to name it up
 front, and if you decide you want to keep it around, you can save the
 session at any time and give it a name then.
 

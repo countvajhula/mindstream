@@ -40,7 +40,7 @@
 (defvar mindstream--user-home-directory (getenv "HOME"))
 
 (defgroup mindstream nil
-  "A scratch buffer."
+  "A versioned freewriting session."
   :group 'Editing)
 
 (defcustom mindstream-path
