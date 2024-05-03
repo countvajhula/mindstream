@@ -212,6 +212,11 @@ Remember that the path we are configuring here is for *anonymous sessions* only.
    (concat (file-name-as-directory (getenv "HOME"))
            "my/mindstream/sessions/path"))
 
+Organizing Sessions
+-------------------
+
+Over time, you may want to rename some sessions, delete others, or reorganize them in some way so you can keep track of them more easily. What special features does Mindstream provide for this? *None*! Remember, Mindstream sessions are just *ordinary folders* containing *ordinary Git repositories*. You can use normal Emacs or shell tools to rename, delete, organize them as you see fit, and you would still be able to load them in Mindstream as usual (once you navigate to what may be their new locations).
+
 Acknowledgements
 ================
 
