@@ -1,4 +1,4 @@
-;;; mindstream-custom.el --- Scratch buffer sessions -*- lexical-binding: t -*-
+;;; mindstream-custom.el --- Start writing, stay focused, don't worry. -*- lexical-binding: t -*-
 
 ;; URL: https://github.com/countvajhula/mindstream
 
