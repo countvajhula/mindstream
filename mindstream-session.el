@@ -44,7 +44,7 @@
 (defvar mindstream-active-sessions nil
   "A set of active sessions.
 
-Sessions are just paths to git repos. A path being an \"active
+Sessions are just paths to git repos.  A path being an \"active
 session\" means that any and all changes made at that path to
 git-tracked files will be versioned if they pull any
 `mindstream-triggers`.

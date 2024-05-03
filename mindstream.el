@@ -232,12 +232,14 @@ This is simply the name of the containing folder."
    "^.*/"))
 
 (defun mindstream-save-session (dest-dir)
-  "Save the current scratch session to a directory.
+  "Save the current session to a permanent location.
 
 If DEST-DIR is a non-existent path, it will be used as the name of a
 new directory that will contain the session.  If it is an existing
 path, then the session will be saved at that path using its current
-\(e.g. randomly generated) name as the name of the saved session folder.
+name as the name of the saved session folder.  Note that if you are
+saving an anonymous session, its original name is a randomly generated
+identifier.
 
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
@@ -266,8 +268,8 @@ you would typically want to specify a new, non-existent folder."
 (defun mindstream-load-session (dir &optional file)
   "Load a previously saved session.
 
-DIR is the directory containing the session. If FILE is specified, it
-will be opened upon loading the session. Otherwise, follow the default
+DIR is the directory containing the session.  If FILE is specified, it
+will be opened upon loading the session.  Otherwise, follow the default
 protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
   (interactive (list (read-directory-name "Load session: "
