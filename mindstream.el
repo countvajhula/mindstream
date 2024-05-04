@@ -85,10 +85,10 @@ affect a named session that you may happen to be visiting."
         ;; first write the existing scratch buffer
         ;; if there are unsaved changes
         (mindstream--iterate)
-        ;; then kill it
-        (kill-buffer)
         ;; end the anonymous session
-        (mindstream-end-session)))))
+        (mindstream-end-session)
+        ;; then kill it
+        (kill-buffer)))))
 
 (defun mindstream--infer-major-mode-for-template (template)
   "Infer the starting major mode for the TEMPLATE."
