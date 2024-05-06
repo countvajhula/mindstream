@@ -1,6 +1,7 @@
 ;; Modified from flycheck build scripts at: https://github.com/flycheck/flycheck/
 
 (require 'subr-x)
+(require 'seq)
 
 (defun flycheck/checkdoc-get-current-errors ()
   "Get the current checkdoc errors.
