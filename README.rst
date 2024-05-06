@@ -1,6 +1,10 @@
 .. image:: https://github.com/countvajhula/mindstream/actions/workflows/test.yml/badge.svg
     :target: https://github.com/countvajhula/mindstream/actions
 
+.. image:: https://melpa.org/packages/mindstream-badge.svg
+    :alt: MELPA
+    :target: https://melpa.org/#/mindstream
+
 mindstream
 ==========
 
@@ -19,20 +23,17 @@ Typical uses of this package are for early stages of prototyping in a software p
 Installation
 ============
 
-This package isn't on `MELPA <https://melpa.org/>`_ yet, but you can install a pre-release version using `straight.el <https://github.com/raxod502/straight.el>`_ by putting this somewhere in your :code:`.emacs.d`:
+Mindstream is on `MELPA <https://melpa.org/>`_, so you can install it in the usual way (either via `Straight.el <https://github.com/radian-software/straight.el>`_ (recommended) or Emacs's built-in package.el), assuming you have MELPA in your configured list of package archives.
+
+Place the following config somewhere in your ``.emacs.d``:
 
 .. code-block:: elisp
 
   (use-package mindstream
-    :straight
-    (mindstream
-      :type git
-      :host github
-      :repo "countvajhula/mindstream")
     :config
     (mindstream-mode))
 
-``(mindstream-mode)`` here initializes the package, providing global keybindings that allow you to enter Mindstream sessions from anywhere.
+``(mindstream-mode)`` initializes the package, providing global keybindings that allow you to enter Mindstream sessions from anywhere, and registering hooks that allow sessions to be versioned when buffers are saved.
 
 Usage
 =====
