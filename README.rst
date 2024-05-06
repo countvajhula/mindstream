@@ -1,4 +1,4 @@
-.. image:: https://github.com/countvajhula/mindstream/actions/workflows/test.yml/badge.svg
+.. image:: https://github.com/countvajhula/mindstream/actions/workflows/melpazoid.yml/badge.svg
     :target: https://github.com/countvajhula/mindstream/actions
 
 .. image:: https://melpa.org/packages/mindstream-badge.svg
