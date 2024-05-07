@@ -102,7 +102,7 @@ indicating a file for the template in `mindstream-starting-file'."
   (push default-directory mindstream-active-sessions))
 
 (defun mindstream-end-session ()
-  "Begin a session at the current path."
+  "End the session at the current path."
   (interactive)
   (setq mindstream-active-sessions
         (remove default-directory mindstream-active-sessions)))
