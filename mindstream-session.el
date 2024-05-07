@@ -101,11 +101,15 @@ indicating a file for the template in `mindstream-starting-file'."
   (interactive)
   (push default-directory mindstream-active-sessions))
 
-(defun mindstream-end-session ()
-  "End the session at the current path."
-  (interactive)
+(defun mindstream-end-session (session)
+  "End SESSION.
+
+This only removes implicit versioning. It does not close any open
+buffers at the SESSION path."
+  (interactive (list (completing-read "Which session? "
+                                      mindstream-active-sessions)))
   (setq mindstream-active-sessions
-        (remove default-directory mindstream-active-sessions)))
+        (remove session mindstream-active-sessions)))
 
 (defun mindstream-session-p (&optional path)
   "Predicate to check whether PATH is an active session."
