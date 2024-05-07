@@ -107,7 +107,11 @@ indicating a file for the template in `mindstream-starting-file'."
 This only removes implicit versioning. It does not close any open
 buffers at the SESSION path."
   (interactive (list (completing-read "Which session? "
-                                      mindstream-active-sessions)))
+                                      mindstream-active-sessions
+                                      (lambda (session)
+                                        (not
+                                         (string-prefix-p mindstream-path
+                                                          session))))))
   (setq mindstream-active-sessions
         (remove session mindstream-active-sessions)))
 
