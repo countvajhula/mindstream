@@ -1,9 +1,6 @@
 ;;; mindstream-backend.el --- Start writing, stay focused, don't worry -*- lexical-binding: t -*-
 
-;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
-;; Version: 0.0
-;; Keywords: convenience, files, languages, outlines, tools, vc, wp
 
 ;; This work is "part of the world." You are free to do whatever you
 ;; like with it and it isn't owned by anybody, not even the creators.
