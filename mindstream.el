@@ -2,7 +2,7 @@
 
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
-;; Version: 0.0
+;; Version: 1.0
 ;; Package-Requires: ((emacs "25.1") (magit "3.3.0"))
 ;; Keywords: convenience, files, languages, outlines, tools, vc, wp
 
