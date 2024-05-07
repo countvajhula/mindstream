@@ -20,8 +20,6 @@ Every mindstream session begins from a template (an ordinary folder) that you pr
 
 Typical uses of this package are for early stages of prototyping in a software project, or for exploratory programming to understand a new idea, tool, or technology. It's also great for just taking quick notes or freewriting blog posts or content in authoring settings in general.
 
-.. contents::
-
 Installation
 ============
 
