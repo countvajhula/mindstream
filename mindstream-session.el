@@ -155,6 +155,11 @@ If NAME isn't provided, use the default template."
   (mindstream--joindirs mindstream-template-path
                         (or name mindstream-default-template)))
 
+(defun mindstream--ensure-anonymous-path ()
+  "Ensure that the anonymous session path exists."
+  (unless (file-directory-p mindstream-path)
+    (mkdir mindstream-path t)))
+
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   (unless (file-directory-p mindstream-template-path)

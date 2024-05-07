@@ -147,6 +147,7 @@ version for!), it's possible that you might want to iterate the
 session at a coarser granularity than every save. In that case, you
 can customize `mindstream-triggers' and add the function(s) that
 should trigger session iteration (and remove `save-buffer')."
+  (mindstream--ensure-anonymous-path)
   (mindstream--ensure-templates-exist)
   (dolist (fn mindstream-triggers)
     (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
