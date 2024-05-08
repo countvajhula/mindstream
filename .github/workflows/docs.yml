@@ -1,0 +1,38 @@
+name: docs
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**.scrbl'
+      - '.github/workflows/docs.yml'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  deploy-docs:
+    runs-on: ubuntu-latest
+    name: Build and deploy Mindstream documentation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Install Racket
+        uses: Bogdanp/setup-racket@v1.10
+        with:
+          architecture: 'x64'
+          distribution: 'full'
+          variant: 'CS'
+          version: 'stable'
+      - name: Install Documentation and its Dependencies
+        run: make install-docs
+      - name: Build docs for hosting
+        run: make build-docs
+      - name: Push to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
+        with:
+          folder: doc/output
+          branch: gh-pages
+          clean: true
