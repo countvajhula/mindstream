@@ -99,7 +99,8 @@ indicating a file for the template in `mindstream-starting-file'."
 (defun mindstream-begin-session ()
   "Begin a session at the current path."
   (interactive)
-  (push default-directory mindstream-active-sessions))
+  (push default-directory mindstream-active-sessions)
+  (message "Session started at %s." default-directory))
 
 (defun mindstream-end-session (session)
   "End SESSION.
@@ -113,7 +114,8 @@ buffers at the SESSION path."
                                          (string-prefix-p mindstream-path
                                                           session))))))
   (setq mindstream-active-sessions
-        (remove session mindstream-active-sessions)))
+        (remove session mindstream-active-sessions))
+  (message "Session %s ended." session))
 
 (defun mindstream-session-p (&optional path)
   "Predicate to check whether PATH is an active session."
