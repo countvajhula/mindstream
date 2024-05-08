@@ -36,16 +36,16 @@ help:
 	@echo "docs - view documentation in a browser"
 
 install-docs:
-	raco pkg install --deps search-auto -n $(PACKAGE-NAME) --link doc
+	raco pkg install --deps search-auto -n $(PACKAGE-NAME) --link $(DOCS-PATH)
 
 remove-docs:
 	raco pkg remove $(PACKAGE-NAME)
 
 build-docs:
-	scribble ++style doc/mindstream.css --htmls --dest doc --dest-name output doc/mindstream.scrbl
+	scribble ++style $(DOCS-PATH)/mindstream.css --htmls --dest $(DOCS-PATH) --dest-name output $(DOCS-PATH)/mindstream.scrbl
 
 docs: build-docs
-	open doc/output/index.html
+	open $(DOCS-PATH)/output/index.html
 
 clean :
 	${CASK} clean-elc
