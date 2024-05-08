@@ -3,6 +3,11 @@
 # Source: https://stackoverflow.com/a/27132934/323874
 THIS_FILE := $(lastword $(MAKEFILE_LIST))
 
+SHELL=/bin/bash
+
+PACKAGE-NAME=mindstream
+DOCS-PATH=doc
+
 EMACS=emacs
 CASK ?= cask
 
@@ -25,6 +30,22 @@ help:
 	@echo "checkdoc - check docstrings"
 	@echo "build - byte compile the package"
 	@echo "test - run tests"
+	@echo "install-docs - Install dependencies for building the documentation"
+	@echo "remove-docs - Uninstall docs package"
+	@echo "build-docs - Build self-contained documentation that could be hosted somewhere"
+	@echo "docs - view documentation in a browser"
+
+install-docs:
+	raco pkg install --deps search-auto -n $(PACKAGE-NAME) --link doc
+
+remove-docs:
+	raco pkg remove $(PACKAGE-NAME)
+
+build-docs:
+	scribble ++style doc/mindstream.css --htmls --dest doc --dest-name output doc/mindstream.scrbl
+
+docs: build-docs
+	open doc/output/index.html
 
 clean :
 	${CASK} clean-elc
@@ -60,4 +81,4 @@ build :
 test: build
 	${CASK} exec ert-runner
 
-.PHONY:	help lint lint+less lint-no-noise lint-noiseless checkdoc build clean install test
+.PHONY:	help lint lint+less lint-no-noise lint-noiseless checkdoc build clean install test install-docs remove-docs build-docs docs

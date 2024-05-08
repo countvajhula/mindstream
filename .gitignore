@@ -6,3 +6,7 @@
 .cask
 *.elc
 dist
+
+# Docs compiled files and output
+doc/compiled
+doc/output
