@@ -48,6 +48,11 @@ Save the file at your regular cadence after making a few changes to it. If you p
 
 You may notice that there is only one template available to use for your first session. This is because Mindstream creates a simple text template in ``~/.emacs.d/mindstream/templates/`` if it doesn't find any there. You may want to add more templates that are relevant for you. Learn how to do that (and much more) in the `Mindstream documentation <https://countvajhula.github.io/mindstream/>`_.
 
+Documentation
+=============
+
+`Mindstream documentation <https://countvajhula.github.io/mindstream/>`_.
+
 Acknowledgements
 ================
 
