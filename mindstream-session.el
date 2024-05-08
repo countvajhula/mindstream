@@ -49,6 +49,8 @@ git-tracked files will be versioned if they pull any
 For now, this is implemented as a list for simplicity, since the
 number of active sessions is likely to be small.")
 
+(defvar mindstream-session-history nil)
+
 (defun mindstream--unique-name ()
   "Generate a unique name."
   (let ((time (current-time)))
@@ -100,6 +102,7 @@ indicating a file for the template in `mindstream-starting-file'."
   "Begin a session at the current path."
   (interactive)
   (push default-directory mindstream-active-sessions)
+  (add-to-list 'mindstream-session-history default-directory)
   (message "Session started at %s." default-directory))
 
 (defun mindstream-end-session (&optional session)
@@ -128,7 +131,7 @@ buffers at the SESSION path."
   (let ((path (or path default-directory)))
     (member path mindstream-active-sessions)))
 
-(defun mindstream-start-anonymous-session (&optional template)
+(defun mindstream-start-anonymous-session (&optional session-file)
   "Start a new anonymous session.
 
 This creates a new directory and Git repository for the new session
@@ -138,11 +141,14 @@ Otherwise, it uses the configured default template.
 New sessions always start anonymous."
   (let* ((session (mindstream--unique-name))
          (base-path (mindstream--generate-anonymous-session-path session))
-         (template (or template mindstream-default-template)))
+         (template (or (file-name-directory session-file)
+                       mindstream-default-template)))
     (unless (file-directory-p base-path)
       (copy-directory template base-path)
       (mindstream-backend-initialize base-path)
-      (let ((filename (mindstream--session-file-for-template template)))
+      (let ((filename
+             (or session-file
+                 (mindstream--session-file-for-template template))))
         (find-file
          (expand-file-name filename
                            base-path))
