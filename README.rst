@@ -51,7 +51,7 @@ You may notice that there is only one template available to use for your first s
 Documentation
 =============
 
-`Mindstream documentation <https://countvajhula.github.io/mindstream/>`_.
+`Mindstream documentation <https://countvajhula.github.io/mindstream/>`_
 
 Acknowledgements
 ================
