@@ -42,7 +42,7 @@ Place the following config somewhere in your @code{.emacs.d}:
 
 Save the file at your regular cadence after making a few changes to it. If you pull up a Magit window, you'll notice that there is a distinct commit recorded in the underlying Git repo for your session each time that you saved the file. You can also create new files at the same path, and changes to any of them would also be similarly tracked.
 
-You may notice that there is only one template available to use for your first session. This is because Mindstream creates a simple text template at @code{~/.mindstream/templates/} if it doesn't find any there. You may want to add more templates that are relevant for you. Let's see how to do that.
+You may notice that there is only one template available to use for your first session. This is because Mindstream creates a simple text template in @code{~/.emacs.d/mindstream/templates/} if it doesn't find any there. You may want to add more templates that are relevant for you. Let's see how to do that.
 
 @subsection{Adding New Session Templates}
 
