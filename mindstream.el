@@ -44,6 +44,9 @@
 (require 'mindstream-session)
 (require 'mindstream-util)
 
+(defvar mindstream-template-history nil
+  "History of previously selected templates for use with `completing-read'.")
+
 (defvar-local mindstream-live-timer nil
   "A timer used to execute a periodic action in \"live mode\".
 
@@ -111,7 +114,7 @@ This also begins a new session."
       (mindstream--iterate))
     buf))
 
-(defun mindstream-new (template)
+(defun mindstream-new (&optional template)
   "Start a new anonymous session.
 
 This creates a new directory using the specified TEMPLATE, and begins
@@ -124,13 +127,20 @@ Even though you don't name the session when you begin, it is
 still saved on disk from the beginning, with a randomly-generated
 name, in a dedicated Git version-controlled folder at
 `mindstream-path', which you can customize."
-  (interactive (list (read-directory-name "Which template? "
-                                          mindstream-template-path
-                                          nil
-                                          t
-                                          "")))
-  (let ((buf (mindstream--new template)))
-    (switch-to-buffer buf)))
+  (interactive)
+  (let ((template (or template (mindstream--completing-read-template))))
+    (switch-to-buffer (mindstream--new template))))
+
+(defun mindstream--completing-read-template ()
+  "Completion for template."
+  (let* ((files (directory-files
+                 mindstream-template-path
+                 nil
+                 directory-files-no-dot-files-regexp))
+         (template
+          (completing-read "Which template? " files nil t nil
+                           'mindstream-template-history)))
+    (mindstream--joindirs mindstream-template-path template)))
 
 (defun mindstream-initialize ()
   "Do any setup that's necessary for Mindstream.
