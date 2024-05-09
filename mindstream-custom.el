@@ -84,14 +84,6 @@
                 :value-type function)
   :group 'mindstream)
 
-(defcustom mindstream-starting-file nil
-  "The file to start the session, for each template.
-
-If no file is specified for a template, defaults to `mindstream-file'."
-  :type '(plist :key-type string
-                :value-type string)
-  :group 'mindstream)
-
 (defcustom mindstream-preferred-template nil
   "The preferred template for each major mode.
 
@@ -103,11 +95,6 @@ same extension, you may prefer to indicate which one is \"preferred\"
 for the major mode so that it would be selected."
   :type '(plist :key-type symbol
                 :value-type function)
-  :group 'mindstream)
-
-(defcustom mindstream-filename "scratch"
-  "Filename to use for mindstream buffers."
-  :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-anonymous-buffer-prefix "scratch"

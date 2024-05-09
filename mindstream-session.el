@@ -49,6 +49,8 @@ git-tracked files will be versioned if they pull any
 For now, this is implemented as a list for simplicity, since the
 number of active sessions is likely to be small.")
 
+(defvar mindstream-session-file-history nil)
+
 (defvar mindstream-session-history nil)
 
 (defun mindstream--unique-name ()
@@ -58,45 +60,16 @@ number of active sessions is likely to be small.")
             "-"
             (sha1 (format "%s" time)))))
 
-(defun mindstream--session-file-p (file)
-  "Predicate to identify whether FILE is a Mindstream session file."
-  (string-match-p
-   (concat "^"
-           mindstream-filename)
-   file))
+(defun mindstream--starting-file-for-session (dir)
+  "Select an appropriate starting file for a session.
 
-(defun mindstream--session-file-for-template (template)
-  "Get the name of the session file for TEMPLATE.
-
-This defaults to `mindstream-filename' but can be overridden by
-indicating a file for the template in `mindstream-starting-file'."
-  (let ((template-name (mindstream--directory-name template)))
-    (let ((session-file
-           (or (let ((file (lax-plist-get mindstream-starting-file
-                                          template-name)))
-                 (when file
-                   (unless (file-exists-p (expand-file-name file
-                                                            template))
-                     (error "Starting file %s for %s template not found"
-                            file
-                            template-name))
-                   file))
-               (seq-find #'mindstream--session-file-p
-                         (directory-files template
-                                          nil
-                                          directory-files-no-dot-files-regexp))
-               (let ((files (mindstream--directory-files template)))
-                 ;; if there's only one file, use it
-                 (and files (= 1 (length files)) (car files)))
-               (error
-                ;; We must either raise an error here or support
-                ;; more than one anonymous session per major mode
-                ;; and have `mindstream-enter-anonymous-session' use MRU.
-                ;; For now, raise an error.
-                (concat "More than one file present in template. "
-                        "Please indicate a starting file for the session "
-                        " by customizing `mindstream-starting-file'.")))))
-      session-file)))
+DIR is expected to be a path to an existing folder."
+  (let ((files (mindstream--directory-files-recursively dir)))
+    (if (and files (= 1 (length files)))
+        (car files)
+      (completing-read "Which file? "
+                       files nil t nil
+                       mindstream-session-file-history))))
 
 (defun mindstream-begin-session ()
   "Begin a session at the current path."

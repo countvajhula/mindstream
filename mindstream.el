@@ -53,8 +53,6 @@
 This is stored as a local variable in the session buffer so that it
 can be retrieved and canceled when you leave live mode.")
 
-(defvar mindstream-template-file-history nil)
-
 ;;;###autoload
 (define-minor-mode mindstream-mode
   "Minor mode providing global keybindings for mindstream mode."
