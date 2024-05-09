@@ -285,16 +285,15 @@ will be opened upon loading the session.  Otherwise, follow the default
 protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
   (interactive (list ;; TODO: use completing-read-session
-                (read-directory-name "Load session: "
-                                     mindstream-save-session-path
-                                     nil
-                                     t
-                                     "")))
+                (mindstream--completing-read-session)))
   (let ((file (or file
                   (mindstream--starting-file-for-session dir))))
-    (find-file
-     (expand-file-name file
-                       dir))
+    (find-file file)
+    ;; `expand-file-name' appears to be redundant as
+    ;; `mindstream--directory-files-recursively' uses
+    ;; `directory-files-recursively', which returns file name in its
+    ;; absolute form.
+    ;; (expand-file-name file dir))
     (mindstream-begin-session)))
 
 (defun mindstream--completing-read-session ()
