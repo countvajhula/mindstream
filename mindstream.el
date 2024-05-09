@@ -53,7 +53,6 @@
 This is stored as a local variable in the session buffer so that it
 can be retrieved and canceled when you leave live mode.")
 
-(defvar mindstream-template-history nil)
 (defvar mindstream-template-file-history nil)
 
 ;;;###autoload
