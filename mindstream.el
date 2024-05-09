@@ -312,7 +312,12 @@ the file to be opened."
             ;; It's probably also good to delete sub-directories of
             ;; anon. There will be too many.
             (mapcar #'expand-file-name)
-            (delete-dups)))
+            (delete-dups)
+            (mapcar (lambda (d)
+                      (if (string-match-p
+                           (expand-file-name mindstream-save-session-path) d)
+                          (file-relative-name d mindstream-save-session-path)
+                        (identity d))))))
          (dir (completing-read "Which session? " dirs nil t nil
                                'mindstream-session-history)))
     ;; Return directory name
