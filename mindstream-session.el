@@ -75,7 +75,8 @@ DIR is expected to be a path to an existing folder."
   "Begin a session at the current path."
   (interactive)
   (push default-directory mindstream-active-sessions)
-  (add-to-list 'mindstream-session-history default-directory)
+  (add-to-list 'mindstream-session-history
+               (mindstream--session-file-name-relative default-directory))
   (message "Session started at %s." default-directory))
 
 (defun mindstream-end-session (&optional session)
