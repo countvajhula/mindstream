@@ -76,6 +76,16 @@ platform-appropriate way.
               (directory-files dir
                                nil)))
 
+(defun mindstream--directory-files-recursively (dir)
+  "List files in DIR that aren't hidden or special."
+  ;; TODO: exclude files that aren't versioned by Git
+  (directory-files-recursively dir
+                               directory-files-no-dot-files-regexp
+                               nil
+                               ;; Exclude dotfiles
+                               (lambda (f)
+                                 (not (string-match-p "/\\." f)))))
+
 (defun mindstream--directory-name (path)
   "The name of the directory at PATH."
   (file-name-nondirectory

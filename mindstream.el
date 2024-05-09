@@ -109,29 +109,17 @@ For example:
     (cons template filename)))
 
 (defun mindstream--completing-read-template ()
-  "Return session-file via completion for template."
-  (let* ((dirs (seq-filter #'file-directory-p
-                (directory-files mindstream-template-path
-                                 :full directory-files-no-dot-files-regexp)))
-         (templates-alist (mapcar #'mindstream--full-filename-to-alist dirs))
-         (template (completing-read "Which template? " templates-alist nil t nil
-                                    'mindstream-template-history
-                                    'mindstream-default-template))
-         (template-dir (cdr (assoc-string template templates-alist)))
-         (files-in-template-dir
-          (directory-files-recursively
-           template-dir
-           directory-files-no-dot-files-regexp
-           nil
-           ;; Exclude dotfiles
-           (lambda (f) (not (string-match-p "/\\." f))))))
-    (if (and files-in-template-dir (= 1 (length files-in-template-dir)))
-        (car files-in-template-dir)
-      (completing-read "Which file? "
-                       files-in-template-dir nil t nil
-                       mindstream-template-file-history))))
+  "Completion for template."
+  (let* ((files (directory-files
+                 mindstream-template-path
+                 nil
+                 directory-files-no-dot-files-regexp))
+         (template
+          (completing-read "Which template? " files nil t nil
+                           'mindstream-template-history)))
+    (mindstream--build-path mindstream-template-path template)))
 
-(defun mindstream--new (session-file)
+(defun mindstream--new (template)
   "Start a new anonymous session using a specific TEMPLATE.
 
 This also begins a new session."
@@ -140,13 +128,13 @@ This also begins a new session."
   (mindstream--end-anonymous-session
    (mindstream--infer-major-mode-for-template session-file))
   ;; start a new session (sessions always start anonymous)
-  (let ((buf (mindstream-start-anonymous-session session-file)))
+  (let ((buf (mindstream-start-anonymous-session template)))
     ;; (ab initio) iterate
     (with-current-buffer buf
       (mindstream--iterate))
     buf))
 
-(defun mindstream-new (&optional template-file)
+(defun mindstream-new (&optional template)
   "Start a new anonymous session.
 
 This creates a new directory using the specified TEMPLATE, and begins
@@ -160,8 +148,8 @@ still saved on disk from the beginning, with a randomly-generated
 name, in a dedicated Git version-controlled folder at
 `mindstream-path', which you can customize."
   (interactive)
-  (let ((template-file (or template-file (mindstream--completing-read-template))))
-    (switch-to-buffer (mindstream--new template-file))))
+  (let ((template (or template (mindstream--completing-read-template))))
+    (switch-to-buffer (mindstream--new template))))
 
 (defun mindstream-initialize ()
   "Do any setup that's necessary for Mindstream.
@@ -297,26 +285,29 @@ you would typically want to specify a new, non-existent folder."
                                original-session-name)
        file))))
 
-(defun mindstream-load-session (&optional file)
+(defun mindstream-load-session (dir &optional file)
   "Load a previously saved session.
 
 DIR is the directory containing the session.  If FILE is specified, it
 will be opened upon loading the session.  Otherwise, follow the default
 protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
-  (interactive)
-  (let* ((dir (unless file (mindstream--completing-read-session)))
-         (file (if file
-                   (expand-file-name file dir)
-                 (let ((files (mindstream--directory-files dir)))
-                   (if (and files (= 1 (length files)))
-                       (expand-file-name (car files) dir)
-                     (read-file-name "Which file? " dir nil t ""))))))
-    (find-file file)
+  (interactive (list ;; TODO: use completing-read-session
+                (read-directory-name "Load session: "
+                                     mindstream-save-session-path
+                                     nil
+                                     t
+                                     "")))
+  (let ((file (or file
+                  (mindstream--starting-file-for-session dir))))
+    (find-file
+     (expand-file-name file
+                       dir))
     (mindstream-begin-session)))
 
 (defun mindstream--completing-read-session ()
   "Return session-file via completion for template."
+  ;; would like this to return a folder
   (let* ((dirs
           (thread-last
             (directory-files-recursively
