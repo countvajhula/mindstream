@@ -61,12 +61,9 @@
   :type 'string
   :group 'mindstream)
 
-;; The default mindstream-save-session-path is the user home directory.
-;; This is too big for the directory files recursively used in
-;; `mindstream--completing-read-session'. A default of some other
-;; directory that is more contained is suggested.
-;; (setopt mindstream-save-session-path "~/.config/emacs/mindstream/")
-(defcustom mindstream-save-session-path mindstream--user-home-directory
+(defcustom mindstream-save-session-path
+  (mindstream--joindirs mindstream--user-home-directory
+                        "mindstream")
   "Default directory path for saving mindstream sessions."
   :type 'string
   :group 'mindstream)
