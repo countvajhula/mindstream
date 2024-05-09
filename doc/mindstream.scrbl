@@ -100,7 +100,7 @@ If you have an existing, ordinary file or directory that you were working on at 
   @item{Open the file in Emacs in the usual way and @keybinding{M-x mindstream-begin-session}.}
 ]
 
-Mindstream sessions are just ordinary Git repositories. If you wanted to, you could use Mindstream in any Git repo simply by @keybinding{M-x mindstream-begin-session} after opening a file in the repo, but this isn't a well-supported use case for the moment (e.g. it would result in a lot of commits, and you would most likely want to manually squash them).
+Mindstream sessions are just ordinary Git repositories. If you wanted to, you could use Mindstream in any Git repo simply by @keybinding{M-x mindstream-begin-session} after opening a file in the repo, but this isn't a well-supported use case for the moment (e.g. it would result in a lot of commits, and you would most likely want to manually squash them). For now, if you are interested in mindstreaming an existing repo, try out @hyperlink["https://github.com/countvajhula/mindstream/issues/9#issuecomment-2101439864"]{this workflow by Noboru Ota}.
 
 @subsection{Explore}
 
