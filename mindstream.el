@@ -296,8 +296,8 @@ you would typically want to specify a new, non-existent folder."
     (if named
         (mindstream-load-session dest-dir file)
       (mindstream-load-session
-       (mindstream--joindirs dest-dir
-                             original-session-name)
+       (mindstream--build-path dest-dir
+                               original-session-name)
        file))))
 
 (defun mindstream-load-session (&optional file)

@@ -167,15 +167,15 @@ New sessions always start anonymous."
 
 (defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."
-  (mindstream--joindirs mindstream-path
-                        session))
+  (mindstream--build-path mindstream-path
+                          session))
 
 (defun mindstream--template (&optional name)
   "Path to template NAME.
 
 If NAME isn't provided, use the default template."
-  (mindstream--joindirs mindstream-template-path
-                        (or name mindstream-default-template)))
+  (mindstream--build-path mindstream-template-path
+                          (or name mindstream-default-template)))
 
 (defun mindstream--ensure-anonymous-path ()
   "Ensure that the anonymous session path exists."
@@ -188,9 +188,9 @@ If NAME isn't provided, use the default template."
     (let ((default-template-dir (mindstream--template)))
       (mkdir default-template-dir t)
       (let ((template-file
-             (mindstream--joindirs default-template-dir
-                                   (concat mindstream-anonymous-buffer-prefix
-                                           ".txt"))))
+             (mindstream--build-path default-template-dir
+                                     (concat mindstream-anonymous-buffer-prefix
+                                             ".txt"))))
         (let ((buf (generate-new-buffer "default-template")))
           (with-current-buffer buf
             (insert mindstream-default-template-contents)

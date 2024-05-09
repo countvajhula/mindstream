@@ -45,25 +45,25 @@
 
 (defcustom mindstream-path
   ;; platform-independent ~/.emacs.d/mindstream/anon
-  (mindstream--joindirs user-emacs-directory
-                        "mindstream"
-                        "anon")
+  (mindstream--build-path user-emacs-directory
+                          "mindstream"
+                          "anon")
   "Directory where anonymous mindstream sessions will be stored."
   :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-template-path
   ;; platform-independent ~/.emacs.d/mindstream/templates
-  (mindstream--joindirs user-emacs-directory
-                        "mindstream"
-                        "templates")
+  (mindstream--build-path user-emacs-directory
+                          "mindstream"
+                          "templates")
   "Directory path where mindstream will look for templates."
   :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-save-session-path
-  (mindstream--joindirs mindstream--user-home-directory
-                        "mindstream")
+  (mindstream--build-path mindstream--user-home-directory
+                          "mindstream")
   "Default directory path for saving mindstream sessions."
   :type 'string
   :group 'mindstream)

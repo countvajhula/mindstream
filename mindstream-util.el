@@ -53,17 +53,17 @@ This consults Emacs's `auto-mode-alist'."
           (throw 'return mode))))))
 
 ;; From: https://stackoverflow.com/a/13473856/323874
-(defun mindstream--joindirs (root &rest dirs)
+(defun mindstream--build-path (root &rest dirs)
   "Joins a series of directories together, like Python's os.path.join.
 
 This concatenates the ROOT path with the sequence of DIRS in the
 platform-appropriate way.
 
-  (mindstream--joindirs \"/tmp\" \"a\" \"b\" \"c\") => /tmp/a/b/c"
+  (mindstream--build-path \"/tmp\" \"a\" \"b\" \"c\") => /tmp/a/b/c"
 
   (if (not dirs)
       root
-    (apply #'mindstream--joindirs
+    (apply #'mindstream--build-path
            (expand-file-name (car dirs) root)
            (cdr dirs))))
 
