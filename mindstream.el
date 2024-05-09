@@ -108,7 +108,7 @@ such that the last part of the name is mindstream template's name.
 For example:
 - FILENAME: /home/<user name>/.config/emacs/mindstream/templates/text
 - template: text"
-  (let ((template (car (last (string-split filename "/")))))
+  (let ((template (car (last (split-string filename "/")))))
     (cons template filename)))
 
 (defun mindstream--completing-read-template ()
