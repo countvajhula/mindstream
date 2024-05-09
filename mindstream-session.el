@@ -119,6 +119,10 @@ New sessions always start anonymous."
       (copy-directory template base-path)
       (mindstream-backend-initialize base-path)
       (let ((filename (mindstream--starting-file-for-session base-path)))
+        ;; end existing anonymous session for this major mode
+        (mindstream--end-anonymous-session
+         (mindstream--infer-major-mode
+          filename))
         (find-file
          (expand-file-name filename
                            base-path))

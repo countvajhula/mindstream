@@ -93,10 +93,6 @@ affect a named session that you may happen to be visiting."
         ;; then kill it
         (kill-buffer)))))
 
-(defun mindstream--infer-major-mode-for-template (session-file)
-  "Infer the starting major mode for the TEMPLATE."
-    (mindstream--infer-major-mode session-file))
-
 (defun mindstream--full-filename-to-alist (filename)
   "Return cons cell of \(template . FILENAME\).
 FILENAME is assumed to be an absolute file name of a directory,
@@ -123,10 +119,6 @@ For example:
   "Start a new anonymous session using a specific TEMPLATE.
 
 This also begins a new session."
-  ;; end the current anonymous session for the
-  ;; desired major mode
-  (mindstream--end-anonymous-session
-   (mindstream--infer-major-mode-for-template session-file))
   ;; start a new session (sessions always start anonymous)
   (let ((buf (mindstream-start-anonymous-session template)))
     ;; (ab initio) iterate
