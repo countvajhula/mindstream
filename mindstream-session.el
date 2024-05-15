@@ -91,18 +91,18 @@ This only removes implicit versioning. It does not close any open
 buffers at the SESSION path."
   (interactive (list (completing-read "Which session? "
                                       mindstream-active-sessions
-                                      ;; This excludes all anonymous
-                                      ;; sessions, which we should be
-                                      ;; able to also end.
-
-                                      ;; (lambda (session)
-                                      ;;   (not
-                                      ;;    (string-prefix-p mindstream-path
-                                      ;;                     session)))
-                                      )))
-  ;; Since we have completing-read above, do we have a case when session
-  ;; is nil and use `mind-stream--curent-session' at all?
+                                      ;; We typically end sessions on existing
+                                      ;; projects to stop implicit versioning.
+                                      ;; Exclude anonymous sessions here since
+                                      ;; it's OK if those aren't ended (we can
+                                      ;; just forget about them and move on).
+                                      (lambda (session)
+                                        (not
+                                         (string-prefix-p mindstream-path
+                                                          session))))))
   (let ((session (or session (mindstream--current-session))))
+    ;; session can be nil if called non-interactively
+    ;; as in `mindstream--end-anonymous-session'
     (setq mindstream-active-sessions
           (remove session mindstream-active-sessions))
     (message "Session %s ended." session)))

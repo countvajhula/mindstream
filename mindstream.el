@@ -304,8 +304,16 @@ the file to be opened."
                       (lambda (d)
                         (cons d (mindstream--session-file-name-expand d)))
                       (seq-uniq
-                       (append mindstream-session-history
-                               (mindstream--directory-files mindstream-save-session-path))
+                       ;; deduplicate candidates
+                       (seq-filter
+                        ;; exclude anonymous sessions
+                        (lambda (f)
+                          (not (string-match-p (abbreviate-file-name
+                                                (expand-file-name mindstream-path))
+                                               f)))
+                        (append mindstream-session-history
+                                (mindstream--directory-files mindstream-save-session-path)))
+                       ;; trim any trailing slashes for comparison
                        (lambda (a b)
                          (equal (string-trim-right a "/")
                                 (string-trim-right b "/"))))))
