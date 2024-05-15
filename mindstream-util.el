@@ -80,9 +80,9 @@ platform-appropriate way.
   "List files in DIR that aren't hidden or special."
   ;; TODO: exclude files that aren't versioned by Git
   (directory-files-recursively dir
-                               directory-files-no-dot-files-regexp
+                               "^[^\\.]"
                                nil
-                               ;; Exclude dotfiles
+                               ;; Exclude hidden directories like .git
                                (lambda (f)
                                  (not (string-match-p "/\\." f)))))
 
