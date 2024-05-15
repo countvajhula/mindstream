@@ -68,7 +68,11 @@ DIR is expected to be a path to an existing folder."
     (if (and files (= 1 (length files)))
         (car files)
       (completing-read "Which file? "
-                       files nil t nil
+                       (mapcar (lambda (f)
+                                 (mindstream--session-file-name-relative f
+                                                                         dir))
+                               files)
+                       nil t nil
                        mindstream-session-file-history))))
 
 (defun mindstream-begin-session ()
@@ -76,7 +80,8 @@ DIR is expected to be a path to an existing folder."
   (interactive)
   (push default-directory mindstream-active-sessions)
   (add-to-list 'mindstream-session-history
-               (mindstream--session-file-name-relative default-directory))
+               (mindstream--session-file-name-relative default-directory
+                                                       mindstream-save-session-path))
   (message "Session started at %s." default-directory))
 
 (defun mindstream-end-session (&optional session)

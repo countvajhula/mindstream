@@ -318,14 +318,16 @@ the file to be opened."
 (defun mindstream--session-file-name-expand (file)
   "Return fully expanded FILE name for `mindstream-session-history'."
   (if (file-name-absolute-p file)
-      (expand-file-name file)
+      file  ; (expand-file-name file) - probably don't need to expand if absolute?
     (expand-file-name file mindstream-save-session-path)))
 
-(defun mindstream--session-file-name-relative (file)
-  "Return relative FILE name for `mindstream-session-history'."
+(defun mindstream--session-file-name-relative (file dir)
+  "Return relative FILE name for `mindstream-session-history'.
+
+This returns a path of FILE relative to DIR."
   (if (string-match-p
-       (expand-file-name mindstream-save-session-path) file)
-      (file-relative-name file mindstream-save-session-path)
+       (expand-file-name dir) file)
+      (file-relative-name file dir)
     (abbreviate-file-name file)))
 
 (defun mindstream--get-or-create-session ()
