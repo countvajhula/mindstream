@@ -75,7 +75,8 @@ DIR is expected to be a path to an existing folder."
   "Begin a session at the current path."
   (interactive)
   (push default-directory mindstream-active-sessions)
-  (add-to-list 'mindstream-session-history default-directory)
+  (add-to-list 'mindstream-session-history
+               (mindstream--session-file-name-relative default-directory))
   (message "Session started at %s." default-directory))
 
 (defun mindstream-end-session (&optional session)
@@ -85,10 +86,17 @@ This only removes implicit versioning. It does not close any open
 buffers at the SESSION path."
   (interactive (list (completing-read "Which session? "
                                       mindstream-active-sessions
-                                      (lambda (session)
-                                        (not
-                                         (string-prefix-p mindstream-path
-                                                          session))))))
+                                      ;; This excludes all anonymous
+                                      ;; sessions, which we should be
+                                      ;; able to also end.
+
+                                      ;; (lambda (session)
+                                      ;;   (not
+                                      ;;    (string-prefix-p mindstream-path
+                                      ;;                     session)))
+                                      )))
+  ;; Since we have completing-read above, do we have a case when session
+  ;; is nil and use `mind-stream--curent-session' at all?
   (let ((session (or session (mindstream--current-session))))
     (setq mindstream-active-sessions
           (remove session mindstream-active-sessions))

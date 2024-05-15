@@ -285,39 +285,43 @@ will be opened upon loading the session.  Otherwise, follow the default
 protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
   (interactive (list ;; TODO: use completing-read-session
-                (read-directory-name "Load session: "
-                                     mindstream-save-session-path
-                                     nil
-                                     t
-                                     "")))
+                (mindstream--completing-read-session)))
   (let ((file (or file
                   (mindstream--starting-file-for-session dir))))
-    (find-file
-     (expand-file-name file
-                       dir))
+    (find-file file)
+    ;; `expand-file-name' appears to be redundant as
+    ;; `mindstream--directory-files-recursively' uses
+    ;; `directory-files-recursively', which returns file name in its
+    ;; absolute form.
+    ;; (expand-file-name file dir))
     (mindstream-begin-session)))
 
 (defun mindstream--completing-read-session ()
   "Return session-file via completion for template."
-  ;; would like this to return a folder
-  (let* ((dirs
-          (thread-last
-            (directory-files-recursively
-             mindstream-save-session-path
-             directory-files-no-dot-files-regexp
-             :include-directories
-             (lambda (f) (and (file-directory-p f)
-                              ;; Exclude dotfiles
-                              (not (string-match-p "/\\." f)))))
-            (append mindstream-session-history)
-            ;; It's probably also good to delete sub-directories of
-            ;; anon. There will be too many.
-            (mapcar #'expand-file-name)
-            (delete-dups)))
-         (dir (completing-read "Which session? " dirs nil t nil
-                               'mindstream-session-history)))
+  ;; It's probably also good to delete sub-directories of
+  ;; anon. There will be too many.
+  (let* ((dirs-alist (mapcar
+                      (lambda (d)
+                        (cons d (mindstream--session-file-name-expand d)))
+                      mindstream-session-history))
+         (dir-key (completing-read "Which session? " dirs-alist nil t nil
+                                   'mindstream-session-history))
+         (dir (cdr (assoc-string dir-key dirs-alist))))
     ;; Return directory name
     (file-name-as-directory dir)))
+
+(defun mindstream--session-file-name-expand (file)
+  "Return fully expanded FILE name for `mindstream-session-history'."
+  (if (file-name-absolute-p file)
+      (expand-file-name file)
+    (expand-file-name file mindstream-save-session-path)))
+
+(defun mindstream--session-file-name-relative (file)
+  "Return relative FILE name for `mindstream-session-history'."
+  (if (string-match-p
+       (expand-file-name mindstream-save-session-path) file)
+      (file-relative-name file mindstream-save-session-path)
+    (abbreviate-file-name file)))
 
 (defun mindstream--get-or-create-session ()
   "Get the anonymous session buffer or create a new one.
