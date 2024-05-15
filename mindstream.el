@@ -284,7 +284,7 @@ DIR is the directory containing the session.  If FILE is specified, it
 will be opened upon loading the session.  Otherwise, follow the default
 protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
-  (interactive (list ;; TODO: use completing-read-session
+  (interactive (list
                 (mindstream--completing-read-session)))
   (let ((file (or file
                   (mindstream--starting-file-for-session dir))))
@@ -303,7 +303,12 @@ the file to be opened."
   (let* ((dirs-alist (mapcar
                       (lambda (d)
                         (cons d (mindstream--session-file-name-expand d)))
-                      mindstream-session-history))
+                      (seq-uniq
+                       (append mindstream-session-history
+                               (mindstream--directory-files mindstream-save-session-path))
+                       (lambda (a b)
+                         (equal (string-trim-right a "/")
+                                (string-trim-right b "/"))))))
          (dir-key (completing-read "Which session? " dirs-alist nil t nil
                                    'mindstream-session-history))
          (dir (cdr (assoc-string dir-key dirs-alist))))
