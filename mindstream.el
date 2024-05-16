@@ -288,12 +288,7 @@ the file to be opened."
                 (mindstream--completing-read-session)))
   (let ((file (or file
                   (mindstream--starting-file-for-session dir))))
-    (find-file file)
-    ;; `expand-file-name' appears to be redundant as
-    ;; `mindstream--directory-files-recursively' uses
-    ;; `directory-files-recursively', which returns file name in its
-    ;; absolute form.
-    ;; (expand-file-name file dir))
+    (find-file (expand-file-name file dir))
     (mindstream-begin-session)))
 
 (defun mindstream--completing-read-session ()
@@ -332,9 +327,12 @@ the file to be opened."
 (defun mindstream--session-file-name-relative (file dir)
   "Return relative FILE name for `mindstream-session-history'.
 
-This returns a path of FILE relative to DIR."
+This returns the path of FILE relative to DIR if FILE is in DIR,
+otherwise it returns an abbreviated path (e.g. starting with ~
+if it is in the home folder)."
   (if (string-match-p
-       (expand-file-name dir) file)
+       (expand-file-name dir)
+       (expand-file-name file))
       (file-relative-name file dir)
     (abbreviate-file-name file)))
 

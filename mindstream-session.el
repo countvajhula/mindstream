@@ -63,10 +63,12 @@ number of active sessions is likely to be small.")
 (defun mindstream--starting-file-for-session (dir)
   "Select an appropriate starting file for a session.
 
-DIR is expected to be a path to an existing folder."
+DIR is expected to be a path to an existing folder. This returns a
+filename relative to DIR rather than an absolute path."
   (let ((files (mindstream--directory-files-recursively dir)))
     (if (and files (= 1 (length files)))
-        (car files)
+        (mindstream--session-file-name-relative (car files)
+                                                dir)
       (completing-read "Which file? "
                        (mapcar (lambda (f)
                                  (mindstream--session-file-name-relative f
