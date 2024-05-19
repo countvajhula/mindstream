@@ -49,6 +49,10 @@ git-tracked files will be versioned if they pull any
 For now, this is implemented as a list for simplicity, since the
 number of active sessions is likely to be small.")
 
+(defvar mindstream-session-file-history nil)
+
+(defvar mindstream-session-history nil)
+
 (defun mindstream--unique-name ()
   "Generate a unique name."
   (let ((time (current-time)))
@@ -56,50 +60,30 @@ number of active sessions is likely to be small.")
             "-"
             (sha1 (format "%s" time)))))
 
-(defun mindstream--session-file-p (file)
-  "Predicate to identify whether FILE is a Mindstream session file."
-  (string-match-p
-   (concat "^"
-           mindstream-filename)
-   file))
+(defun mindstream--starting-file-for-session (dir)
+  "Select an appropriate starting file for a session.
 
-(defun mindstream--session-file-for-template (template)
-  "Get the name of the session file for TEMPLATE.
-
-This defaults to `mindstream-filename' but can be overridden by
-indicating a file for the template in `mindstream-starting-file'."
-  (let ((template-name (mindstream--directory-name template)))
-    (let ((session-file
-           (or (let ((file (lax-plist-get mindstream-starting-file
-                                          template-name)))
-                 (when file
-                   (unless (file-exists-p (expand-file-name file
-                                                            template))
-                     (error "Starting file %s for %s template not found"
-                            file
-                            template-name))
-                   file))
-               (seq-find #'mindstream--session-file-p
-                         (directory-files template
-                                          nil
-                                          directory-files-no-dot-files-regexp))
-               (let ((files (mindstream--directory-files template)))
-                 ;; if there's only one file, use it
-                 (and files (= 1 (length files)) (car files)))
-               (error
-                ;; We must either raise an error here or support
-                ;; more than one anonymous session per major mode
-                ;; and have `mindstream-enter-anonymous-session' use MRU.
-                ;; For now, raise an error.
-                (concat "More than one file present in template. "
-                        "Please indicate a starting file for the session "
-                        " by customizing `mindstream-starting-file'.")))))
-      session-file)))
+DIR is expected to be a path to an existing folder. This returns a
+filename relative to DIR rather than an absolute path."
+  (let ((files (mindstream--directory-files-recursively dir)))
+    (if (and files (= 1 (length files)))
+        (mindstream--session-file-name-relative (car files)
+                                                dir)
+      (completing-read "Which file? "
+                       (mapcar (lambda (f)
+                                 (mindstream--session-file-name-relative f
+                                                                         dir))
+                               files)
+                       nil t nil
+                       mindstream-session-file-history))))
 
 (defun mindstream-begin-session ()
   "Begin a session at the current path."
   (interactive)
   (push default-directory mindstream-active-sessions)
+  (add-to-list 'mindstream-session-history
+               (mindstream--session-file-name-relative default-directory
+                                                       mindstream-save-session-path))
   (message "Session started at %s." default-directory))
 
 (defun mindstream-end-session (&optional session)
@@ -109,11 +93,18 @@ This only removes implicit versioning. It does not close any open
 buffers at the SESSION path."
   (interactive (list (completing-read "Which session? "
                                       mindstream-active-sessions
+                                      ;; We typically end sessions on existing
+                                      ;; projects to stop implicit versioning.
+                                      ;; Exclude anonymous sessions here since
+                                      ;; it's OK if those aren't ended (we can
+                                      ;; just forget about them and move on).
                                       (lambda (session)
                                         (not
                                          (string-prefix-p mindstream-path
                                                           session))))))
   (let ((session (or session (mindstream--current-session))))
+    ;; session can be nil if called non-interactively
+    ;; as in `mindstream--end-anonymous-session'
     (setq mindstream-active-sessions
           (remove session mindstream-active-sessions))
     (message "Session %s ended." session)))
@@ -142,7 +133,11 @@ New sessions always start anonymous."
     (unless (file-directory-p base-path)
       (copy-directory template base-path)
       (mindstream-backend-initialize base-path)
-      (let ((filename (mindstream--session-file-for-template template)))
+      (let ((filename (mindstream--starting-file-for-session base-path)))
+        ;; end existing anonymous session for this major mode
+        (mindstream--end-anonymous-session
+         (mindstream--infer-major-mode
+          filename))
         (find-file
          (expand-file-name filename
                            base-path))
@@ -161,15 +156,15 @@ New sessions always start anonymous."
 
 (defun mindstream--generate-anonymous-session-path (session)
   "A path on disk to use for a newly created SESSION."
-  (mindstream--joindirs mindstream-path
-                        session))
+  (mindstream--build-path mindstream-path
+                          session))
 
 (defun mindstream--template (&optional name)
   "Path to template NAME.
 
 If NAME isn't provided, use the default template."
-  (mindstream--joindirs mindstream-template-path
-                        (or name mindstream-default-template)))
+  (mindstream--build-path mindstream-template-path
+                          (or name mindstream-default-template)))
 
 (defun mindstream--ensure-anonymous-path ()
   "Ensure that the anonymous session path exists."
@@ -182,9 +177,9 @@ If NAME isn't provided, use the default template."
     (let ((default-template-dir (mindstream--template)))
       (mkdir default-template-dir t)
       (let ((template-file
-             (mindstream--joindirs default-template-dir
-                                   (concat mindstream-anonymous-buffer-prefix
-                                           ".txt"))))
+             (mindstream--build-path default-template-dir
+                                     (concat mindstream-anonymous-buffer-prefix
+                                             ".txt"))))
         (let ((buf (generate-new-buffer "default-template")))
           (with-current-buffer buf
             (insert mindstream-default-template-contents)

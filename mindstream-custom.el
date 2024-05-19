@@ -45,23 +45,25 @@
 
 (defcustom mindstream-path
   ;; platform-independent ~/.emacs.d/mindstream/anon
-  (mindstream--joindirs user-emacs-directory
-                        "mindstream"
-                        "anon")
+  (mindstream--build-path user-emacs-directory
+                          "mindstream"
+                          "anon")
   "Directory where anonymous mindstream sessions will be stored."
   :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-template-path
   ;; platform-independent ~/.emacs.d/mindstream/templates
-  (mindstream--joindirs user-emacs-directory
-                        "mindstream"
-                        "templates")
+  (mindstream--build-path user-emacs-directory
+                          "mindstream"
+                          "templates")
   "Directory path where mindstream will look for templates."
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-save-session-path mindstream--user-home-directory
+(defcustom mindstream-save-session-path
+  (mindstream--build-path mindstream--user-home-directory
+                          "mindstream")
   "Default directory path for saving mindstream sessions."
   :type 'string
   :group 'mindstream)
@@ -82,14 +84,6 @@
                 :value-type function)
   :group 'mindstream)
 
-(defcustom mindstream-starting-file nil
-  "The file to start the session, for each template.
-
-If no file is specified for a template, defaults to `mindstream-file'."
-  :type '(plist :key-type string
-                :value-type string)
-  :group 'mindstream)
-
 (defcustom mindstream-preferred-template nil
   "The preferred template for each major mode.
 
@@ -101,11 +95,6 @@ same extension, you may prefer to indicate which one is \"preferred\"
 for the major mode so that it would be selected."
   :type '(plist :key-type symbol
                 :value-type function)
-  :group 'mindstream)
-
-(defcustom mindstream-filename "scratch"
-  "Filename to use for mindstream buffers."
-  :type 'string
   :group 'mindstream)
 
 (defcustom mindstream-anonymous-buffer-prefix "scratch"

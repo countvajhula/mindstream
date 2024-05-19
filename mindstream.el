@@ -93,20 +93,32 @@ affect a named session that you may happen to be visiting."
         ;; then kill it
         (kill-buffer)))))
 
-(defun mindstream--infer-major-mode-for-template (template)
-  "Infer the starting major mode for the TEMPLATE."
-  (let ((session-file
-         (mindstream--session-file-for-template template)))
-    (mindstream--infer-major-mode session-file)))
+(defun mindstream--full-filename-to-alist (filename)
+  "Return cons cell of \(template . FILENAME\).
+FILENAME is assumed to be an absolute file name of a directory,
+such that the last part of the name is mindstream template's name.
+
+For example:
+- FILENAME: /home/<user name>/.config/emacs/mindstream/templates/text
+- template: text"
+  (let ((template (car (last (split-string filename "/")))))
+    (cons template filename)))
+
+(defun mindstream--completing-read-template ()
+  "Completion for template."
+  (let* ((files (directory-files
+                 mindstream-template-path
+                 nil
+                 directory-files-no-dot-files-regexp))
+         (template
+          (completing-read "Which template? " files nil t nil
+                           'mindstream-template-history)))
+    (mindstream--build-path mindstream-template-path template)))
 
 (defun mindstream--new (template)
   "Start a new anonymous session using a specific TEMPLATE.
 
 This also begins a new session."
-  ;; end the current anonymous session for the
-  ;; desired major mode
-  (mindstream--end-anonymous-session
-   (mindstream--infer-major-mode-for-template template))
   ;; start a new session (sessions always start anonymous)
   (let ((buf (mindstream-start-anonymous-session template)))
     ;; (ab initio) iterate
@@ -130,17 +142,6 @@ name, in a dedicated Git version-controlled folder at
   (interactive)
   (let ((template (or template (mindstream--completing-read-template))))
     (switch-to-buffer (mindstream--new template))))
-
-(defun mindstream--completing-read-template ()
-  "Completion for template."
-  (let* ((files (directory-files
-                 mindstream-template-path
-                 nil
-                 directory-files-no-dot-files-regexp))
-         (template
-          (completing-read "Which template? " files nil t nil
-                           'mindstream-template-history)))
-    (mindstream--joindirs mindstream-template-path template)))
 
 (defun mindstream-initialize ()
   "Do any setup that's necessary for Mindstream.
@@ -272,8 +273,8 @@ you would typically want to specify a new, non-existent folder."
     (if named
         (mindstream-load-session dest-dir file)
       (mindstream-load-session
-       (mindstream--joindirs dest-dir
-                             original-session-name)
+       (mindstream--build-path dest-dir
+                               original-session-name)
        file))))
 
 (defun mindstream-load-session (dir &optional file)
@@ -283,24 +284,57 @@ DIR is the directory containing the session.  If FILE is specified, it
 will be opened upon loading the session.  Otherwise, follow the default
 protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
-  (interactive (list (read-directory-name "Load session: "
-                                          mindstream-save-session-path
-                                          nil
-                                          t
-                                          "")))
-  (let ((file (if file
-                  (expand-file-name file dir)
-                (let ((files (mindstream--directory-files dir)))
-                  (if (and files (= 1 (length files)))
-                      (expand-file-name (car files)
-                                        dir)
-                    (read-file-name "Which file? "
-                                    dir
-                                    nil
-                                    t
-                                    ""))))))
-    (find-file file)
+  (interactive (list
+                (mindstream--completing-read-session)))
+  (let ((file (or file
+                  (mindstream--starting-file-for-session dir))))
+    (find-file (expand-file-name file dir))
     (mindstream-begin-session)))
+
+(defun mindstream--completing-read-session ()
+  "Return session-file via completion for template."
+  ;; It's probably also good to delete sub-directories of
+  ;; anon. There will be too many.
+  (let* ((dirs-alist (mapcar
+                      (lambda (d)
+                        (cons d (mindstream--session-file-name-expand d)))
+                      (seq-uniq
+                       ;; deduplicate candidates
+                       (seq-filter
+                        ;; exclude anonymous sessions
+                        (lambda (f)
+                          (not (string-match-p (abbreviate-file-name
+                                                (expand-file-name mindstream-path))
+                                               f)))
+                        (append mindstream-session-history
+                                (mindstream--directory-files mindstream-save-session-path)))
+                       ;; trim any trailing slashes for comparison
+                       (lambda (a b)
+                         (equal (string-trim-right a "/")
+                                (string-trim-right b "/"))))))
+         (dir-key (completing-read "Which session? " dirs-alist nil t nil
+                                   'mindstream-session-history))
+         (dir (cdr (assoc-string dir-key dirs-alist))))
+    ;; Return directory name
+    (file-name-as-directory dir)))
+
+(defun mindstream--session-file-name-expand (file)
+  "Return fully expanded FILE name for `mindstream-session-history'."
+  (if (file-name-absolute-p file)
+      file  ; (expand-file-name file) - probably don't need to expand if absolute?
+    (expand-file-name file mindstream-save-session-path)))
+
+(defun mindstream--session-file-name-relative (file dir)
+  "Return relative FILE name for `mindstream-session-history'.
+
+This returns the path of FILE relative to DIR if FILE is in DIR,
+otherwise it returns an abbreviated path (e.g. starting with ~
+if it is in the home folder)."
+  (if (string-match-p
+       (expand-file-name dir)
+       (expand-file-name file))
+      (file-relative-name file dir)
+    (abbreviate-file-name file)))
 
 (defun mindstream--get-or-create-session ()
   "Get the anonymous session buffer or create a new one.
