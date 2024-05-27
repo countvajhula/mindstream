@@ -1,0 +1,28 @@
+.tocset {
+    background-color: #e4d190;
+	border-top-color: #e4d190;
+}
+
+.navsettop {
+    background: #e4d190;
+}
+
+.tocviewselflink {
+	color: #111613;
+}
+
+.tocviewtoggle {
+	color: #111613;
+}
+
+.tocviewlink {
+	color: #111613;
+}
+
+.tocsubseclink {
+	color: #111613;
+}
+
+body {
+    background-color: #edeae0;
+}

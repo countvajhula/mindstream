@@ -8,6 +8,8 @@ SHELL=/bin/bash
 PACKAGE-NAME=mindstream
 DOCS-PATH=doc
 
+DEPS-FLAGS=--check-pkg-deps --unused-pkg-deps
+
 EMACS=emacs
 CASK ?= cask
 
@@ -42,10 +44,13 @@ remove-docs:
 	raco pkg remove $(PACKAGE-NAME)
 
 build-docs:
-	scribble ++style $(DOCS-PATH)/mindstream.css --htmls --dest $(DOCS-PATH) --dest-name output $(DOCS-PATH)/mindstream.scrbl
+	scribble ++style $(DOCS-PATH)/assets/css/$(PACKAGE-NAME).css --htmls --dest $(DOCS-PATH) --dest-name output $(DOCS-PATH)/mindstream.scrbl
 
 docs: build-docs
 	open $(DOCS-PATH)/output/index.html
+
+check-docs-deps:
+	raco setup --no-docs $(DEPS-FLAGS) --pkgs $(PACKAGE-NAME)
 
 clean :
 	${CASK} clean-elc
