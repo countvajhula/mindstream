@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - '**.scrbl'
+      - 'doc/**'
       - '.github/workflows/docs.yml'
 
 defaults:
