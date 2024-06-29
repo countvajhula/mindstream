@@ -127,24 +127,21 @@ after copying over the contents of TEMPLATE if one is specified.
 Otherwise, it uses the configured default template.
 
 New sessions always start anonymous."
-  (let* ((session (mindstream--unique-name))
-         (base-path (mindstream--generate-anonymous-session-path session))
-         (template (or template mindstream-default-template)))
-    (unless (file-directory-p base-path)
-      (copy-directory template base-path)
-      (mindstream-backend-initialize base-path)
-      (let ((filename (mindstream--starting-file-for-session base-path)))
-        ;; end existing anonymous session for this major mode
-        (mindstream--end-anonymous-session
-         (mindstream--infer-major-mode
-          filename))
-        (find-file
-         (expand-file-name filename
-                           base-path))
-        (mindstream--initialize-buffer)
-        (rename-buffer (mindstream-anonymous-buffer-name))
-        (mindstream-begin-session)
-        (current-buffer)))))
+  (let* ((template (or template mindstream-default-template))
+         (filename (mindstream--starting-file-for-session template))
+         (major-mode-to-use (mindstream--infer-major-mode filename))
+         (path (mindstream--generate-anonymous-session-path major-mode-to-use)))
+    (unless (file-directory-p path)
+      (copy-directory template path)
+      (mindstream-backend-initialize path)
+      (mindstream--end-anonymous-session major-mode-to-use)
+      (find-file
+       (expand-file-name filename
+                         path))
+      (mindstream--initialize-buffer)
+      (rename-buffer (mindstream-anonymous-buffer-name))
+      (mindstream-begin-session)
+      (current-buffer))))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
@@ -154,10 +151,17 @@ New sessions always start anonymous."
    (file-name-nondirectory (buffer-file-name)))
   (mindstream-backend-iterate))
 
-(defun mindstream--generate-anonymous-session-path (session)
-  "A path on disk to use for a newly created SESSION."
-  (mindstream--build-path mindstream-path
-                          session))
+(defun mindstream--generate-anonymous-session-path (major-mode-to-use)
+  "A path on disk to use for a newly created SESSION.
+
+This creates an appropriate base path on disk for the major mode if it
+isn't already present."
+  (let* ((session-name (mindstream--unique-name))
+         (base-path (mindstream--build-path mindstream-path
+                                            (mindstream--mode-name major-mode-to-use))))
+    (mindstream--ensure-path base-path)
+    (mindstream--build-path base-path
+                            session-name)))
 
 (defun mindstream--template (&optional name)
   "Path to template NAME.
@@ -166,10 +170,14 @@ If NAME isn't provided, use the default template."
   (mindstream--build-path mindstream-template-path
                           (or name mindstream-default-template)))
 
+(defun mindstream--ensure-path (path)
+  "Ensure that PATH exists on the filesystem."
+  (unless (file-directory-p path)
+    (mkdir path t)))
+
 (defun mindstream--ensure-anonymous-path ()
   "Ensure that the anonymous session path exists."
-  (unless (file-directory-p mindstream-path)
-    (mkdir mindstream-path t)))
+  (mindstream--ensure-path mindstream-path))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
