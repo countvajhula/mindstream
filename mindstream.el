@@ -347,7 +347,7 @@ want to get a session buffer for the current major mode, without
 worrying about how that happens. It is too connoted to be useful in
 features implementing the session iteration model."
   (or (mindstream--get-anonymous-session-buffer)
-      (mindstream--new (mindstream--template
+      (mindstream--new (mindstream--template-path
                         (mindstream--infer-template major-mode)))))
 
 (defun mindstream-enter-anonymous-session ()

@@ -127,10 +127,11 @@ after copying over the contents of TEMPLATE if one is specified.
 Otherwise, it uses the configured default template.
 
 New sessions always start anonymous."
-  (let* ((template (or template mindstream-default-template))
+  (let* ((template (or template
+                       (mindstream--template-path mindstream-default-template)))
          (filename (mindstream--starting-file-for-session template))
          (major-mode-to-use (mindstream--infer-major-mode filename))
-         (path (mindstream--generate-anonymous-session-path major-mode-to-use)))
+         (path (mindstream--generate-anonymous-session-path template)))
     (unless (file-directory-p path)
       (copy-directory template path)
       (mindstream-backend-initialize path)
@@ -151,24 +152,28 @@ New sessions always start anonymous."
    (file-name-nondirectory (buffer-file-name)))
   (mindstream-backend-iterate))
 
-(defun mindstream--generate-anonymous-session-path (major-mode-to-use)
+(defun mindstream--generate-anonymous-session-path (template)
   "A path on disk to use for a newly created SESSION.
 
-This creates an appropriate base path on disk for the major mode if it
+This creates an appropriate base path on disk for the TEMPLATE if it
 isn't already present."
   (let* ((session-name (mindstream--unique-name))
          (base-path (mindstream--build-path mindstream-path
-                                            (mindstream--mode-name major-mode-to-use))))
+                                            (mindstream--template-name template))))
     (mindstream--ensure-path base-path)
     (mindstream--build-path base-path
                             session-name)))
 
-(defun mindstream--template (&optional name)
+(defun mindstream--template-path (&optional name)
   "Path to template NAME.
 
 If NAME isn't provided, use the default template."
   (mindstream--build-path mindstream-template-path
                           (or name mindstream-default-template)))
+
+(defun mindstream--template-name (path)
+  "Name of template at PATH."
+  (file-name-base path))
 
 (defun mindstream--ensure-path (path)
   "Ensure that PATH exists on the filesystem."
@@ -182,7 +187,7 @@ If NAME isn't provided, use the default template."
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   (unless (file-directory-p mindstream-template-path)
-    (let ((default-template-dir (mindstream--template)))
+    (let ((default-template-dir (mindstream--template-path)))
       (mkdir default-template-dir t)
       (let ((template-file
              (mindstream--build-path default-template-dir
