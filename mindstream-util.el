@@ -120,16 +120,16 @@ a file in FROM-DIR to refer to TO-DIR."
     (let ((blist (buffer-list)))
       (while blist
         (with-current-buffer (car blist)
-	      (if (and buffer-file-name
-		           (mindstream--file-in-tree-p buffer-file-name
-                                               from-dir))
-	          (let ((modflag (buffer-modified-p))
-                    (to-file (replace-regexp-in-string
-                              (concat "^" (regexp-quote from-pat))
-			                  to-pat
-			                  buffer-file-name)))
-	            (set-visited-file-name to-file)
-	            (set-buffer-modified-p modflag))))
+          (when (and buffer-file-name
+		             (mindstream--file-in-tree-p buffer-file-name
+                                                 from-dir))
+	        (let ((modflag (buffer-modified-p))
+                  (to-file (replace-regexp-in-string
+                            (concat "^" (regexp-quote from-pat))
+			                to-pat
+			                buffer-file-name)))
+	          (set-visited-file-name to-file)
+	          (set-buffer-modified-p modflag))))
         (setq blist (cdr blist))))))
 
 (defun mindstream--file-in-tree-p (file dir)
