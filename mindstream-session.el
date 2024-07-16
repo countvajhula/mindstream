@@ -297,10 +297,10 @@ buffer is used."
   (let ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use)))
     (get-buffer buffer-name)))
 
-(defun mindstream-anonymous-session-buffer-p ()
-  "Predicate to check if the current buffer is the anonymous scratch buffer."
-  ;; TODO: this is fairly weak
-  (string-match-p mindstream-anonymous-buffer-prefix (buffer-name)))
+(defun mindstream-anonymous-session-p ()
+  "Predicate to check if the current buffer is part of an anonymous session."
+  (mindstream--file-in-tree-p (buffer-file-name)
+                              mindstream-path))
 
 (provide 'mindstream-session)
 ;;; mindstream-session.el ends here
