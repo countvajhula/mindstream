@@ -77,23 +77,6 @@ can be retrieved and canceled when you leave live mode.")
       (mindstream-initialize)
     (mindstream-disable)))
 
-(defun mindstream--end-anonymous-session (&optional major-mode-to-use)
-  "End the current anonymous session.
-
-This ends the current anonymous session for MAJOR-MODE-TO-USE and does not
-affect a named session that you may happen to be visiting."
-  ;; TODO: may want to also kill any other open buffers at the same base path
-  (let ((buf (mindstream--get-anonymous-session-buffer major-mode-to-use)))
-    (when buf
-      (with-current-buffer buf
-        ;; first write the existing scratch buffer
-        ;; if there are unsaved changes
-        (mindstream--iterate)
-        ;; end the anonymous session
-        (mindstream-end-session)
-        ;; then kill it
-        (kill-buffer)))))
-
 (defun mindstream--full-filename-to-alist (filename)
   "Return cons cell of \(template . FILENAME\).
 FILENAME is assumed to be an absolute file name of a directory,
@@ -329,18 +312,6 @@ the file to be opened."
       file  ; (expand-file-name file) - probably don't need to expand if absolute?
     (expand-file-name file mindstream-save-session-path)))
 
-(defun mindstream--session-file-name-relative (file dir)
-  "Return relative FILE name for `mindstream-session-history'.
-
-This returns the path of FILE relative to DIR if FILE is in DIR,
-otherwise it returns an abbreviated path (e.g. starting with ~
-if it is in the home folder)."
-  (if (string-match-p
-       (expand-file-name dir)
-       (expand-file-name file))
-      (file-relative-name file dir)
-    (abbreviate-file-name file)))
-
 (defun mindstream--get-or-create-session ()
   "Get the anonymous session buffer or create a new one.
 
@@ -370,7 +341,8 @@ a file in FROM-DIR to refer to TO-DIR."
     (while blist
       (with-current-buffer (car blist)
 	    (if (and buffer-file-name
-		         (dired-in-this-tree-p buffer-file-name expanded-from-dir))
+		         (mindstream--file-in-tree-p buffer-file-name
+                                             expanded-from-dir))
 	        (let ((modflag (buffer-modified-p))
                   ;; TODO: this is not a robust way to update
                   ;; the visited file path, since

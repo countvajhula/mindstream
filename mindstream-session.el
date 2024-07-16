@@ -60,10 +60,22 @@ number of active sessions is likely to be small.")
             "-"
             (sha1 (format "%s" time)))))
 
+(defun mindstream--session-file-name-relative (file dir)
+  "Return relative FILE name for `mindstream-session-history'.
+
+This returns the path of FILE relative to DIR if FILE is in DIR,
+otherwise it returns an abbreviated path (e.g. starting with ~
+if it is in the home folder)."
+  (if (string-match-p
+       (expand-file-name dir)
+       (expand-file-name file))
+      (file-relative-name file dir)
+    (abbreviate-file-name file)))
+
 (defun mindstream--starting-file-for-session (dir)
   "Select an appropriate starting file for a session.
 
-DIR is expected to be a path to an existing folder. This returns a
+DIR is expected to be a path to an existing folder.  This returns a
 filename relative to DIR rather than an absolute path."
   (let ((files (mindstream--directory-files-recursively dir)))
     (if (and files (= 1 (length files)))
@@ -86,10 +98,27 @@ filename relative to DIR rather than an absolute path."
                                                        mindstream-save-session-path))
   (message "Session started at %s." default-directory))
 
+(defun mindstream--end-anonymous-session (&optional major-mode-to-use)
+  "End the current anonymous session.
+
+This ends the current anonymous session for MAJOR-MODE-TO-USE and does not
+affect a named session that you may happen to be visiting."
+  ;; TODO: may want to also kill any other open buffers at the same base path
+  (let ((buf (mindstream--get-anonymous-session-buffer major-mode-to-use)))
+    (when buf
+      (with-current-buffer buf
+        ;; first write the existing scratch buffer
+        ;; if there are unsaved changes
+        (mindstream--iterate)
+        ;; end the anonymous session
+        (mindstream-end-session)
+        ;; then kill it
+        (kill-buffer)))))
+
 (defun mindstream-end-session (&optional session)
   "End SESSION.
 
-This only removes implicit versioning. It does not close any open
+This only removes implicit versioning.  It does not close any open
 buffers at the SESSION path."
   (interactive (list (completing-read "Which session? "
                                       mindstream-active-sessions

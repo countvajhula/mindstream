@@ -93,5 +93,11 @@ platform-appropriate way.
     (file-name-directory
      path))))
 
+(defun mindstream--file-in-tree-p (file dir)
+  "Is FILE part of the directory tree starting at DIR?"
+  ;; Source: `dired-in-this-tree-p'
+  (let (case-fold-search)
+    (string-match-p (concat "^" (regexp-quote dir)) file)))
+
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here
