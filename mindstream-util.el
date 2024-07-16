@@ -132,11 +132,43 @@ a file in FROM-DIR to refer to TO-DIR."
 	          (set-buffer-modified-p modflag))))
         (setq blist (cdr blist))))))
 
+(defun mindstream--close-buffers-at-path (path)
+  "Close all buffers in the PATH tree.
+
+If any buffers have been modified, they will be saved first."
+  (let ((blist (buffer-list)))
+    (while blist
+      (with-current-buffer (car blist)
+        (when (and buffer-file-name
+		           (mindstream--file-in-tree-p buffer-file-name
+                                               path))
+          (when (buffer-modified-p)
+            (save-buffer))
+          (kill-buffer)))
+      (setq blist (cdr blist)))))
+
 (defun mindstream--file-in-tree-p (file dir)
   "Is FILE part of the directory tree starting at DIR?"
   ;; Source: `dired-in-this-tree-p'
   (let (case-fold-search)
     (string-match-p (concat "^" (regexp-quote dir)) file)))
+
+(defun mindstream--session-name ()
+  "Name of the current session.
+
+This is simply the name of the containing folder."
+  ;; TODO: generalize to derive base repo path
+  ;; in case the file is in a nested path
+  (string-trim-left
+   (directory-file-name
+    (file-name-directory (buffer-file-name)))
+   "^.*/"))
+
+(defun mindstream--session-dir (file)
+  "The repo base path containing FILE."
+  ;; TODO: generalize to derive base repo path
+  ;; in case the file is in a nested path
+  (file-name-directory file))
 
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here

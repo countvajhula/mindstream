@@ -211,9 +211,10 @@ If NAME isn't provided, use the default template."
   (unless (file-directory-p path)
     (mkdir path t)))
 
-(defun mindstream--ensure-anonymous-path ()
-  "Ensure that the anonymous session path exists."
-  (mindstream--ensure-path mindstream-path))
+(defun mindstream--ensure-paths ()
+  "Ensure that paths that mindstream needs to function exist."
+  (mindstream--ensure-path mindstream-path)
+  (mindstream--ensure-path mindstream-archive-path))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."

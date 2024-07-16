@@ -68,6 +68,15 @@
   :type 'string
   :group 'mindstream)
 
+(defcustom mindstream-archive-path
+  ;; platform-independent ~/.emacs.d/mindstream/archive
+  (mindstream--build-path user-emacs-directory
+                          "mindstream"
+                          "archive")
+  "Directory where archived anonymous mindstream sessions will be stored."
+  :type 'string
+  :group 'mindstream)
+
 (defcustom mindstream-triggers (list #'save-buffer)
   "Functions that, when called, should implicitly iterate the mindstream buffer."
   :type 'list

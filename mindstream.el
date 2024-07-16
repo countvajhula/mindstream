@@ -142,7 +142,7 @@ version for!), it's possible that you might want to iterate the
 session at a coarser granularity than every save. In that case, you
 can customize `mindstream-triggers' and add the function(s) that
 should trigger session iteration (and remove `save-buffer')."
-  (mindstream--ensure-anonymous-path)
+  (mindstream--ensure-paths)
   (mindstream--ensure-templates-exist)
   (dolist (fn mindstream-triggers)
     (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
@@ -218,15 +218,6 @@ in that invocation."
       (mindstream--iterate))
     result))
 
-(defun mindstream--session-name ()
-  "Name of the current session.
-
-This is simply the name of the containing folder."
-  (string-trim-left
-   (directory-file-name
-    (file-name-directory (buffer-file-name)))
-   "^.*/"))
-
 (defun mindstream-save-session (dest-dir)
   "Save the current session to a permanent location.
 
@@ -246,7 +237,7 @@ you would typically want to specify a new, non-existent folder."
   ;; The chosen name of the directory becomes the name of the session.
   (let* ((original-session-name (mindstream--session-name))
          (file (file-name-nondirectory (buffer-file-name)))
-         (dir (file-name-directory (buffer-file-name)))
+         (dir (mindstream--session-dir (buffer-file-name)))
          (named (not (file-directory-p dest-dir))))
     ;; ensure no unsaved changes
     ;; note: this is a no-op if save-buffer is a trigger for iteration
@@ -334,6 +325,17 @@ otherwise, it creates a new one and enters it."
   (interactive)
   (let ((buf (mindstream--get-or-create-session)))
     (switch-to-buffer buf)))
+
+(defun mindstream-archive-session ()
+  "Move the current session to `mindstream-archive-path'.
+
+The current session is expected to be anonymous, and no action is
+taken if it is already a saved session."
+  (interactive)
+  (when (mindstream-anonymous-session-p)
+    (let ((dir (mindstream--session-dir (buffer-file-name))))
+      (mindstream--close-buffers-at-path dir)
+      (mindstream--move-dir dir mindstream-archive-path))))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here
