@@ -135,6 +135,8 @@ New sessions always start anonymous."
     (unless (file-directory-p path)
       (copy-directory template path)
       (mindstream-backend-initialize path)
+      ;; TODO: archive instead of end,
+      ;; conditioned on `mindstream-unique'
       (mindstream--end-anonymous-session major-mode-to-use)
       (find-file
        (expand-file-name filename
