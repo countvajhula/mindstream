@@ -93,6 +93,40 @@ platform-appropriate way.
     (file-name-directory
      path))))
 
+(defun mindstream--move-dir (from-dir to-dir)
+  "Move folder FROM-DIR to TO-DIR.
+
+This also updates the visited file names of all open buffers visiting
+a file in FROM-DIR to refer to TO-DIR."
+  ;; Based on `dired-rename-file' and `dired-rename-subdir'
+  (rename-file from-dir to-dir nil)
+  (setq from-dir (file-name-as-directory from-dir)
+	    to-dir (file-name-as-directory to-dir))
+  ;; Update visited file name of all affected buffers
+  (let ((expanded-from-dir (expand-file-name from-dir))
+	    (blist (buffer-list)))
+    (while blist
+      (with-current-buffer (car blist)
+	    (if (and buffer-file-name
+		         (mindstream--file-in-tree-p buffer-file-name
+                                             expanded-from-dir))
+	        (let ((modflag (buffer-modified-p))
+                  ;; TODO: this is not a robust way to update
+                  ;; the visited file path, since
+                  ;; /a/b/a/c.txt -> /a/b/b/c.txt
+                  ;; would rewrite to /b/b/b/c.txt
+                  ;; but it works in "most" cases where
+                  ;; the renamed folder isn't a trailing
+                  ;; match on a containing folder name
+                  ;; Improve this.
+                  (to-file (replace-regexp-in-string
+			                (regexp-quote from-dir)
+			                to-dir
+			                buffer-file-name)))
+	          (set-visited-file-name to-file)
+	          (set-buffer-modified-p modflag))))
+      (setq blist (cdr blist)))))
+
 (defun mindstream--file-in-tree-p (file dir)
   "Is FILE part of the directory tree starting at DIR?"
   ;; Source: `dired-in-this-tree-p'
