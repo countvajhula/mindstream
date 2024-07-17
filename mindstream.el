@@ -90,14 +90,12 @@ For example:
 
 (defun mindstream--completing-read-template ()
   "Completion for template."
-  (let* ((files (directory-files
-                 mindstream-template-path
-                 nil
-                 directory-files-no-dot-files-regexp))
-         (template
-          (completing-read "Which template? " files nil t nil
-                           'mindstream-template-history)))
-    (mindstream--build-path mindstream-template-path template)))
+  (let ((files (directory-files
+                mindstream-template-path
+                nil
+                directory-files-no-dot-files-regexp)))
+    (completing-read "Which template? " files nil t nil
+                     'mindstream-template-history)))
 
 (defun mindstream--new (template)
   "Start a new anonymous session using a specific TEMPLATE.
@@ -124,7 +122,8 @@ still saved on disk from the beginning, with a randomly-generated
 name, in a dedicated Git version-controlled folder at
 `mindstream-path', which you can customize."
   (interactive)
-  (let ((template (or template (mindstream--completing-read-template))))
+  (let ((template (or template
+                      (mindstream--completing-read-template))))
     (switch-to-buffer (mindstream--new template))))
 
 (defun mindstream-initialize ()
@@ -336,6 +335,25 @@ taken if it is already a saved session."
     (let ((dir (mindstream--session-dir (buffer-file-name))))
       (mindstream--close-buffers-at-path dir)
       (mindstream--move-dir dir mindstream-archive-path))))
+
+(defun mindstream-archive-template-sessions (template)
+  "Archive all sessions associated with TEMPLATE."
+  (interactive (list
+                (mindstream--completing-read-template)))
+  (let ((from-dir (mindstream--build-path mindstream-path
+                                          template))
+        (to-dir (mindstream--build-path mindstream-archive-path
+                                        template)))
+    (mindstream--ensure-path
+     (mindstream--build-path mindstream-archive-path
+                             template))
+    (dolist (dir (seq-filter (lambda (dir)
+                               (file-directory-p dir))
+                             (mindstream--directory-files
+                              from-dir
+                              t)))
+      (mindstream--close-buffers-at-path dir)
+      (mindstream--move-dir dir to-dir))))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here

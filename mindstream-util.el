@@ -67,14 +67,21 @@ platform-appropriate way.
            (expand-file-name (car dirs) root)
            (cdr dirs))))
 
-(defun mindstream--directory-files (dir)
-  "List files in DIR that aren't hidden or special."
+(defun mindstream--directory-files (dir &optional full)
+  "List files in DIR that aren't hidden or special.
+
+Return FULL, absolute paths, or relative paths."
   ;; TODO: exclude files that aren't versioned by Git
-  (seq-filter (lambda (x)
-                ;; e.g. .gitignore
-                (not (string-match-p "^\\." x)))
-              (directory-files dir
-                               nil)))
+  (let ((files (seq-filter (lambda (x)
+                             ;; e.g. .gitignore
+                             (not (string-match-p "^\\." x)))
+                           (directory-files dir
+                                            nil))))
+    (if full
+        (seq-map (lambda (d)
+                   (expand-file-name d dir))
+                 files)
+      files)))
 
 (defun mindstream--directory-files-recursively (dir)
   "List files in DIR that aren't hidden or special."

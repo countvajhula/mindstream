@@ -156,8 +156,9 @@ after copying over the contents of TEMPLATE if one is specified.
 Otherwise, it uses the configured default template.
 
 New sessions always start anonymous."
-  (let* ((template (or template
-                       (mindstream--template-path mindstream-default-template)))
+  (let* ((template (mindstream--template-path
+                    (or template
+                        (mindstream--template-path mindstream-default-template))))
          (filename (mindstream--starting-file-for-session template))
          (major-mode-to-use (mindstream--infer-major-mode filename))
          (path (mindstream--generate-anonymous-session-path template)))
