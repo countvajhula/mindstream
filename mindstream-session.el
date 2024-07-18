@@ -154,7 +154,6 @@ New sessions always start anonymous."
        (expand-file-name filename
                          path))
       (mindstream--initialize-buffer)
-      (rename-buffer (mindstream-anonymous-buffer-name))
       (mindstream-begin-session)
       (current-buffer))))
 
@@ -287,14 +286,6 @@ buffer is used."
         ;; on older versions of Emacs
         mode-name
       (car mode-name))))
-
-(defun mindstream-anonymous-buffer-name (&optional major-mode-to-use)
-  "Name of the anonymous session buffer for MAJOR-MODE-TO-USE."
-  (concat "*"
-          mindstream-anonymous-buffer-prefix
-          " - "
-          (mindstream--mode-name major-mode-to-use)
-          "*"))
 
 (defun mindstream-anonymous-session-p ()
   "Predicate to check if the current buffer is part of an anonymous session."
