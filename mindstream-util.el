@@ -100,6 +100,18 @@ Return FULL, absolute paths, or relative paths."
     (file-name-directory
      path))))
 
+(defun mindstream--for-all-buffers (action)
+  "Take ACTION for all open buffers.
+
+ACTION must take no arguments and should return nothing. If a return
+value is desired, then use a closure with a mutable lexical variable,
+and mutate that variable in ACTION."
+  (let ((blist (buffer-list)))
+    (while blist
+      (with-current-buffer (car blist)
+        (funcall action))
+      (setq blist (cdr blist)))))
+
 (defun mindstream--move-dir (from-dir to-dir)
   "Move folder FROM-DIR to TO-DIR.
 
@@ -124,35 +136,31 @@ a file in FROM-DIR to refer to TO-DIR."
                    to-dir)))
     (rename-file from-dir to-dir nil)
     ;; Update visited file name of all affected buffers
-    (let ((blist (buffer-list)))
-      (while blist
-        (with-current-buffer (car blist)
-          (when (and buffer-file-name
-		             (mindstream--file-in-tree-p buffer-file-name
-                                                 from-dir))
-	        (let ((modflag (buffer-modified-p))
-                  (to-file (replace-regexp-in-string
-                            (concat "^" (regexp-quote from-pat))
-			                to-pat
-			                buffer-file-name)))
-	          (set-visited-file-name to-file)
-	          (set-buffer-modified-p modflag))))
-        (setq blist (cdr blist))))))
+    (mindstream--for-all-buffers
+     (lambda ()
+       (when (and buffer-file-name
+		          (mindstream--file-in-tree-p buffer-file-name
+                                              from-dir))
+	     (let ((modflag (buffer-modified-p))
+               (to-file (replace-regexp-in-string
+                         (concat "^" (regexp-quote from-pat))
+			             to-pat
+			             buffer-file-name)))
+	       (set-visited-file-name to-file)
+	       (set-buffer-modified-p modflag)))))))
 
 (defun mindstream--close-buffers-at-path (path)
   "Close all buffers in the PATH tree.
 
 If any buffers have been modified, they will be saved first."
-  (let ((blist (buffer-list)))
-    (while blist
-      (with-current-buffer (car blist)
-        (when (and buffer-file-name
-		           (mindstream--file-in-tree-p buffer-file-name
-                                               path))
-          (when (buffer-modified-p)
-            (save-buffer))
-          (kill-buffer)))
-      (setq blist (cdr blist)))))
+  (mindstream--for-all-buffers
+   (lambda ()
+     (when (and buffer-file-name
+		        (mindstream--file-in-tree-p buffer-file-name
+                                            path))
+       (when (buffer-modified-p)
+         (save-buffer))
+       (kill-buffer)))))
 
 (defun mindstream--file-in-tree-p (file dir)
   "Is FILE part of the directory tree starting at DIR?"
