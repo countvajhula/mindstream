@@ -346,9 +346,14 @@ taken if it is already a saved session."
   (let ((from-dir (mindstream--anonymous-path template))
         (to-dir (mindstream--archive-path template)))
     (mindstream--ensure-path to-dir)
-    (dolist (dir (mindstream--directory-dirs from-dir))
-      (mindstream--close-buffers-at-path dir)
-      (mindstream--move-dir dir to-dir))))
+    (when (file-directory-p from-dir)
+      ;; TODO: should we ensure that all template paths
+      ;; exist in the anon path at startup, even for
+      ;; templates where we haven't created any sessions
+      ;; yet?
+      (dolist (dir (mindstream--directory-dirs from-dir))
+        (mindstream--close-buffers-at-path dir)
+        (mindstream--move-dir dir to-dir)))))
 
 (defun mindstream-archive ()
   "Archive sessions for _all_ templates."
