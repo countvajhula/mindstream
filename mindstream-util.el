@@ -221,5 +221,26 @@ This is simply the name of the containing folder."
       ;; but magit-toplevel seems to work.
       (magit-toplevel))))
 
+(defun mindstream--get-containing-dir (file)
+  "Get the name of the directory containing FILE.
+
+FILE could be a file or a directory. Only the name of the containing
+directory is returned, rather than its full path."
+  (let ((file (if (directory-name-p file)
+                  (directory-file-name file)
+                file)))
+    (file-name-base
+     (directory-file-name
+      (file-name-directory
+       file)))))
+
+(defun mindstream--template-used (session)
+  "Name of the template used in the SESSION.
+
+SESSION is expected to be a full path to a session folder."
+  (let ((session  ; add trailing slash for good measure
+         (file-name-as-directory session)))
+    (mindstream--get-containing-dir session)))
+
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here

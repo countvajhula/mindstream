@@ -344,16 +344,28 @@ otherwise, it creates a new one and enters it."
   (let ((buf (mindstream--get-or-create-session)))
     (switch-to-buffer buf)))
 
-(defun mindstream-archive-session ()
+(defun mindstream--list-anonymous-sessions ()
+  "List anonymous session paths."
+  (let ((sessions nil))
+    (mindstream--for-all-buffers
+     (lambda ()
+       (when (mindstream-anonymous-session-p)
+         (push (mindstream--session-dir (current-buffer))
+               sessions))))
+    (seq-uniq sessions)))
+
+(defun mindstream-archive (session)
   "Move the current session to `mindstream-archive-path'.
 
-The current session is expected to be anonymous, and no action is
-taken if it is already a saved session."
-  (interactive)
-  (when (mindstream-anonymous-session-p)
-    (let ((dir (mindstream--session-dir (buffer-file-name))))
-      (mindstream--close-buffers-at-path dir)
-      (mindstream--move-dir dir mindstream-archive-path))))
+The session is expected to be anonymous - it does not make sense to
+archive saved sessions."
+  (interactive (list (completing-read "Which session? "
+                                      (mindstream--list-anonymous-sessions))))
+  (let ((template (mindstream--template-used session)))
+    (mindstream--close-buffers-at-path session)
+    (mindstream--move-dir session
+                          (mindstream--build-path mindstream-archive-path
+                                                  template))))
 
 (defun mindstream-archive-template-sessions (template)
   "Archive all sessions associated with TEMPLATE."
@@ -371,7 +383,7 @@ taken if it is already a saved session."
         (mindstream--close-buffers-at-path dir)
         (mindstream--move-dir dir to-dir)))))
 
-(defun mindstream-archive ()
+(defun mindstream-archive-all ()
   "Archive sessions for _all_ templates."
   (dolist (template (mindstream--list-templates))
     (mindstream-archive-template-sessions template)))
