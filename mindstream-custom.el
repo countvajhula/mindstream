@@ -44,8 +44,8 @@
   :group 'Editing)
 
 (defcustom mindstream-path
-  ;; platform-independent ~/.emacs.d/mindstream/anon
-  (mindstream--build-path user-emacs-directory
+  ;; platform-independent ~/mindstream/anon
+  (mindstream--build-path mindstream--user-home-directory
                           "mindstream"
                           "anon")
   "Directory where anonymous mindstream sessions will be stored."
@@ -62,8 +62,10 @@
   :group 'mindstream)
 
 (defcustom mindstream-save-session-path
+  ;; platform-independent ~/mindstream/saved
   (mindstream--build-path mindstream--user-home-directory
-                          "mindstream")
+                          "mindstream"
+                          "saved")
   "Default directory path for saving mindstream sessions."
   :type 'string
   :group 'mindstream)

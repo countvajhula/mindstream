@@ -52,7 +52,7 @@ To add a new template, visit @code{mindstream-template-path} (default: @code{"~/
 
 @subsection{Saving Sessions}
 
-You can also save scratch sessions that you'd like to keep by using @code{mindstream-save-session} (default binding: @keybinding{C-c , C-s}). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be temporary and defaults to @code{~/.emacs.d/mindstream/anon}), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
+You can also save scratch sessions that you'd like to keep by using @code{mindstream-save-session} (default binding: @keybinding{C-c , C-s}). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be ephemeral and defaults to @code{~/mindstream/anon}), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
 
 @subsection{Entering Sessions Even More Quickly}
 
@@ -157,13 +157,11 @@ This tip is not about Mindstream specifically but more about a good workflow to 
 
 Mindstream sessions can have @emph{a lot} of commits, and they ensure that you never need to name your document at different stages of development out of fear that you'll lose important work. But if you happen to be writing a book, say, you might like to mark specific points as being significant in some way, so that if you ever have to search through earlier versions of your work, you'll know where to look. Traditionally, you might rename your file something like @code{draft_first_revision_final.tex}. From Mindstream's perspective, this a confusion of space and time. We seek to capture a moment in time, but we use a distinct place in space (a new file) for this purpose. In Mindstream, it'd be better to use a standard feature of Git, @emph{tagging}, to achieve the same result. That is, when you arrive at a version you think is significant, simply tag the current commit (using a Git client of your choice, such as Magit) with a name and a message. It's a much more useful way to do it than @code{draft_final_final_....tex}! For example, it allows you to very quickly switch to different "good" versions (e.g. in Magit, @keybinding{bb} and then select a tag in the completion menu) that you could show to editors for proofreading.
 
-@subsection{Choosing a Session Path}
+@subsection{Choosing an Archive Path}
 
-Mindstream stores anonymous sessions under a randomly generated folder name. This allows you to enter a freewriting session without worrying about the messy details of naming and storing files. As a result, it's likely that you will work on dozens, hundreds, or thousands of such sessions over time, of which you will keep only a small minority as saved, named sessions. For the anonymous sessions you don't save, you may prefer to just delete them from time to time rather than have them accumulate. Many operating systems provide standard ways to do this kind of thing -- @emph{temp folders}, usually named @code{tmp} -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
+Mindstream stores anonymous sessions under a randomly generated folder name under @variable{mindstream-path} (default: @code{~/mindstream/anon}). Sessions that you don't save will be @emph{archived} instead, which moves them to @variable{mindstream-archive-path} (default: @code{~/mindstream/saved}).
 
-@subsubsection{Your Emacs Folder}
-
-By default, anonymous sessions are placed in the @code{mindstream/anon} folder in your Emacs directory (e.g. @code{.emacs.d}). This is a safe default, as it is entirely under your control and you can clear this folder (if you wish to) or leave it to its own devices, as you see fit. If you retain this default behavior, you may want to add @code{mindstream/anon} to your @code{.gitignore} for your Emacs directory (assuming you keep your Emacs config versioned and publicly hosted, as many Emacs users do), so that these freewrite sessions aren't publicly visible.
+As it's likely that you will work on dozens, hundreds, or thousands of anonymous sessions over time, of which you will only save a small minority. For the remaining, archived, sessions, you may prefer to just delete these from time to time rather than have them accumulate. Many operating systems provide standard ways to do this kind of thing -- @emph{temp folders}, usually named @code{tmp} -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
 
 @subsubsection{@code{/var/tmp}}
 
@@ -189,7 +187,7 @@ Another option that's similar to this one but more predictable is to define a ne
            "tmp/mindstream"))
 }
 
-Remember that the path we are configuring here is for @emph{anonymous sessions} only. If you decide to keep a session around and save it via @code{mindstream-save} (default binding: @keybinding{C-c , C-s}), it would be saved to @code{mindstream-save-session-path} which defaults to your home folder. You can customize this as well, of course:
+Remember that the path we are configuring here is for @emph{anonymous sessions} only. If you decide to keep a session around and save it via @code{mindstream-save} (default binding: @keybinding{C-c , C-s}), it would be saved to @code{mindstream-save-session-path} which defaults to @code{~/mindstream/saved}. You can customize this as well, of course:
 
 @codeblock{
   :custom
