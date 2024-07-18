@@ -88,12 +88,15 @@ For example:
   (let ((template (car (last (split-string filename "/")))))
     (cons template filename)))
 
+(defun mindstream--list-templates ()
+  "List all templates by name."
+  (directory-files mindstream-template-path
+                   nil
+                   directory-files-no-dot-files-regexp))
+
 (defun mindstream--completing-read-template ()
   "Completion for template."
-  (let ((files (directory-files
-                mindstream-template-path
-                nil
-                directory-files-no-dot-files-regexp)))
+  (let ((files (mindstream--list-templates)))
     (completing-read "Which template? " files nil t nil
                      'mindstream-template-history)))
 
@@ -346,6 +349,11 @@ taken if it is already a saved session."
     (dolist (dir (mindstream--directory-dirs from-dir))
       (mindstream--close-buffers-at-path dir)
       (mindstream--move-dir dir to-dir))))
+
+(defun mindstream-archive ()
+  "Archive sessions for _all_ templates."
+  (dolist (template (mindstream--list-templates))
+    (mindstream-archive-template-sessions template)))
 
 (defun mindstream-open (template)
   "Open all active anonymous sessions for TEMPLATE."
