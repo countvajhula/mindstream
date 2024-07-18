@@ -210,11 +210,16 @@ This is simply the name of the containing folder."
     (file-name-directory (buffer-file-name)))
    "^.*/"))
 
-(defun mindstream--session-dir (file)
+(defun mindstream--session-dir (&optional buffer)
   "The repo base path containing FILE."
   ;; TODO: generalize to derive base repo path
   ;; in case the file is in a nested path
-  (file-name-directory file))
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      ;; (vc-root-dir) returns nil in some cases,
+      ;; e.g. for an anonymous text session,
+      ;; but magit-toplevel seems to work.
+      (magit-toplevel))))
 
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here
