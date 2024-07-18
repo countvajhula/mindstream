@@ -157,7 +157,9 @@ If any buffers have been modified, they will be saved first."
 (defun mindstream--file-in-tree-p (file dir)
   "Is FILE part of the directory tree starting at DIR?"
   ;; Source: `dired-in-this-tree-p'
-  (let (case-fold-search)
+  (let (case-fold-search
+        (file (expand-file-name file))
+        (dir (expand-file-name dir)))
     (string-match-p (concat "^" (regexp-quote dir)) file)))
 
 (defun mindstream--session-name ()
