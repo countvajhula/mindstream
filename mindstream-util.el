@@ -134,9 +134,8 @@ a file in FROM-DIR to refer to TO-DIR."
   (let* ((from-dir (file-name-as-directory
                     (expand-file-name
                      from-dir)))
-         (to-dir (file-name-as-directory
-                  (expand-file-name
-                   to-dir)))
+         (to-dir (expand-file-name
+                  to-dir))
          (from-pat from-dir)
          (to-pat (if (file-directory-p to-dir)
                      (concat to-dir
@@ -144,7 +143,11 @@ a file in FROM-DIR to refer to TO-DIR."
                               (mindstream--directory-name
                                from-dir)))
                    to-dir)))
-    (rename-file from-dir to-dir nil)
+    (rename-file from-dir
+                 (if (file-directory-p to-dir)
+                     (file-name-as-directory to-dir)
+                   to-dir)
+                 nil)
     ;; Update visited file name of all affected buffers
     (mindstream--for-all-buffers
      (lambda ()
