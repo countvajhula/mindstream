@@ -113,13 +113,18 @@ Return FULL, absolute paths, or relative paths."
 (defun mindstream--for-all-buffers (action)
   "Take ACTION for all open buffers.
 
+This only operates on buffers that are visiting files, and not
+non-file buffers, since all buffers of interest for our purposes
+correspond to files on disk.
+
 ACTION must take no arguments and should return nothing. If a return
 value is desired, then use a closure with a mutable lexical variable,
 and mutate that variable in ACTION."
   (let ((blist (buffer-list)))
     (while blist
       (with-current-buffer (car blist)
-        (funcall action))
+        (when buffer-file-name
+          (funcall action)))
       (setq blist (cdr blist)))))
 
 (defun mindstream--find-buffer (predicate)
@@ -164,9 +169,8 @@ a file in FROM-DIR to refer to TO-DIR."
     ;; Update visited file name of all affected buffers
     (mindstream--for-all-buffers
      (lambda ()
-       (when (and buffer-file-name
-		          (mindstream--file-in-tree-p buffer-file-name
-                                              from-dir))
+       (when (mindstream--file-in-tree-p buffer-file-name
+                                         from-dir)
 	     (let ((modflag (buffer-modified-p))
                (to-file (replace-regexp-in-string
                          (concat "^" (regexp-quote from-pat))
@@ -181,9 +185,8 @@ a file in FROM-DIR to refer to TO-DIR."
 If any buffers have been modified, they will be saved first."
   (mindstream--for-all-buffers
    (lambda ()
-     (when (and buffer-file-name
-		        (mindstream--file-in-tree-p buffer-file-name
-                                            path))
+     (when (mindstream--file-in-tree-p buffer-file-name
+                                       path)
        (when (buffer-modified-p)
          (save-buffer))
        (kill-buffer)))))
