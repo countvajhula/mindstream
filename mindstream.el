@@ -348,5 +348,13 @@ taken if it is already a saved session."
       (mindstream--close-buffers-at-path dir)
       (mindstream--move-dir dir to-dir))))
 
+(defun mindstream-open (template)
+  "Open all active anonymous sessions for TEMPLATE."
+  (interactive (list
+                (mindstream--completing-read-template)))
+  (dolist (dir (mindstream--directory-dirs
+                (mindstream--anonymous-path template)))
+    (mindstream-load-session dir)))
+
 (provide 'mindstream)
 ;;; mindstream.el ends here
