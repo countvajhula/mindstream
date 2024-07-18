@@ -122,6 +122,19 @@ and mutate that variable in ACTION."
         (funcall action))
       (setq blist (cdr blist)))))
 
+(defun mindstream--find-buffer (predicate)
+  "Find the first buffer that returns true for PREDICATE.
+
+PREDICATE must take no arguments. The matching buffer is returned, or
+nil if there is no match."
+  (let ((blist (buffer-list)))
+    (catch 'break
+      (while blist
+        (with-current-buffer (car blist)
+          (when (funcall predicate)
+            (throw 'break (current-buffer))))
+        (setq blist (cdr blist))))))
+
 (defun mindstream--move-dir (from-dir to-dir)
   "Move folder FROM-DIR to TO-DIR.
 

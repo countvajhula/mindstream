@@ -98,23 +98,6 @@ filename relative to DIR rather than an absolute path."
                                                        mindstream-save-session-path))
   (message "Session started at %s." default-directory))
 
-(defun mindstream--end-anonymous-session (&optional major-mode-to-use)
-  "End the current anonymous session.
-
-This ends the current anonymous session for MAJOR-MODE-TO-USE and does not
-affect a named session that you may happen to be visiting."
-  ;; TODO: may want to also kill any other open buffers at the same base path
-  (let ((buf (mindstream--get-anonymous-session-buffer major-mode-to-use)))
-    (when buf
-      (with-current-buffer buf
-        ;; first write the existing scratch buffer
-        ;; if there are unsaved changes
-        (mindstream--iterate)
-        ;; end the anonymous session
-        (mindstream-end-session)
-        ;; then kill it
-        (kill-buffer)))))
-
 (defun mindstream-end-session (&optional session)
   "End SESSION.
 
@@ -133,7 +116,6 @@ buffers at the SESSION path."
                                                           session))))))
   (let ((session (or session (mindstream--current-session))))
     ;; session can be nil if called non-interactively
-    ;; as in `mindstream--end-anonymous-session'
     (setq mindstream-active-sessions
           (remove session mindstream-active-sessions))
     (message "Session %s ended." session)))
@@ -167,7 +149,7 @@ New sessions always start anonymous."
       (mindstream-backend-initialize path)
       ;; TODO: archive instead of end,
       ;; conditioned on `mindstream-unique'
-      (mindstream--end-anonymous-session major-mode-to-use)
+      ;; (mindstream--end-anonymous-session major-mode-to-use)
       (find-file
        (expand-file-name filename
                          path))
@@ -313,11 +295,6 @@ buffer is used."
           " - "
           (mindstream--mode-name major-mode-to-use)
           "*"))
-
-(defun mindstream--get-anonymous-session-buffer (&optional major-mode-to-use)
-  "Get the active anonymous session buffer for MAJOR-MODE-TO-USE, if it exists."
-  (let ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use)))
-    (get-buffer buffer-name)))
 
 (defun mindstream-anonymous-session-p ()
   "Predicate to check if the current buffer is part of an anonymous session."

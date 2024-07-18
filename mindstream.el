@@ -250,7 +250,7 @@ you would typically want to specify a new, non-existent folder."
     ;; session in `mindsteam-active-sessions'. But that's OK
     ;; for now as it doesn't affect anything, and this "state"
     ;; will be removed eventually anyway in the design refactor
-    (mindstream--end-anonymous-session)
+    ;; (mindstream--end-anonymous-session)
     (if named
         (mindstream-load-session dest-dir file)
       (mindstream-load-session
@@ -305,6 +305,21 @@ the file to be opened."
       file  ; (expand-file-name file) - probably don't need to expand if absolute?
     (expand-file-name file mindstream-save-session-path)))
 
+(defun mindstream--list-template-sessions (template)
+  "List all active anonymous sessions for template."
+  (let ((path (mindstream--anonymous-path template)))
+    (when (file-directory-p path)
+      (mindstream--directory-dirs path))))
+
+(defun mindstream--visit-anonymous-session (template)
+  "Visit the most recent open anonymous session for TEMPLATE."
+  (mindstream--find-buffer
+   (lambda ()
+     (and buffer-file-name
+		  (mindstream--file-in-tree-p
+           buffer-file-name
+           (mindstream--anonymous-path template))))))
+
 (defun mindstream--get-or-create-session ()
   "Get the anonymous session buffer or create a new one.
 
@@ -315,9 +330,10 @@ This is a convenience utility for \"read only\" cases where we simply
 want to get a session buffer for the current major mode, without
 worrying about how that happens. It is too connoted to be useful in
 features implementing the session iteration model."
-  (or (mindstream--get-anonymous-session-buffer)
-      (mindstream--new (mindstream--template-path
-                        (mindstream--infer-template major-mode)))))
+  (let ((template (mindstream--infer-template major-mode)))
+    (or (mindstream--visit-anonymous-session template)
+        (mindstream-open template)
+        (mindstream--new template))))
 
 (defun mindstream-enter-anonymous-session ()
   "Enter an anonymous session buffer.
@@ -343,15 +359,15 @@ taken if it is already a saved session."
   "Archive all sessions associated with TEMPLATE."
   (interactive (list
                 (mindstream--completing-read-template)))
-  (let ((from-dir (mindstream--anonymous-path template))
+  (let ((sessions (mindstream--list-template-sessions template))
         (to-dir (mindstream--archive-path template)))
     (mindstream--ensure-path to-dir)
-    (when (file-directory-p from-dir)
+    (when sessions
       ;; TODO: should we ensure that all template paths
       ;; exist in the anon path at startup, even for
       ;; templates where we haven't created any sessions
       ;; yet?
-      (dolist (dir (mindstream--directory-dirs from-dir))
+      (dolist (dir sessions)
         (mindstream--close-buffers-at-path dir)
         (mindstream--move-dir dir to-dir)))))
 
@@ -364,9 +380,13 @@ taken if it is already a saved session."
   "Open all active anonymous sessions for TEMPLATE."
   (interactive (list
                 (mindstream--completing-read-template)))
-  (dolist (dir (mindstream--directory-dirs
-                (mindstream--anonymous-path template)))
-    (mindstream-load-session dir)))
+  (let ((sessions (mindstream--list-template-sessions template)))
+    (when sessions
+      (dolist (dir sessions)
+        (mindstream-load-session dir))
+      ;; TODO: seems artificial to return this just so we
+      ;; have a no-op buffer to switch to in "enter session"
+      (current-buffer))))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here
