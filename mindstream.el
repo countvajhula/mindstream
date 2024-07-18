@@ -340,18 +340,11 @@ taken if it is already a saved session."
   "Archive all sessions associated with TEMPLATE."
   (interactive (list
                 (mindstream--completing-read-template)))
-  (let ((from-dir (mindstream--build-path mindstream-path
-                                          template))
-        (to-dir (mindstream--build-path mindstream-archive-path
-                                        template)))
-    (mindstream--ensure-path
-     (mindstream--build-path mindstream-archive-path
-                             template))
-    (dolist (dir (seq-filter (lambda (dir)
-                               (file-directory-p dir))
-                             (mindstream--directory-files
-                              from-dir
-                              t)))
+  (let ((from-dir (mindstream--anonymous-path template))
+        (to-dir (mindstream--archive-path template)))
+    (mindstream--ensure-path to-dir)
+    (dolist (dir (mindstream--directory-dirs from-dir
+                                             t))
       (mindstream--close-buffers-at-path dir)
       (mindstream--move-dir dir to-dir))))
 

@@ -70,6 +70,8 @@ platform-appropriate way.
 (defun mindstream--directory-files (dir &optional full)
   "List files in DIR that aren't hidden or special.
 
+This includes subdirectories.
+
 Return FULL, absolute paths, or relative paths."
   ;; TODO: exclude files that aren't versioned by Git
   (let ((files (seq-filter (lambda (x)
@@ -82,6 +84,14 @@ Return FULL, absolute paths, or relative paths."
                    (expand-file-name d dir))
                  files)
       files)))
+
+(defun mindstream--directory-dirs (dir)
+  "List subdirectories in DIR."
+  (seq-filter (lambda (file)
+                (file-directory-p file))
+              (mindstream--directory-files dir
+                                           ;; always absolute for now
+                                           t)))
 
 (defun mindstream--directory-files-recursively (dir)
   "List files in DIR that aren't hidden or special."

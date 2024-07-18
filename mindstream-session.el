@@ -196,12 +196,32 @@ isn't already present."
     (mindstream--build-path base-path
                             session-name)))
 
-(defun mindstream--template-path (&optional name)
-  "Path to template NAME.
+(defun mindstream--template-path (&optional template)
+  "Path to TEMPLATE.
 
-If NAME isn't provided, use the default template."
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'. If it isn't provided, use the
+default template."
   (mindstream--build-path mindstream-template-path
-                          (or name mindstream-default-template)))
+                          (or template mindstream-default-template)))
+
+(defun mindstream--anonymous-path (&optional template)
+  "Path to anonymous sessions using TEMPLATE.
+
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'. If it isn't provided, use the
+default template."
+  (mindstream--build-path mindstream-path
+                          (or template mindstream-default-template)))
+
+(defun mindstream--archive-path (&optional template)
+  "Path to archived sessions using TEMPLATE.
+
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'. If it isn't provided, use the
+default template."
+  (mindstream--build-path mindstream-archive-path
+                          (or template mindstream-default-template)))
 
 (defun mindstream--template-name (path)
   "Name of template at PATH."
