@@ -375,10 +375,6 @@ archive saved sessions."
         (to-dir (mindstream--archive-path template)))
     (mindstream--ensure-path to-dir)
     (when sessions
-      ;; TODO: should we ensure that all template paths
-      ;; exist in the anon path at startup, even for
-      ;; templates where we haven't created any sessions
-      ;; yet?
       (dolist (dir sessions)
         (mindstream--close-buffers-at-path dir)
         (mindstream--move-dir dir to-dir)))))
