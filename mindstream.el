@@ -343,8 +343,7 @@ taken if it is already a saved session."
   (let ((from-dir (mindstream--anonymous-path template))
         (to-dir (mindstream--archive-path template)))
     (mindstream--ensure-path to-dir)
-    (dolist (dir (mindstream--directory-dirs from-dir
-                                             t))
+    (dolist (dir (mindstream--directory-dirs from-dir))
       (mindstream--close-buffers-at-path dir)
       (mindstream--move-dir dir to-dir))))
 
