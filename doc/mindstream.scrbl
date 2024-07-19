@@ -54,15 +54,19 @@ You may notice that there is only one template available to use for your first s
 
 Mindstream doesn't include any templates out of the box, so you'll probably want to create some for standard sessions you are likely to need, for instance, for programming in your favorite language (perhaps @hyperlink["https://racket-lang.org/"]{Racket}?), or just freewriting some text for your next great novel, following in the keystrokes of Emacs octopuses like Neal Stephenson.
 
-To add a new template, visit @variable{mindstream-template-path} (default: @code{"~/.emacs.d/mindstream/templates/"}) in your filemanager of choice (e.g. Emacs's @code{dired}, or just a command line), and create a folder there with the name of your template (e.g. @code{racket}). The folder should contain an ordinary file (or multiple files) with the appropriate extension (e.g. @code{.rkt} -- it could be anything at all that you typically use Emacs to edit). This template will now be available as an option in @function{mindstream-new}.
+To add a new template, visit @variable{mindstream-template-path} (default: @code{"~/.emacs.d/mindstream/templates/"}) in your file manager of choice (e.g. Emacs's @code{dired}, or just a command line), and create a folder there with the name of your template (e.g. @code{racket}). The folder should contain an ordinary file (or multiple files) with the appropriate extension (e.g. @code{.rkt} -- it could be anything at all that you typically use Emacs to edit). This template will now be available as an option in @function{mindstream-new}.
 
 @subsection{Saving Sessions}
 
 You can also save scratch sessions that you'd like to keep by using @function{mindstream-save-session} (default binding: @keybinding{C-c , C-s}). This simply clones the session's Git repo to a more permanent and familiar path that you indicate (as opposed to the anonymous session path which is assumed to be ephemeral and defaults to @code{~/mindstream/anon}), thus preserving the entire session history, allowing it to be navigated and even resumed at any time in the future.
 
+@subsection{Archiving Sessions}
+
+For sessions that you don't save, if you have @variable{mindstream-unique} set to true, then they will automatically be @emph{archived} -- that is, moved into @variable{mindstream-archive-path} -- each time you start a new session from a particular template. On the other hand, if you are not using a unique session per template, you may want to manually archive sessions when you are done with them, if you are choosing not to @seclink["Saving_Sessions"]{save them}. Use @function{mindstream-archive} (default binding: @keybinding{C-c , a}) to do this.
+
 @subsection{Entering Sessions Even More Quickly}
 
-@function{mindstream-enter-anonymous-session} (default: @keybinding{C-c , b}) will take you immediately to a new anonymous session for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
+@function{mindstream-enter-anonymous-session} (default: @keybinding{C-c , b}) will take you immediately to an anonymous session for the current major mode, without asking you any questions. If an anonymous session already exists, it will take you there rather than create a new one. In creating a new session, it will use the first template it finds that is recognizable to your current major mode.
 
 If you've got more than one template for a particular major mode, you may want to indicate which one is preferred rather than leave it to chance or accidents of alphabetical order. You can do this by associating each major mode with the name of the preferred template. For example:
 
@@ -129,15 +133,36 @@ But if you happen to want to use a different customization for Mindstream sessio
                 (setq-local racket-repl-buffer-name "*scratch - Racket REPL*")))
 }
 
+@subsection{Persistent Sessions}
+
+If you would like anonymous sessions to persist across Emacs restarts, set @variable{mindstream-persist} to @code{t}. For example, you could put this in the @code{:custom} section of your @code{use-package} declaration:
+
+@codeblock{
+  :custom
+  ...
+  (mindstream-persist t)
+}
+
+@subsection{Multiple Concurrent Anonymous Sessions}
+
+By default, starting a new anonymous session for a template @emph{archives} any existing anonymous session for that template (leaving sessions for other templates alone). If you would like to support more than one active anonymous session at a time per template instead, set @variable{mindstream-unique} to @code{nil}. For example, you could put this in the @code{:custom} section of your @code{use-package} declaration:
+
+@codeblock{
+  :custom
+  ...
+  (mindstream-unique nil)
+}
+
 @section{Design}
 
-Mindstream structures your workflow in sessions, which are version-controlled files. When you first start a session it begins as anonymous, meaning that it doesn't have a name. If the session develops into something worth keeping, you can save it to a preconfigured (or any) location on disk by giving the session a name. A session is stored as a version-controlled folder. You can also save just the file rather than the entire session. With that in mind, here are some properties of the design:
+Mindstream structures your workflow in sessions, which are version-controlled files. When you first start a session it begins as anonymous, meaning that it doesn't have a name. If the session develops into something worth keeping, you can save it to a preconfigured (or any) location on disk by giving the session a name. A session is stored as a version-controlled folder. With that in mind, here are some properties of the design:
 
 @itemlist[#:style 'ordered
-  @item{There is only one anonymous scratch session active at any time, per major mode.}
-  @item{Saving an anonymous session turns it into a named session, and there is no active anonymous session at that point. Named sessions work the same as anonymous sessions aside from having a name and being in a permanent location on disk. A new anonymous session could be started at any time via @function{mindstream-new}.}
-  @item{New sessions always begin as anonymous.}
-  @item{Named sessions may be loaded without interfering with the active anonymous session.}
+  @item{Depending on @variable{mindstream-unique}, there may be only one anonymous session active at any time per template, or there may be more than one.}
+  @item{Saving an anonymous session turns it into a named session. Named sessions work the same as anonymous sessions aside from having a name and being in a permanent location on disk. A new anonymous session could be started at any time via @function{mindstream-new}.}
+  @item{New sessions always begin anonymous.}
+  @item{Anonymous sessions may persist across Emacs restarts, depending on @variable{mindstream-persist}.}
+  @item{Named sessions may be loaded without interfering with any active anonymous sessions.}
   @item{Any number of named sessions could be active at the same time. Sessions are self-contained and independent.}
 ]
 
@@ -165,9 +190,11 @@ Mindstream sessions can have @emph{a lot} of commits, and they ensure that you n
 
 @subsection{Choosing an Archive Path}
 
-Mindstream stores anonymous sessions under a randomly generated folder name under @variable{mindstream-path} (default: @code{~/mindstream/anon}). Sessions that you don't save will be @emph{archived} instead, which moves them to @variable{mindstream-archive-path} (default: @code{~/mindstream/saved}).
+Mindstream stores anonymous sessions under a randomly generated folder name under @variable{mindstream-path} (default: @code{~/mindstream/anon}). Sessions that you don't save will typically be @emph{archived} instead (either implicitly if @variable{mindstream-unique} is @code{t}, or by you, manually, otherwise), which moves them to @variable{mindstream-archive-path} (default: @code{~/mindstream/saved}).
 
-As it's likely that you will work on dozens, hundreds, or thousands of anonymous sessions over time, of which you will only save a small minority. For the remaining, archived, sessions, you may prefer to just delete these from time to time rather than have them accumulate. Many operating systems provide standard ways to do this kind of thing -- @emph{temp folders}, usually named @code{tmp} -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
+The default value of @variable{mindstream-archive-path} is a safe and good choice. But you may like to do things differently, and in that case, here are some options to consider.
+
+It's likely that you will work on dozens, hundreds, or thousands of anonymous sessions over time, of which you will only save a small minority. For the remaining, archived, sessions, you may prefer to just delete these from time to time rather than have them accumulate. Many operating systems provide standard ways to do this kind of thing -- @emph{temp folders}, usually named @code{tmp} -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
 
 @subsubsection{@code{/var/tmp}}
 
