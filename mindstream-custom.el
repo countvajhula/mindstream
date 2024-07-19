@@ -71,8 +71,8 @@
   :group 'mindstream)
 
 (defcustom mindstream-archive-path
-  ;; platform-independent ~/.emacs.d/mindstream/archive
-  (mindstream--build-path user-emacs-directory
+  ;; platform-independent ~/mindstream/archive
+  (mindstream--build-path mindstream--user-home-directory
                           "mindstream"
                           "archive")
   "Directory where archived anonymous mindstream sessions will be stored."
