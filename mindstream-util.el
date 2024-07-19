@@ -117,7 +117,7 @@ This only operates on buffers that are visiting files, and not
 non-file buffers, since all buffers of interest for our purposes
 correspond to files on disk.
 
-ACTION must take no arguments and should return nothing. If a return
+ACTION must take no arguments and should return nothing.  If a return
 value is desired, then use a closure with a mutable lexical variable,
 and mutate that variable in ACTION."
   (let ((blist (buffer-list)))
@@ -130,7 +130,7 @@ and mutate that variable in ACTION."
 (defun mindstream--find-buffer (predicate)
   "Find the first buffer that returns true for PREDICATE.
 
-PREDICATE must take no arguments. The matching buffer is returned, or
+PREDICATE must take no arguments.  The matching buffer is returned, or
 nil if there is no match."
   (let ((blist (buffer-list)))
     (catch 'break
@@ -211,20 +211,13 @@ This is simply the name of the containing folder."
    "^.*/"))
 
 (defun mindstream--session-dir (&optional buffer)
-  "The repo base path containing FILE."
-  ;; TODO: generalize to derive base repo path
-  ;; in case the file is in a nested path
-  (let ((buffer (or buffer (current-buffer))))
-    (with-current-buffer buffer
-      ;; (vc-root-dir) returns nil in some cases,
-      ;; e.g. for an anonymous text session,
-      ;; but magit-toplevel seems to work.
-      (magit-toplevel))))
+  "The repo base path containing BUFFER."
+  (mindstream-backend-root buffer))
 
 (defun mindstream--get-containing-dir (file)
   "Get the name of the directory containing FILE.
 
-FILE could be a file or a directory. Only the name of the containing
+FILE could be a file or a directory.  Only the name of the containing
 directory is returned, rather than its full path."
   (let ((file (if (directory-name-p file)
                   (directory-file-name file)

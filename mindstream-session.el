@@ -144,8 +144,7 @@ buffers at the SESSION path."
 This creates an appropriate base path on disk for the TEMPLATE if it
 isn't already present."
   (let* ((session-name (mindstream--unique-name))
-         (base-path (mindstream--build-path mindstream-path
-                                            (mindstream--template-name template))))
+         (base-path (mindstream--anonymous-path template)))
     (mindstream--ensure-path base-path)
     (mindstream--build-path base-path
                             session-name)))
@@ -154,7 +153,7 @@ isn't already present."
   "Path to TEMPLATE.
 
 TEMPLATE is expected to be a simple name corresponding to the name of
-a folder at `mindstream-template-path'. If it isn't provided, use the
+a folder at `mindstream-template-path'.  If it isn't provided, use the
 default template."
   (mindstream--build-path mindstream-template-path
                           (or template mindstream-default-template)))
@@ -163,7 +162,7 @@ default template."
   "Path to anonymous sessions using TEMPLATE.
 
 TEMPLATE is expected to be a simple name corresponding to the name of
-a folder at `mindstream-template-path'. If it isn't provided, use the
+a folder at `mindstream-template-path'.  If it isn't provided, use the
 default template."
   (mindstream--build-path mindstream-path
                           (or template mindstream-default-template)))
@@ -172,7 +171,7 @@ default template."
   "Path to archived sessions using TEMPLATE.
 
 TEMPLATE is expected to be a simple name corresponding to the name of
-a folder at `mindstream-template-path'. If it isn't provided, use the
+a folder at `mindstream-template-path'.  If it isn't provided, use the
 default template."
   (mindstream--build-path mindstream-archive-path
                           (or template mindstream-default-template)))

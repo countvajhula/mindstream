@@ -333,7 +333,7 @@ the file to be opened."
     (expand-file-name file mindstream-save-session-path)))
 
 (defun mindstream--list-template-sessions (template)
-  "List all active anonymous sessions for template."
+  "List all active anonymous sessions for TEMPLATE."
   (let ((path (mindstream--anonymous-path template)))
     (when (file-directory-p path)
       (mindstream--directory-dirs path))))
@@ -382,7 +382,7 @@ otherwise, it creates a new one and enters it."
     (seq-uniq sessions)))
 
 (defun mindstream-archive (session)
-  "Move the current session to `mindstream-archive-path'.
+  "Move the current SESSION to `mindstream-archive-path'.
 
 The session is expected to be anonymous - it does not make sense to
 archive saved sessions."
