@@ -130,33 +130,6 @@ buffers at the SESSION path."
   (let ((path (or path default-directory)))
     (member path mindstream-active-sessions)))
 
-(defun mindstream-start-anonymous-session (&optional template)
-  "Start a new anonymous session.
-
-This creates a new directory and Git repository for the new session
-after copying over the contents of TEMPLATE if one is specified.
-Otherwise, it uses the configured default template.
-
-New sessions always start anonymous."
-  (let* ((template (mindstream--template-path
-                    (or template
-                        mindstream-default-template)))
-         (filename (mindstream--starting-file-for-session template))
-         (major-mode-to-use (mindstream--infer-major-mode filename))
-         (path (mindstream--generate-anonymous-session-path template)))
-    (unless (file-directory-p path)
-      (copy-directory template path)
-      (mindstream-backend-initialize path)
-      ;; TODO: archive instead of end,
-      ;; conditioned on `mindstream-unique'
-      ;; (mindstream--end-anonymous-session major-mode-to-use)
-      (find-file
-       (expand-file-name filename
-                         path))
-      (mindstream--initialize-buffer)
-      (mindstream-begin-session)
-      (current-buffer))))
-
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
   ;; always add the current file (where mindstream-session-mode

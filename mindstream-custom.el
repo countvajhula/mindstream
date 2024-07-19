@@ -116,6 +116,15 @@ for the major mode so that it would be selected."
   :type 'boolean
   :group 'mindstream)
 
+(defcustom mindstream-unique t
+  "Whether there should be a unique anonymous session per template.
+
+If true, then starting a new anonymous session always archives any
+existing ones.  If nil, then any number of anonymous sessions may be
+active for the template at any given time."
+  :type 'boolean
+  :group 'mindstream)
+
 (defcustom mindstream-add-everything t
   "Whether to add all files to the index before commiting on each iteration."
   :type 'boolean

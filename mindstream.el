@@ -43,6 +43,7 @@
 
 (require 'mindstream-custom)
 (require 'mindstream-session)
+(require 'mindstream-backend)
 (require 'mindstream-util)
 
 (defvar mindstream-template-history nil
@@ -128,6 +129,29 @@ name, in a dedicated Git version-controlled folder at
   (let ((template (or template
                       (mindstream--completing-read-template))))
     (switch-to-buffer (mindstream--new template))))
+
+(defun mindstream-start-anonymous-session (&optional template)
+  "Start a new anonymous session.
+
+This creates a new directory and Git repository for the new session
+after copying over the contents of TEMPLATE if one is specified.
+Otherwise, it uses the configured default template.
+
+New sessions always start anonymous."
+  (let* ((template-path (mindstream--template-path template))
+         (filename (mindstream--starting-file-for-session template-path))
+         (path (mindstream--generate-anonymous-session-path template)))
+    (unless (file-directory-p path)
+      (copy-directory template-path path)
+      (mindstream-backend-initialize path)
+      (when mindstream-unique
+        (mindstream-archive-template-sessions template))
+      (find-file
+       (expand-file-name filename
+                         path))
+      (mindstream--initialize-buffer)
+      (mindstream-begin-session)
+      (current-buffer))))
 
 (defun mindstream-initialize ()
   "Do any setup that's necessary for Mindstream.
