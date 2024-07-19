@@ -111,6 +111,11 @@ for the major mode so that it would be selected."
   :type 'string
   :group 'mindstream)
 
+(defcustom mindstream-persist nil
+  "Whether anonymous sessions should persist across Emacs restarts until archived."
+  :type 'boolean
+  :group 'mindstream)
+
 (defcustom mindstream-add-everything t
   "Whether to add all files to the index before commiting on each iteration."
   :type 'boolean

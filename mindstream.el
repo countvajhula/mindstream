@@ -146,6 +146,9 @@ can customize `mindstream-triggers' and add the function(s) that
 should trigger session iteration (and remove `save-buffer')."
   (mindstream--ensure-paths)
   (mindstream--ensure-templates-exist)
+  (unless mindstream-persist
+    ;; archive all sessions on startup
+    (mindstream-archive-all))
   (dolist (fn mindstream-triggers)
     (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
 
