@@ -142,10 +142,10 @@ New sessions always start anonymous."
          (filename (mindstream--starting-file-for-session template-path))
          (path (mindstream--generate-anonymous-session-path template)))
     (unless (file-directory-p path)
-      (copy-directory template-path path)
-      (mindstream-backend-initialize path)
       (when mindstream-unique
         (mindstream-archive-template-sessions template))
+      (copy-directory template-path path)
+      (mindstream-backend-initialize path)
       (find-file
        (expand-file-name filename
                          path))
