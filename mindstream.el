@@ -347,20 +347,18 @@ the file to be opened."
            buffer-file-name
            (mindstream--anonymous-path template))))))
 
-(defun mindstream--get-or-create-session ()
-  "Get the anonymous session buffer or create a new one.
+(defun mindstream--get-or-create-session (template)
+  "Get an existing anonymous session buffer for TEMPLATE or create a new one.
 
-If an anonymous buffer doesn't exist, this creates a new one using the
-default configured template.
+If an anonymous buffer doesn't exist, this creates a new one using TEMPLATE.
 
 This is a convenience utility for \"read only\" cases where we simply
 want to get a session buffer for the current major mode, without
 worrying about how that happens. It is too connoted to be useful in
 features implementing the session iteration model."
-  (let ((template (mindstream--infer-template major-mode)))
-    (or (mindstream--visit-anonymous-session template)
-        (mindstream-open template)
-        (mindstream--new template))))
+  (or (mindstream--visit-anonymous-session template)
+      (mindstream-open template)
+      (mindstream--new template)))
 
 (defun mindstream-enter-anonymous-session ()
   "Enter an anonymous session buffer.
@@ -368,7 +366,19 @@ features implementing the session iteration model."
 This enters an existing anonymous session if one is present,
 otherwise, it creates a new one and enters it."
   (interactive)
-  (let ((buf (mindstream--get-or-create-session)))
+  (let ((buf (mindstream--get-or-create-session
+              (mindstream--infer-template
+               major-mode))))
+    (switch-to-buffer buf)))
+
+(defun mindstream-enter-session-for-template (template)
+  "Enter an anonymous session buffer.
+
+This enters an existing anonymous session if one is present,
+otherwise, it creates a new one and enters it."
+  (interactive (list
+                (mindstream--completing-read-template)))
+  (let ((buf (mindstream--get-or-create-session template)))
     (switch-to-buffer buf)))
 
 (defun mindstream--list-anonymous-sessions ()
