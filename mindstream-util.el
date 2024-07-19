@@ -42,16 +42,6 @@ This searches PATH recursively."
     (when files
       (car files))))
 
-(defun mindstream--major-mode-for-file-extension (extension)
-  "Appropriate major mode for the given file EXTENSION.
-
-This consults Emacs's `auto-mode-alist'."
-  (catch 'return
-    (dolist (assoc auto-mode-alist)
-      (pcase-let ((`(,ext . ,mode) assoc))
-        (when (string-match-p ext extension)
-          (throw 'return mode))))))
-
 ;; From: https://stackoverflow.com/a/13473856/323874
 (defun mindstream--build-path (root &rest dirs)
   "Joins a series of directories together, like Python's os.path.join.

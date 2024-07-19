@@ -233,32 +233,6 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
     (or template-name
         (mindstream--find-template-for-mode major-mode-to-use))))
 
-(defun mindstream--infer-major-mode (filename)
-  "Infer a major mode to use.
-
-Given a FILENAME, this infers the appropriate major mode based on the
-file extension by consulting Emacs."
-  (let ((extension (concat "." (file-name-extension filename))))
-    (let ((mode (mindstream--major-mode-for-file-extension extension)))
-      (or mode
-          (error "No major modes recognize the template extension '%s'!" extension)))))
-
-(defun mindstream--mode-name (major-mode-to-use)
-  "Human readable name of MAJOR-MODE-TO-USE.
-
-If MAJOR-MODE-TO-USE is not provided, the major mode of the current
-buffer is used."
-  (if major-mode-to-use
-      (string-trim-right
-       (capitalize
-        (substring
-         (symbol-name major-mode-to-use)
-         0 -5)))
-    (if (stringp mode-name)
-        ;; on older versions of Emacs
-        mode-name
-      (car mode-name))))
-
 (defun mindstream-anonymous-session-p ()
   "Predicate to check if the current buffer is part of an anonymous session."
   (mindstream--file-in-tree-p (buffer-file-name)
