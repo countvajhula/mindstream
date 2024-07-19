@@ -65,11 +65,13 @@ can be retrieved and canceled when you leave live mode.")
   (let ((mindstream-map (make-sparse-keymap)))
     (define-key mindstream-map (kbd "C-c , n") #'mindstream-new)
     (define-key mindstream-map (kbd "C-c , b") #'mindstream-enter-anonymous-session)
+    (define-key mindstream-map (kbd "C-c , t") #'mindstream-enter-session-for-template)
     (define-key mindstream-map (kbd "C-c , m") #'mindstream-begin-session)
     (define-key mindstream-map (kbd "C-c , q") #'mindstream-end-session)
     (define-key mindstream-map (kbd "C-c , s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c , C-s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
+    (define-key mindstream-map (kbd "C-c , a") #'mindstream-archive)
     (define-key mindstream-map (kbd "C-c , C-l") #'mindstream-go-live)
     (define-key mindstream-map (kbd "C-c , C-o") #'mindstream-go-offline)
 
@@ -392,7 +394,7 @@ otherwise, it creates a new one and enters it."
     (seq-uniq sessions)))
 
 (defun mindstream-archive (session)
-  "Move the current SESSION to `mindstream-archive-path'.
+  "Move the selected SESSION to `mindstream-archive-path'.
 
 The session is expected to be anonymous - it does not make sense to
 archive saved sessions."
