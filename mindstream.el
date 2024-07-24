@@ -393,6 +393,7 @@ otherwise, it creates a new one and enters it."
                sessions))))
     (seq-uniq sessions)))
 
+;; TODO: archive should be ordered by recency, so that the current session is highlighted.
 (defun mindstream-archive (session)
   "Move the selected SESSION to `mindstream-archive-path'.
 
