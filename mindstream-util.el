@@ -146,7 +146,7 @@ a file in FROM-DIR to refer to TO-DIR."
                   to-dir))
          (from-pat from-dir)
          (to-pat (if (file-directory-p to-dir)
-                     (concat to-dir
+                     (concat (file-name-as-directory to-dir)
                              (file-name-as-directory
                               (mindstream--directory-name
                                from-dir)))
