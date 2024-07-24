@@ -150,7 +150,7 @@ a file in FROM-DIR to refer to TO-DIR."
                              (file-name-as-directory
                               (mindstream--directory-name
                                from-dir)))
-                   to-dir)))
+                   (file-name-as-directory to-dir))))
     (rename-file from-dir
                  (if (file-directory-p to-dir)
                      (file-name-as-directory to-dir)
