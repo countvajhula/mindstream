@@ -44,8 +44,8 @@
   :group 'Editing)
 
 (defcustom mindstream-path
-  ;; platform-independent ~/.emacs.d/mindstream/anon
-  (mindstream--build-path user-emacs-directory
+  ;; platform-independent ~/mindstream/anon
+  (mindstream--build-path mindstream--user-home-directory
                           "mindstream"
                           "anon")
   "Directory where anonymous mindstream sessions will be stored."
@@ -62,9 +62,20 @@
   :group 'mindstream)
 
 (defcustom mindstream-save-session-path
+  ;; platform-independent ~/mindstream/saved
   (mindstream--build-path mindstream--user-home-directory
-                          "mindstream")
+                          "mindstream"
+                          "saved")
   "Default directory path for saving mindstream sessions."
+  :type 'string
+  :group 'mindstream)
+
+(defcustom mindstream-archive-path
+  ;; platform-independent ~/mindstream/archive
+  (mindstream--build-path mindstream--user-home-directory
+                          "mindstream"
+                          "archive")
+  "Directory where archived anonymous mindstream sessions will be stored."
   :type 'string
   :group 'mindstream)
 
@@ -100,6 +111,20 @@ for the major mode so that it would be selected."
 (defcustom mindstream-anonymous-buffer-prefix "scratch"
   "The prefix to use in the name of a mindstream scratch buffer."
   :type 'string
+  :group 'mindstream)
+
+(defcustom mindstream-persist nil
+  "Whether anonymous sessions should persist across Emacs restarts until archived."
+  :type 'boolean
+  :group 'mindstream)
+
+(defcustom mindstream-unique t
+  "Whether there should be a unique anonymous session per template.
+
+If true, then starting a new anonymous session always archives any
+existing ones.  If nil, then any number of anonymous sessions may be
+active for the template at any given time."
+  :type 'boolean
   :group 'mindstream)
 
 (defcustom mindstream-add-everything t

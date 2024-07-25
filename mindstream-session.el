@@ -60,10 +60,22 @@ number of active sessions is likely to be small.")
             "-"
             (sha1 (format "%s" time)))))
 
+(defun mindstream--session-file-name-relative (file dir)
+  "Return relative FILE name for `mindstream-session-history'.
+
+This returns the path of FILE relative to DIR if FILE is in DIR,
+otherwise it returns an abbreviated path (e.g. starting with ~
+if it is in the home folder)."
+  (if (string-match-p
+       (expand-file-name dir)
+       (expand-file-name file))
+      (file-relative-name file dir)
+    (abbreviate-file-name file)))
+
 (defun mindstream--starting-file-for-session (dir)
   "Select an appropriate starting file for a session.
 
-DIR is expected to be a path to an existing folder. This returns a
+DIR is expected to be a path to an existing folder.  This returns a
 filename relative to DIR rather than an absolute path."
   (let ((files (mindstream--directory-files-recursively dir)))
     (if (and files (= 1 (length files)))
@@ -89,7 +101,7 @@ filename relative to DIR rather than an absolute path."
 (defun mindstream-end-session (&optional session)
   "End SESSION.
 
-This only removes implicit versioning. It does not close any open
+This only removes implicit versioning.  It does not close any open
 buffers at the SESSION path."
   (interactive (list (completing-read "Which session? "
                                       mindstream-active-sessions
@@ -104,7 +116,6 @@ buffers at the SESSION path."
                                                           session))))))
   (let ((session (or session (mindstream--current-session))))
     ;; session can be nil if called non-interactively
-    ;; as in `mindstream--end-anonymous-session'
     (setq mindstream-active-sessions
           (remove session mindstream-active-sessions))
     (message "Session %s ended." session)))
@@ -119,33 +130,6 @@ buffers at the SESSION path."
   (let ((path (or path default-directory)))
     (member path mindstream-active-sessions)))
 
-(defun mindstream-start-anonymous-session (&optional template)
-  "Start a new anonymous session.
-
-This creates a new directory and Git repository for the new session
-after copying over the contents of TEMPLATE if one is specified.
-Otherwise, it uses the configured default template.
-
-New sessions always start anonymous."
-  (let* ((session (mindstream--unique-name))
-         (base-path (mindstream--generate-anonymous-session-path session))
-         (template (or template mindstream-default-template)))
-    (unless (file-directory-p base-path)
-      (copy-directory template base-path)
-      (mindstream-backend-initialize base-path)
-      (let ((filename (mindstream--starting-file-for-session base-path)))
-        ;; end existing anonymous session for this major mode
-        (mindstream--end-anonymous-session
-         (mindstream--infer-major-mode
-          filename))
-        (find-file
-         (expand-file-name filename
-                           base-path))
-        (mindstream--initialize-buffer)
-        (rename-buffer (mindstream-anonymous-buffer-name))
-        (mindstream-begin-session)
-        (current-buffer)))))
-
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
   ;; always add the current file (where mindstream-session-mode
@@ -154,27 +138,62 @@ New sessions always start anonymous."
    (file-name-nondirectory (buffer-file-name)))
   (mindstream-backend-iterate))
 
-(defun mindstream--generate-anonymous-session-path (session)
-  "A path on disk to use for a newly created SESSION."
-  (mindstream--build-path mindstream-path
-                          session))
+(defun mindstream--generate-anonymous-session-path (template)
+  "A path on disk to use for a newly created SESSION.
 
-(defun mindstream--template (&optional name)
-  "Path to template NAME.
+This creates an appropriate base path on disk for the TEMPLATE if it
+isn't already present."
+  (let* ((session-name (mindstream--unique-name))
+         (base-path (mindstream--anonymous-path template)))
+    (mindstream--ensure-path base-path)
+    (mindstream--build-path base-path
+                            session-name)))
 
-If NAME isn't provided, use the default template."
+(defun mindstream--template-path (&optional template)
+  "Path to TEMPLATE.
+
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'.  If it isn't provided, use the
+default template."
   (mindstream--build-path mindstream-template-path
-                          (or name mindstream-default-template)))
+                          (or template mindstream-default-template)))
 
-(defun mindstream--ensure-anonymous-path ()
-  "Ensure that the anonymous session path exists."
-  (unless (file-directory-p mindstream-path)
-    (mkdir mindstream-path t)))
+(defun mindstream--anonymous-path (&optional template)
+  "Path to anonymous sessions using TEMPLATE.
+
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'.  If it isn't provided, use the
+default template."
+  (mindstream--build-path mindstream-path
+                          (or template mindstream-default-template)))
+
+(defun mindstream--archive-path (&optional template)
+  "Path to archived sessions using TEMPLATE.
+
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'.  If it isn't provided, use the
+default template."
+  (mindstream--build-path mindstream-archive-path
+                          (or template mindstream-default-template)))
+
+(defun mindstream--template-name (path)
+  "Name of template at PATH."
+  (file-name-base path))
+
+(defun mindstream--ensure-path (path)
+  "Ensure that PATH exists on the filesystem."
+  (unless (file-directory-p path)
+    (mkdir path t)))
+
+(defun mindstream--ensure-paths ()
+  "Ensure that paths that mindstream needs to function exist."
+  (mindstream--ensure-path mindstream-path)
+  (mindstream--ensure-path mindstream-archive-path))
 
 (defun mindstream--ensure-templates-exist ()
   "Ensure that the templates directory exists and contains the default template."
   (unless (file-directory-p mindstream-template-path)
-    (let ((default-template-dir (mindstream--template)))
+    (let ((default-template-dir (mindstream--template-path)))
       (mkdir default-template-dir t)
       (let ((template-file
              (mindstream--build-path default-template-dir
@@ -214,49 +233,10 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
     (or template-name
         (mindstream--find-template-for-mode major-mode-to-use))))
 
-(defun mindstream--infer-major-mode (filename)
-  "Infer a major mode to use.
-
-Given a FILENAME, this infers the appropriate major mode based on the
-file extension by consulting Emacs."
-  (let ((extension (concat "." (file-name-extension filename))))
-    (let ((mode (mindstream--major-mode-for-file-extension extension)))
-      (or mode
-          (error "No major modes recognize the template extension '%s'!" extension)))))
-
-(defun mindstream--mode-name (major-mode-to-use)
-  "Human readable name of MAJOR-MODE-TO-USE.
-
-If MAJOR-MODE-TO-USE is not provided, the major mode of the current
-buffer is used."
-  (if major-mode-to-use
-      (string-trim-right
-       (capitalize
-        (substring
-         (symbol-name major-mode-to-use)
-         0 -5)))
-    (if (stringp mode-name)
-        ;; on older versions of Emacs
-        mode-name
-      (car mode-name))))
-
-(defun mindstream-anonymous-buffer-name (&optional major-mode-to-use)
-  "Name of the anonymous session buffer for MAJOR-MODE-TO-USE."
-  (concat "*"
-          mindstream-anonymous-buffer-prefix
-          " - "
-          (mindstream--mode-name major-mode-to-use)
-          "*"))
-
-(defun mindstream--get-anonymous-session-buffer (&optional major-mode-to-use)
-  "Get the active anonymous session buffer for MAJOR-MODE-TO-USE, if it exists."
-  (let ((buffer-name (mindstream-anonymous-buffer-name major-mode-to-use)))
-    (get-buffer buffer-name)))
-
-(defun mindstream-anonymous-session-buffer-p ()
-  "Predicate to check if the current buffer is the anonymous scratch buffer."
-  ;; TODO: this is fairly weak
-  (string-match-p mindstream-anonymous-buffer-prefix (buffer-name)))
+(defun mindstream-anonymous-session-p ()
+  "Predicate to check if the current buffer is part of an anonymous session."
+  (mindstream--file-in-tree-p (buffer-file-name)
+                              mindstream-path))
 
 (provide 'mindstream-session)
 ;;; mindstream-session.el ends here

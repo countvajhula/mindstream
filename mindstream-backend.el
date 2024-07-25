@@ -35,6 +35,7 @@
 ;;; Code:
 
 (require 'mindstream-custom)
+(require 'magit-git)
 
 (defun mindstream--execute-shell-command (command &optional directory)
   "Execute shell COMMAND at DIRECTORY.
@@ -72,6 +73,15 @@ and arguments that are to be supplied to the command."
   "Add FILE to the Git index."
   (mindstream--execute-shell-command
    (list "git" "add" file)))
+
+(defun mindstream-backend-root (&optional buffer)
+  "Get the root folder of the VCS for BUFFER."
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      ;; (vc-root-dir) returns nil in some cases,
+      ;; e.g. for an anonymous text session,
+      ;; but magit-toplevel seems to work.
+      (magit-toplevel))))
 
 (provide 'mindstream-backend)
 ;;; mindstream-backend.el ends here

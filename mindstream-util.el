@@ -42,16 +42,6 @@ This searches PATH recursively."
     (when files
       (car files))))
 
-(defun mindstream--major-mode-for-file-extension (extension)
-  "Appropriate major mode for the given file EXTENSION.
-
-This consults Emacs's `auto-mode-alist'."
-  (catch 'return
-    (dolist (assoc auto-mode-alist)
-      (pcase-let ((`(,ext . ,mode) assoc))
-        (when (string-match-p ext extension)
-          (throw 'return mode))))))
-
 ;; From: https://stackoverflow.com/a/13473856/323874
 (defun mindstream--build-path (root &rest dirs)
   "Joins a series of directories together, like Python's os.path.join.
@@ -67,14 +57,31 @@ platform-appropriate way.
            (expand-file-name (car dirs) root)
            (cdr dirs))))
 
-(defun mindstream--directory-files (dir)
-  "List files in DIR that aren't hidden or special."
+(defun mindstream--directory-files (dir &optional full)
+  "List files in DIR that aren't hidden or special.
+
+This includes subdirectories.
+
+Return FULL, absolute paths, or relative paths."
   ;; TODO: exclude files that aren't versioned by Git
-  (seq-filter (lambda (x)
-                ;; e.g. .gitignore
-                (not (string-match-p "^\\." x)))
-              (directory-files dir
-                               nil)))
+  (let ((files (seq-filter (lambda (x)
+                             ;; e.g. .gitignore
+                             (not (string-match-p "^\\." x)))
+                           (directory-files dir
+                                            nil))))
+    (if full
+        (seq-map (lambda (d)
+                   (expand-file-name d dir))
+                 files)
+      files)))
+
+(defun mindstream--directory-dirs (dir)
+  "List subdirectories in DIR."
+  (seq-filter (lambda (file)
+                (file-directory-p file))
+              (mindstream--directory-files dir
+                                           ;; always absolute for now
+                                           t)))
 
 (defun mindstream--directory-files-recursively (dir)
   "List files in DIR that aren't hidden or special."
@@ -92,6 +99,131 @@ platform-appropriate way.
    (directory-file-name
     (file-name-directory
      path))))
+
+(defun mindstream--for-all-buffers (action)
+  "Take ACTION for all open buffers.
+
+This only operates on buffers that are visiting files, and not
+non-file buffers, since all buffers of interest for our purposes
+correspond to files on disk.
+
+ACTION must take no arguments and should return nothing.  If a return
+value is desired, then use a closure with a mutable lexical variable,
+and mutate that variable in ACTION."
+  (let ((blist (buffer-list)))
+    (while blist
+      (with-current-buffer (car blist)
+        (when buffer-file-name
+          (funcall action)))
+      (setq blist (cdr blist)))))
+
+(defun mindstream--find-buffer (predicate)
+  "Find the first buffer that returns true for PREDICATE.
+
+PREDICATE must take no arguments.  The matching buffer is returned, or
+nil if there is no match."
+  (let ((blist (buffer-list)))
+    (catch 'break
+      (while blist
+        (with-current-buffer (car blist)
+          (when (funcall predicate)
+            (throw 'break (current-buffer))))
+        (setq blist (cdr blist))))))
+
+(defun mindstream--move-dir (from-dir to-dir)
+  "Move folder FROM-DIR to TO-DIR.
+
+If TO-DIR already exists, then move FROM-DIR inside it, otherwise
+simply rename FROM-DIR to TO-DIR.
+
+This also updates the visited file names of all open buffers visiting
+a file in FROM-DIR to refer to TO-DIR."
+  ;; Based on `dired-rename-file' and `dired-rename-subdir'
+  (let* ((from-dir (file-name-as-directory
+                    (expand-file-name
+                     from-dir)))
+         (to-dir (expand-file-name
+                  to-dir))
+         (from-pat from-dir)
+         (to-pat (if (file-directory-p to-dir)
+                     (concat (file-name-as-directory to-dir)
+                             (file-name-as-directory
+                              (mindstream--directory-name
+                               from-dir)))
+                   (file-name-as-directory to-dir))))
+    (rename-file from-dir
+                 (if (file-directory-p to-dir)
+                     (file-name-as-directory to-dir)
+                   to-dir)
+                 nil)
+    ;; Update visited file name of all affected buffers
+    (mindstream--for-all-buffers
+     (lambda ()
+       (when (mindstream--file-in-tree-p buffer-file-name
+                                         from-dir)
+	     (let ((modflag (buffer-modified-p))
+               (to-file (replace-regexp-in-string
+                         (concat "^" (regexp-quote from-pat))
+			             to-pat
+			             buffer-file-name)))
+	       (set-visited-file-name to-file)
+	       (set-buffer-modified-p modflag)))))))
+
+(defun mindstream--close-buffers-at-path (path)
+  "Close all buffers in the PATH tree.
+
+If any buffers have been modified, they will be saved first."
+  (mindstream--for-all-buffers
+   (lambda ()
+     (when (mindstream--file-in-tree-p buffer-file-name
+                                       path)
+       (when (buffer-modified-p)
+         (save-buffer))
+       (kill-buffer)))))
+
+(defun mindstream--file-in-tree-p (file dir)
+  "Is FILE part of the directory tree starting at DIR?"
+  ;; Source: `dired-in-this-tree-p'
+  (let (case-fold-search
+        (file (expand-file-name file))
+        (dir (expand-file-name dir)))
+    (string-match-p (concat "^" (regexp-quote dir)) file)))
+
+(defun mindstream--session-name ()
+  "Name of the current session.
+
+This is simply the name of the containing folder."
+  ;; TODO: generalize to derive base repo path
+  ;; in case the file is in a nested path
+  (string-trim-left
+   (directory-file-name
+    (file-name-directory (buffer-file-name)))
+   "^.*/"))
+
+(defun mindstream--session-dir (&optional buffer)
+  "The repo base path containing BUFFER."
+  (mindstream-backend-root buffer))
+
+(defun mindstream--get-containing-dir (file)
+  "Get the name of the directory containing FILE.
+
+FILE could be a file or a directory.  Only the name of the containing
+directory is returned, rather than its full path."
+  (let ((file (if (directory-name-p file)
+                  (directory-file-name file)
+                file)))
+    (file-name-base
+     (directory-file-name
+      (file-name-directory
+       file)))))
+
+(defun mindstream--template-used (session)
+  "Name of the template used in the SESSION.
+
+SESSION is expected to be a full path to a session folder."
+  (let ((session  ; add trailing slash for good measure
+         (file-name-as-directory session)))
+    (mindstream--get-containing-dir session)))
 
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here
