@@ -69,7 +69,7 @@ If you've got more than one template for a particular major mode, you may want t
 @codeblock{
   :custom
   ...
-  (mindstream-preferred-template '(racket-mode "racket.rkt"))
+  (mindstream-preferred-template '(racket-mode "racket"))
 }
 
 This customization is only relevant when using @function{mindstream-enter-anonymous-session}, as you would select the template yourself when using @function{mindstream-new}.
