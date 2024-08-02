@@ -235,7 +235,7 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
 
 (defun mindstream-anonymous-session-p ()
   "Predicate to check if the current buffer is part of an anonymous session."
-  (mindstream--file-in-tree-p (buffer-file-name)
+  (mindstream--path-in-tree-p (buffer-file-name)
                               mindstream-path))
 
 (provide 'mindstream-session)

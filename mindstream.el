@@ -345,7 +345,7 @@ the file to be opened."
   (mindstream--find-buffer
    (lambda ()
      (and buffer-file-name
-		  (mindstream--file-in-tree-p
+		  (mindstream--path-in-tree-p
            buffer-file-name
            (mindstream--anonymous-path template))))))
 

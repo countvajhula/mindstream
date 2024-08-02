@@ -159,7 +159,7 @@ a file in FROM-DIR to refer to TO-DIR."
     ;; Update visited file name of all affected buffers
     (mindstream--for-all-buffers
      (lambda ()
-       (when (mindstream--file-in-tree-p buffer-file-name
+       (when (mindstream--path-in-tree-p buffer-file-name
                                          from-dir)
 	     (let ((modflag (buffer-modified-p))
                (to-file (replace-regexp-in-string
@@ -175,19 +175,19 @@ a file in FROM-DIR to refer to TO-DIR."
 If any buffers have been modified, they will be saved first."
   (mindstream--for-all-buffers
    (lambda ()
-     (when (mindstream--file-in-tree-p buffer-file-name
+     (when (mindstream--path-in-tree-p buffer-file-name
                                        path)
        (when (buffer-modified-p)
          (save-buffer))
        (kill-buffer)))))
 
-(defun mindstream--file-in-tree-p (file dir)
-  "Is FILE part of the directory tree starting at DIR?"
+(defun mindstream--path-in-tree-p (path dir)
+  "Is PATH part of the directory tree starting at DIR?"
   ;; Source: `dired-in-this-tree-p'
   (let (case-fold-search
-        (file (expand-file-name file))
+        (path (expand-file-name path))
         (dir (expand-file-name dir)))
-    (string-match-p (concat "^" (regexp-quote dir)) file)))
+    (string-match-p (concat "^" (regexp-quote dir)) path)))
 
 (defun mindstream--session-name ()
   "Name of the current session.
