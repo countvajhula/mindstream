@@ -79,7 +79,7 @@
   :type 'string
   :group 'mindstream)
 
-(defcustom mindstream-triggers (list #'save-buffer)
+(defcustom mindstream-triggers (list #'basic-save-buffer)
   "Functions that, when called, should implicitly iterate the mindstream buffer."
   :type 'list
   :group 'mindstream)

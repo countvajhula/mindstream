@@ -159,17 +159,17 @@ New sessions always start anonymous."
   "Do any setup that's necessary for Mindstream.
 
 This advises any functions that should implicitly cause the session to
-iterate.  By default, this is just `save-buffer', so that the session
-is iterated every time the buffer is saved.  This is the recommended
-usage, intended to capture \"natural\" points at which the session is
-meaningful.
+iterate. By default, this is just `basic-save-buffer', so that the
+session is iterated every time the buffer is saved. This is the
+recommended usage, intended to capture \"natural\" points at which the
+session is meaningful.
 
 While it doesn't make sense to iterate the session if the buffer
 has *not* been saved (there would be no changes to record a fresh
 version for!), it's possible that you might want to iterate the
 session at a coarser granularity than every save. In that case, you
 can customize `mindstream-triggers' and add the function(s) that
-should trigger session iteration (and remove `save-buffer')."
+should trigger session iteration (and remove `basic-save-buffer')."
   (mindstream--ensure-paths)
   (mindstream--ensure-templates-exist)
   (unless mindstream-persist
@@ -181,8 +181,8 @@ should trigger session iteration (and remove `save-buffer')."
 (defun mindstream-disable ()
   "Cleanup actions on exiting `mindstream-mode'.
 
-This removes any advice (e.g. on `save-buffer') that was added for
-session iteration."
+This removes any advice (e.g. on `basic-save-buffer') that was added
+for session iteration."
   (dolist (fn mindstream-triggers)
     (advice-remove fn #'mindstream-implicitly-iterate-advice)))
 
@@ -195,6 +195,8 @@ session iteration."
                              major-mode)))
       (if action
           (funcall action)
+        ;; TODO: here and in other places in the code, might there
+        ;; be any reason to use `basic-save-buffer' instead?
         (save-buffer)))))
 
 (defun mindstream--start-live-timer ()
