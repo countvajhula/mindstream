@@ -129,7 +129,8 @@ buffers at the SESSION path."
   "Predicate to check whether PATH is an active session."
   (let ((path (or path default-directory)))
     (or (member path mindstream-active-sessions)
-        (mindstream-anonymous-session-p path))))
+        (mindstream-anonymous-session-p path)
+        (mindstream-archived-session-p path))))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
@@ -240,6 +241,13 @@ Search the templates folder for a template recognizable to MAJOR-MODE-TO-USE."
 If PATH isn't specified, assume the current file."
   (mindstream--path-in-tree-p (or path (buffer-file-name))
                               mindstream-path))
+
+(defun mindstream-archived-session-p (&optional path)
+  "Predicate to check if PATH is part of an archived session.
+
+If PATH isn't specified, assume the current file."
+  (mindstream--path-in-tree-p (or path (buffer-file-name))
+                              mindstream-archive-path))
 
 (provide 'mindstream-session)
 ;;; mindstream-session.el ends here
