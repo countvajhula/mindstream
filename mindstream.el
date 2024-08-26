@@ -176,7 +176,7 @@ should trigger session iteration (and remove `basic-save-buffer')."
     ;; archive all sessions on startup
     (mindstream-archive-all))
   (dolist (fn mindstream-triggers)
-    (advice-add fn :around #'mindstream-implicitly-iterate-advice)))
+    (advice-add fn :after #'mindstream-implicitly-iterate-advice)))
 
 (defun mindstream-disable ()
   "Cleanup actions on exiting `mindstream-mode'.
@@ -238,18 +238,13 @@ before invoking it is customized via `mindstream-live-delay'."
                #'mindstream--reset-live-timer
                t))
 
-(defun mindstream-implicitly-iterate-advice (orig-fn &rest args)
+(defun mindstream-implicitly-iterate-advice (&rest _)
   "Implicitly iterate the session upon execution of some command.
 
 This only iterates the session if there have been changes since
-the last persistent state.  Otherwise, it takes no action.
-
-ORIG-FN is the original function invoked, and ARGS are the arguments
-in that invocation."
-  (let ((result (apply orig-fn args)))
-    (when (mindstream-session-p)
-      (mindstream--iterate))
-    result))
+the last persistent state.  Otherwise, it takes no action."
+  (when (mindstream-session-p)
+    (mindstream--iterate)))
 
 (defun mindstream-save-session (dest-dir)
   "Save the current session to a permanent location.
