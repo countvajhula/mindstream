@@ -259,7 +259,10 @@ identifier.
 It is advisable to use a descriptive name when saving a session, i.e.
 you would typically want to specify a new, non-existent folder."
   (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  (unless (mindstream-session-p)
+  (unless (mindstream-native-session-p)
+    ;; Only save buffers that are at a standard Mindstream path.
+    ;; We do not expect that a user would want to "save" (and thereby move)
+    ;; a repo that is already at a custom path.
     (error "Not a mindstream buffer!"))
   (save-buffer) ; ensure it saves any WIP
   ;; The chosen name of the directory becomes the name of the session.

@@ -125,12 +125,19 @@ buffers at the SESSION path."
   (and (member default-directory mindstream-active-sessions)
        default-directory))
 
+(defun mindstream-native-session-p (&optional path)
+  "Predicate to check whether PATH is a standard Mindstream path.
+
+That is, either the anonymous session path or the archive path."
+  (let ((path (or path default-directory)))
+    (or (mindstream-anonymous-session-p path)
+        (mindstream-archived-session-p path))))
+
 (defun mindstream-session-p (&optional path)
   "Predicate to check whether PATH is an active session."
   (let ((path (or path default-directory)))
     (or (member path mindstream-active-sessions)
-        (mindstream-anonymous-session-p path)
-        (mindstream-archived-session-p path))))
+        (mindstream-native-session-p path))))
 
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
