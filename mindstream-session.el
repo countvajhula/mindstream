@@ -55,10 +55,8 @@ number of active sessions is likely to be small.")
 
 (defun mindstream--unique-name ()
   "Generate a unique name."
-  (let ((time (current-time)))
-    (concat (format-time-string "%F" time)
-            "-"
-            (sha1 (format "%s" time)))))
+  (sha1
+   (format "%s" (current-time))))
 
 (defun mindstream--session-file-name-relative (file dir)
   "Return relative FILE name for `mindstream-session-history'.
@@ -153,7 +151,10 @@ That is, either the anonymous session path or the archive path."
 This creates an appropriate base path on disk for the TEMPLATE if it
 isn't already present."
   (let* ((session-name (mindstream--unique-name))
-         (base-path (mindstream--anonymous-path template)))
+         (filed-date (format-time-string "%F"))
+         (base-path (mindstream--build-path
+                     (mindstream--anonymous-path template)
+                     filed-date)))
     (mindstream--ensure-path base-path)
     (mindstream--build-path base-path
                             session-name)))
@@ -186,8 +187,7 @@ TEMPLATE is expected to be a simple name corresponding to the name of
 a folder at `mindstream-template-path'.  If it isn't provided, use the
 default template."
   (mindstream--build-path mindstream-archive-path
-                          (or template mindstream-default-template)
-                          (format-time-string "%Y-%m-%d")))
+                          (or template mindstream-default-template)))
 
 (defun mindstream--template-name (path)
   "Name of template at PATH."

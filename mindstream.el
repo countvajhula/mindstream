@@ -343,7 +343,13 @@ TEMPLATE is expected to be a name rather than a path. The sessions are
 returned as absolute paths to the session directories."
   (let ((path (mindstream--anonymous-path template)))
     (when (file-directory-p path)
-      (mindstream--directory-dirs path))))
+      (let ((date-dirs (mindstream--directory-dirs path))
+            (result nil))
+        (dolist (dir date-dirs)
+          (setq result
+                (append result
+                        (mindstream--directory-dirs dir))))
+        result))))
 
 (defun mindstream--visit-anonymous-session (template)
   "Visit the most recent open anonymous session for TEMPLATE."
@@ -404,9 +410,14 @@ otherwise, it creates a new one and enters it."
 
 (defun mindstream--archive (session-dir template)
   "Close all open buffers at SESSION-DIR and move it to the archive."
-  (let ((to-dir (mindstream--archive-path template)))
+  ;; first close the session
+  (mindstream-close-session session-dir)
+  ;; then move it to its new location in the archive
+  (let* ((base-path (mindstream--archive-path template))
+         (date-dir (mindstream--get-containing-dir session-dir))
+         (to-dir (mindstream--build-path base-path
+                                         date-dir)))
     (mindstream--ensure-path to-dir)
-    (mindstream-close-session session-dir)
     (mindstream--move-dir session-dir
                           to-dir)))
 

@@ -206,26 +206,35 @@ This is simply the name of the containing folder."
   "The repo base path containing BUFFER."
   (mindstream-backend-root buffer))
 
-(defun mindstream--get-containing-dir (file)
+(defun mindstream--get-containing-dir (file &optional full)
   "Get the name of the directory containing FILE.
 
-FILE could be a file or a directory.  Only the name of the containing
-directory is returned, rather than its full path."
+FILE could be a file or a directory. If FULL is nil, only the name of
+the containing directory is returned, rather than its full path,
+otherwise the full (absolute) path is returned."
   (let ((file (if (directory-name-p file)
                   (directory-file-name file)
                 file)))
-    (file-name-base
-     (directory-file-name
-      (file-name-directory
-       file)))))
+    (let ((result (directory-file-name
+                   (file-name-directory
+                    file))))
+      (if full
+          result
+        (file-name-base result)))))
 
 (defun mindstream--template-used (session)
   "Name of the template used in the SESSION.
 
-SESSION is expected to be a full path to a session folder."
+SESSION is expected to be a full path to a session folder.
+
+This can only be used in paths managed by Mindstream, that is,
+anonymous and archive paths."
   (let ((session  ; add trailing slash for good measure
          (file-name-as-directory session)))
-    (mindstream--get-containing-dir session)))
+    ;; sessions are filed under template-name/date/session
+    (mindstream--get-containing-dir
+     (mindstream--get-containing-dir session
+                                     t))))
 
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here
