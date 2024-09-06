@@ -430,6 +430,7 @@ TEMPLATE is expected to be a simple name rather than a full path."
 
 (defun mindstream-archive-all ()
   "Archive sessions for _all_ templates."
+  (interactive)
   (dolist (template (mindstream--list-templates))
     (mindstream-archive-template-sessions template)))
 
