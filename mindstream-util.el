@@ -76,7 +76,9 @@ Return FULL, absolute paths, or relative paths."
       files)))
 
 (defun mindstream--directory-dirs (dir)
-  "List subdirectories in DIR."
+  "List subdirectories in DIR.
+
+This returns absolute paths to the subdirectories."
   (seq-filter (lambda (file)
                 (file-directory-p file))
               (mindstream--directory-files dir

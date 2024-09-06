@@ -172,7 +172,9 @@ can customize `mindstream-triggers' and add the function(s) that
 should trigger session iteration (and remove `basic-save-buffer')."
   (mindstream--ensure-paths)
   (mindstream--ensure-templates-exist)
-  (unless mindstream-persist
+  (if mindstream-persist
+      ;; open all existing anonymous sessions
+      (mindstream-open-all)
     ;; archive all sessions on startup
     (mindstream-archive-all))
   (dolist (fn mindstream-triggers)
@@ -335,7 +337,10 @@ the file to be opened."
     (expand-file-name file mindstream-save-session-path)))
 
 (defun mindstream--list-template-sessions (template)
-  "List all active anonymous sessions for TEMPLATE."
+  "List all active anonymous sessions for TEMPLATE.
+
+TEMPLATE is expected to be a name rather than a path. The sessions are
+returned as absolute paths to the session directories."
   (let ((path (mindstream--anonymous-path template)))
     (when (file-directory-p path)
       (mindstream--directory-dirs path))))
@@ -411,7 +416,9 @@ archive saved sessions."
                          (mindstream--archive-path template))))
 
 (defun mindstream-archive-template-sessions (template)
-  "Archive all sessions associated with TEMPLATE."
+  "Archive all sessions associated with TEMPLATE.
+
+TEMPLATE is expected to be a simple name rather than a full path."
   (interactive (list
                 (mindstream--completing-read-template)))
   (let ((sessions (mindstream--list-template-sessions template))
@@ -437,6 +444,29 @@ archive saved sessions."
       ;; TODO: seems artificial to return this just so we
       ;; have a no-op buffer to switch to in "enter session"
       (current-buffer))))
+
+(defun mindstream-open-all ()
+  "Open anonymous sessions for _all_ templates."
+  (dolist (template (mindstream--list-templates))
+    (mindstream-open template)))
+
+(defun mindstream-close-session (dir)
+  "Close all open buffers at DIR."
+  (mindstream--close-buffers-at-path dir))
+
+(defun mindstream-close (template)
+  "Close all open sessions for TEMPLATE."
+  (interactive (list
+                (mindstream--completing-read-template)))
+  (let ((sessions (mindstream--list-template-sessions template)))
+    (dolist (dir sessions)
+      (mindstream-close-session dir))))
+
+(defun mindstream-close-all ()
+  "Close anonymous sessions for _all_ templates."
+  (interactive)
+  (dolist (template (mindstream--list-templates))
+    (mindstream-close template)))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here
