@@ -72,6 +72,7 @@ can be retrieved and canceled when you leave live mode.")
     (define-key mindstream-map (kbd "C-c , C-s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
     (define-key mindstream-map (kbd "C-c , a") #'mindstream-archive)
+    (define-key mindstream-map (kbd "C-c , o") #'mindstream-open)
     (define-key mindstream-map (kbd "C-c , C-l") #'mindstream-go-live)
     (define-key mindstream-map (kbd "C-c , C-o") #'mindstream-go-offline)
 
@@ -172,9 +173,7 @@ can customize `mindstream-triggers' and add the function(s) that
 should trigger session iteration (and remove `basic-save-buffer')."
   (mindstream--ensure-paths)
   (mindstream--ensure-templates-exist)
-  (if mindstream-persist
-      ;; open all existing anonymous sessions
-      (mindstream-open-all)
+  (unless mindstream-persist
     ;; archive all sessions on startup
     (mindstream-archive-all))
   (dolist (fn mindstream-triggers)
