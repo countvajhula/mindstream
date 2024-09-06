@@ -398,10 +398,17 @@ otherwise, it creates a new one and enters it."
                sessions))))
     (seq-uniq sessions)))
 
-(defun mindstream--archive (dir to-dir)
-  "Close all open buffers at DIR and move DIR to TO-DIR."
-  (mindstream--close-buffers-at-path dir)
-  (mindstream--move-dir dir to-dir))
+(defun mindstream-close-session (dir)
+  "Close all open buffers at DIR."
+  (mindstream--close-buffers-at-path dir))
+
+(defun mindstream--archive (session-dir template)
+  "Close all open buffers at SESSION-DIR and move it to the archive."
+  (let ((to-dir (mindstream--archive-path template)))
+    (mindstream--ensure-path to-dir)
+    (mindstream-close-session session-dir)
+    (mindstream--move-dir session-dir
+                          to-dir)))
 
 ;; TODO: archive should be ordered by recency, so that the current session is highlighted.
 (defun mindstream-archive (session)
@@ -413,7 +420,7 @@ archive saved sessions."
                                       (mindstream--list-anonymous-sessions))))
   (let ((template (mindstream--template-used session)))
     (mindstream--archive session
-                         (mindstream--archive-path template))))
+                         template)))
 
 (defun mindstream-archive-template-sessions (template)
   "Archive all sessions associated with TEMPLATE.
@@ -421,12 +428,11 @@ archive saved sessions."
 TEMPLATE is expected to be a simple name rather than a full path."
   (interactive (list
                 (mindstream--completing-read-template)))
-  (let ((sessions (mindstream--list-template-sessions template))
-        (to-dir (mindstream--archive-path template)))
-    (mindstream--ensure-path to-dir)
+  (let ((sessions (mindstream--list-template-sessions template)))
     (when sessions
       (dolist (dir sessions)
-        (mindstream--archive dir to-dir)))))
+        (mindstream--archive dir
+                             template)))))
 
 (defun mindstream-archive-all ()
   "Archive sessions for _all_ templates."
@@ -450,10 +456,6 @@ TEMPLATE is expected to be a simple name rather than a full path."
   "Open anonymous sessions for _all_ templates."
   (dolist (template (mindstream--list-templates))
     (mindstream-open template)))
-
-(defun mindstream-close-session (dir)
-  "Close all open buffers at DIR."
-  (mindstream--close-buffers-at-path dir))
 
 (defun mindstream-close (template)
   "Close all open sessions for TEMPLATE."
