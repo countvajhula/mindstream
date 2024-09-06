@@ -393,6 +393,11 @@ otherwise, it creates a new one and enters it."
                sessions))))
     (seq-uniq sessions)))
 
+(defun mindstream--archive (dir to-dir)
+  "Close all open buffers at DIR and move DIR to TO-DIR."
+  (mindstream--close-buffers-at-path dir)
+  (mindstream--move-dir dir to-dir))
+
 ;; TODO: archive should be ordered by recency, so that the current session is highlighted.
 (defun mindstream-archive (session)
   "Move the selected SESSION to `mindstream-archive-path'.
@@ -402,10 +407,8 @@ archive saved sessions."
   (interactive (list (completing-read "Which session? "
                                       (mindstream--list-anonymous-sessions))))
   (let ((template (mindstream--template-used session)))
-    (mindstream--close-buffers-at-path session)
-    (mindstream--move-dir session
-                          (mindstream--build-path mindstream-archive-path
-                                                  template))))
+    (mindstream--archive session
+                         (mindstream--archive-path template))))
 
 (defun mindstream-archive-template-sessions (template)
   "Archive all sessions associated with TEMPLATE."
@@ -416,8 +419,7 @@ archive saved sessions."
     (mindstream--ensure-path to-dir)
     (when sessions
       (dolist (dir sessions)
-        (mindstream--close-buffers-at-path dir)
-        (mindstream--move-dir dir to-dir)))))
+        (mindstream--archive dir to-dir)))))
 
 (defun mindstream-archive-all ()
   "Archive sessions for _all_ templates."
