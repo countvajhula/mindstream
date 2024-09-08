@@ -191,6 +191,13 @@ If any buffers have been modified, they will be saved first."
         (dir (expand-file-name dir)))
     (string-match-p (concat "^" (regexp-quote dir)) path)))
 
+;; from Emacs source code in org-compat.el
+;; this is available natively in Emacs 28+
+(defun mindstream--directory-empty-p (dir)
+  "Is DIR empty?"
+  (and (file-directory-p dir)
+       (null (directory-files dir nil directory-files-no-dot-files-regexp t))))
+
 (defun mindstream--session-name ()
   "Name of the current session.
 

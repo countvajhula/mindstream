@@ -414,11 +414,14 @@ otherwise, it creates a new one and enters it."
   ;; then move it to its new location in the archive
   (let* ((base-path (mindstream--archive-path template))
          (date-dir (mindstream--get-containing-dir session-dir))
+         (anon-date-dir (mindstream--get-containing-dir session-dir t))
          (to-dir (mindstream--build-path base-path
                                          date-dir)))
     (mindstream--ensure-path to-dir)
     (mindstream--move-dir session-dir
-                          to-dir)))
+                          to-dir)
+    (when (mindstream--directory-empty-p anon-date-dir)
+      (delete-directory anon-date-dir))))
 
 ;; TODO: archive should be ordered by recency, so that the current session is highlighted.
 (defun mindstream-archive (session)
