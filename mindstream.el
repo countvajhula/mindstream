@@ -464,6 +464,7 @@ TEMPLATE is expected to be a simple name rather than a full path."
 
 (defun mindstream-open-all ()
   "Open anonymous sessions for _all_ templates."
+  (interactive)
   (dolist (template (mindstream--list-templates))
     (mindstream-open template)))
 
