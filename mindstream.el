@@ -72,6 +72,7 @@ can be retrieved and canceled when you leave live mode.")
     (define-key mindstream-map (kbd "C-c , C-s") #'mindstream-save-session)
     (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
     (define-key mindstream-map (kbd "C-c , a") #'mindstream-archive)
+    (define-key mindstream-map (kbd "C-c , o") #'mindstream-open)
     (define-key mindstream-map (kbd "C-c , C-l") #'mindstream-go-live)
     (define-key mindstream-map (kbd "C-c , C-o") #'mindstream-go-offline)
 
@@ -159,8 +160,8 @@ New sessions always start anonymous."
   "Do any setup that's necessary for Mindstream.
 
 This advises any functions that should implicitly cause the session to
-iterate. By default, this is just `basic-save-buffer', so that the
-session is iterated every time the buffer is saved. This is the
+iterate.  By default, this is just `basic-save-buffer', so that the
+session is iterated every time the buffer is saved.  This is the
 recommended usage, intended to capture \"natural\" points at which the
 session is meaningful.
 
@@ -335,10 +336,19 @@ the file to be opened."
     (expand-file-name file mindstream-save-session-path)))
 
 (defun mindstream--list-template-sessions (template)
-  "List all active anonymous sessions for TEMPLATE."
+  "List all active anonymous sessions for TEMPLATE.
+
+TEMPLATE is expected to be a name rather than a path.  The sessions are
+returned as absolute paths to the session directories."
   (let ((path (mindstream--anonymous-path template)))
     (when (file-directory-p path)
-      (mindstream--directory-dirs path))))
+      (let ((date-dirs (mindstream--directory-dirs path))
+            (result nil))
+        (dolist (dir date-dirs)
+          (setq result
+                (append result
+                        (mindstream--directory-dirs dir))))
+        result))))
 
 (defun mindstream--visit-anonymous-session (template)
   "Visit the most recent open anonymous session for TEMPLATE."
@@ -362,19 +372,8 @@ features implementing the session iteration model."
       (mindstream-open template)
       (mindstream--new template)))
 
-(defun mindstream-enter-anonymous-session ()
-  "Enter an anonymous session buffer.
-
-This enters an existing anonymous session if one is present,
-otherwise, it creates a new one and enters it."
-  (interactive)
-  (let ((buf (mindstream--get-or-create-session
-              (mindstream--infer-template
-               major-mode))))
-    (switch-to-buffer buf)))
-
 (defun mindstream-enter-session-for-template (template)
-  "Enter an anonymous session buffer.
+  "Enter an anonymous session buffer for TEMPLATE.
 
 This enters an existing anonymous session if one is present,
 otherwise, it creates a new one and enters it."
@@ -382,6 +381,17 @@ otherwise, it creates a new one and enters it."
                 (mindstream--completing-read-template)))
   (let ((buf (mindstream--get-or-create-session template)))
     (switch-to-buffer buf)))
+
+(defun mindstream-enter-anonymous-session ()
+  "Enter a relevant anonymous session buffer.
+
+This infers the template based on the current major mode and then
+enters an existing anonymous session for that template if one is
+present, otherwise, it creates a new one and enters it."
+  (interactive)
+  (mindstream-enter-session-for-template
+   (mindstream--infer-template
+    major-mode)))
 
 (defun mindstream--list-anonymous-sessions ()
   "List anonymous session paths."
@@ -393,6 +403,26 @@ otherwise, it creates a new one and enters it."
                sessions))))
     (seq-uniq sessions)))
 
+(defun mindstream-close-session (dir)
+  "Close all open buffers at DIR."
+  (mindstream--close-buffers-at-path dir))
+
+(defun mindstream--archive (session-dir template)
+  "Close all open buffers at SESSION-DIR and move it to the archive for TEMPLATE."
+  ;; first close the session
+  (mindstream-close-session session-dir)
+  ;; then move it to its new location in the archive
+  (let* ((base-path (mindstream--archive-path template))
+         (date-dir (mindstream--get-containing-dir session-dir))
+         (anon-date-dir (mindstream--get-containing-dir session-dir t))
+         (to-dir (mindstream--build-path base-path
+                                         date-dir)))
+    (mindstream--ensure-path to-dir)
+    (mindstream--move-dir session-dir
+                          to-dir)
+    (when (mindstream--directory-empty-p anon-date-dir)
+      (delete-directory anon-date-dir))))
+
 ;; TODO: archive should be ordered by recency, so that the current session is highlighted.
 (defun mindstream-archive (session)
   "Move the selected SESSION to `mindstream-archive-path'.
@@ -402,25 +432,24 @@ archive saved sessions."
   (interactive (list (completing-read "Which session? "
                                       (mindstream--list-anonymous-sessions))))
   (let ((template (mindstream--template-used session)))
-    (mindstream--close-buffers-at-path session)
-    (mindstream--move-dir session
-                          (mindstream--build-path mindstream-archive-path
-                                                  template))))
+    (mindstream--archive session
+                         template)))
 
 (defun mindstream-archive-template-sessions (template)
-  "Archive all sessions associated with TEMPLATE."
+  "Archive all sessions associated with TEMPLATE.
+
+TEMPLATE is expected to be a simple name rather than a full path."
   (interactive (list
                 (mindstream--completing-read-template)))
-  (let ((sessions (mindstream--list-template-sessions template))
-        (to-dir (mindstream--archive-path template)))
-    (mindstream--ensure-path to-dir)
+  (let ((sessions (mindstream--list-template-sessions template)))
     (when sessions
       (dolist (dir sessions)
-        (mindstream--close-buffers-at-path dir)
-        (mindstream--move-dir dir to-dir)))))
+        (mindstream--archive dir
+                             template)))))
 
 (defun mindstream-archive-all ()
   "Archive sessions for _all_ templates."
+  (interactive)
   (dolist (template (mindstream--list-templates))
     (mindstream-archive-template-sessions template)))
 
@@ -435,6 +464,26 @@ archive saved sessions."
       ;; TODO: seems artificial to return this just so we
       ;; have a no-op buffer to switch to in "enter session"
       (current-buffer))))
+
+(defun mindstream-open-all ()
+  "Open anonymous sessions for _all_ templates."
+  (interactive)
+  (dolist (template (mindstream--list-templates))
+    (mindstream-open template)))
+
+(defun mindstream-close (template)
+  "Close all open sessions for TEMPLATE."
+  (interactive (list
+                (mindstream--completing-read-template)))
+  (let ((sessions (mindstream--list-template-sessions template)))
+    (dolist (dir sessions)
+      (mindstream-close-session dir))))
+
+(defun mindstream-close-all ()
+  "Close anonymous sessions for _all_ templates."
+  (interactive)
+  (dolist (template (mindstream--list-templates))
+    (mindstream-close template)))
 
 (provide 'mindstream)
 ;;; mindstream.el ends here

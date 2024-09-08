@@ -76,7 +76,9 @@ Return FULL, absolute paths, or relative paths."
       files)))
 
 (defun mindstream--directory-dirs (dir)
-  "List subdirectories in DIR."
+  "List subdirectories in DIR.
+
+This returns absolute paths to the subdirectories."
   (seq-filter (lambda (file)
                 (file-directory-p file))
               (mindstream--directory-files dir
@@ -189,6 +191,13 @@ If any buffers have been modified, they will be saved first."
         (dir (expand-file-name dir)))
     (string-match-p (concat "^" (regexp-quote dir)) path)))
 
+;; from Emacs source code in org-compat.el
+;; this is available natively in Emacs 28+
+(defun mindstream--directory-empty-p (dir)
+  "Is DIR empty?"
+  (and (file-directory-p dir)
+       (null (directory-files dir nil directory-files-no-dot-files-regexp t))))
+
 (defun mindstream--session-name ()
   "Name of the current session.
 
@@ -204,26 +213,35 @@ This is simply the name of the containing folder."
   "The repo base path containing BUFFER."
   (mindstream-backend-root buffer))
 
-(defun mindstream--get-containing-dir (file)
+(defun mindstream--get-containing-dir (file &optional full)
   "Get the name of the directory containing FILE.
 
-FILE could be a file or a directory.  Only the name of the containing
-directory is returned, rather than its full path."
+FILE could be a file or a directory.  If FULL is nil, only the name of
+the containing directory is returned, rather than its full path,
+otherwise the full (absolute) path is returned."
   (let ((file (if (directory-name-p file)
                   (directory-file-name file)
                 file)))
-    (file-name-base
-     (directory-file-name
-      (file-name-directory
-       file)))))
+    (let ((result (directory-file-name
+                   (file-name-directory
+                    file))))
+      (if full
+          result
+        (file-name-base result)))))
 
 (defun mindstream--template-used (session)
   "Name of the template used in the SESSION.
 
-SESSION is expected to be a full path to a session folder."
+SESSION is expected to be a full path to a session folder.
+
+This can only be used in paths managed by Mindstream, that is,
+anonymous and archive paths."
   (let ((session  ; add trailing slash for good measure
          (file-name-as-directory session)))
-    (mindstream--get-containing-dir session)))
+    ;; sessions are filed under template-name/date/session
+    (mindstream--get-containing-dir
+     (mindstream--get-containing-dir session
+                                     t))))
 
 (provide 'mindstream-util)
 ;;; mindstream-util.el ends here
