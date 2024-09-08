@@ -160,8 +160,8 @@ New sessions always start anonymous."
   "Do any setup that's necessary for Mindstream.
 
 This advises any functions that should implicitly cause the session to
-iterate. By default, this is just `basic-save-buffer', so that the
-session is iterated every time the buffer is saved. This is the
+iterate.  By default, this is just `basic-save-buffer', so that the
+session is iterated every time the buffer is saved.  This is the
 recommended usage, intended to capture \"natural\" points at which the
 session is meaningful.
 
@@ -338,7 +338,7 @@ the file to be opened."
 (defun mindstream--list-template-sessions (template)
   "List all active anonymous sessions for TEMPLATE.
 
-TEMPLATE is expected to be a name rather than a path. The sessions are
+TEMPLATE is expected to be a name rather than a path.  The sessions are
 returned as absolute paths to the session directories."
   (let ((path (mindstream--anonymous-path template)))
     (when (file-directory-p path)
@@ -372,19 +372,8 @@ features implementing the session iteration model."
       (mindstream-open template)
       (mindstream--new template)))
 
-(defun mindstream-enter-anonymous-session ()
-  "Enter an anonymous session buffer.
-
-This enters an existing anonymous session if one is present,
-otherwise, it creates a new one and enters it."
-  (interactive)
-  (let ((buf (mindstream--get-or-create-session
-              (mindstream--infer-template
-               major-mode))))
-    (switch-to-buffer buf)))
-
 (defun mindstream-enter-session-for-template (template)
-  "Enter an anonymous session buffer.
+  "Enter an anonymous session buffer for TEMPLATE.
 
 This enters an existing anonymous session if one is present,
 otherwise, it creates a new one and enters it."
@@ -392,6 +381,17 @@ otherwise, it creates a new one and enters it."
                 (mindstream--completing-read-template)))
   (let ((buf (mindstream--get-or-create-session template)))
     (switch-to-buffer buf)))
+
+(defun mindstream-enter-anonymous-session ()
+  "Enter a relevant anonymous session buffer.
+
+This infers the template based on the current major mode and then
+enters an existing anonymous session for that template if one is
+present, otherwise, it creates a new one and enters it."
+  (interactive)
+  (mindstream-enter-session-for-template
+   (mindstream--infer-template
+    major-mode)))
 
 (defun mindstream--list-anonymous-sessions ()
   "List anonymous session paths."
@@ -408,7 +408,7 @@ otherwise, it creates a new one and enters it."
   (mindstream--close-buffers-at-path dir))
 
 (defun mindstream--archive (session-dir template)
-  "Close all open buffers at SESSION-DIR and move it to the archive."
+  "Close all open buffers at SESSION-DIR and move it to the archive for TEMPLATE."
   ;; first close the session
   (mindstream-close-session session-dir)
   ;; then move it to its new location in the archive

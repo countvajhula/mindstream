@@ -216,7 +216,7 @@ This is simply the name of the containing folder."
 (defun mindstream--get-containing-dir (file &optional full)
   "Get the name of the directory containing FILE.
 
-FILE could be a file or a directory. If FULL is nil, only the name of
+FILE could be a file or a directory.  If FULL is nil, only the name of
 the containing directory is returned, rather than its full path,
 otherwise the full (absolute) path is returned."
   (let ((file (if (directory-name-p file)
