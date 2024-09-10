@@ -78,7 +78,23 @@ See @secref["Design"] to learn more about anonymous sessions.
 
 @subsection{Archiving Sessions}
 
-Anonymous sessions at @variable{mindstream-path} are considered @emph{active}, that is, they are sessions you are currently in the middle of. Anonymous sessions that have served their purpose, and which you do not @seclink["Saving_Sessions"]{save} as named sessions, are @emph{archived} instead, which simply moves them to @variable{mindstream-archive-path}. This path will accumulate hundreds, or thousands, of sessions over time. They are always there if you need to refer to them, but you may also just want to delete them periodically. See @secref["Choosing_an_Archive_Path"] for more on this.
+Anonymous sessions at @variable{mindstream-path} are considered @emph{active}, that is, they are sessions you are currently in the middle of. Anonymous sessions that have served their purpose, and which you do not @seclink["Saving_Sessions"]{save} as named sessions, are @emph{archived} instead, which simply moves them to @variable{mindstream-archive-path}. These sessions will retain their filing under folders named for their creation date, under folders named for the template from which the session was begun.
+
+@codeblock{
+  anon-or-archive-path/
+    python/
+      2024-09-02/
+        b6c86878fd8bcddfef3c7b4781f8a3b6694e72b7
+        ...
+    text/
+      2024-09-08/
+        2b31e1f7e58ab273709bad1bf47888fb523c49af
+        b914a595b8d2ad567d4e14ab128570207742ce06
+        ...
+    ...
+}
+
+This path will accumulate hundreds, or thousands, of sessions over time. They are always there and conveniently filed if you need to refer to them, and can serve as a detailed log of your thoughts and work over time. See @secref["Choosing_an_Archive_Path"] for some further considerations regarding the archive.
 
 Sessions are archived either automatically, depending on your customization of session @seclink["Persistent_Sessions"]{persistence} and @seclink["Multiple_Concurrent_Anonymous_Sessions"]{uniqueness}, or manually by you on demand.
 
@@ -194,11 +210,13 @@ Mindstream sessions can have @emph{a lot} of commits, and they ensure that you n
 
 @subsection{Choosing an Archive Path}
 
-Mindstream stores anonymous sessions under a randomly generated folder name under @variable{mindstream-path} (default: @code{~/mindstream/anon}). Sessions that you don't save are typically @seclink["Archiving_Sessions"]{archived} instead, which moves them to @variable{mindstream-archive-path} (default: @code{~/mindstream/archive}).
+Mindstream stores anonymous sessions at @variable{mindstream-path} (default: @code{~/mindstream/anon}) in a randomly generated folder name filed under the session creation date under the name of the template used to create the session. Sessions that you don't save are typically @seclink["Archiving_Sessions"]{archived} instead, which moves them to @variable{mindstream-archive-path} (default: @code{~/mindstream/archive}) following the same organization scheme.
 
 The default value of @variable{mindstream-archive-path} is a safe and good choice. But you may like to do things differently, and in that case, here are some options to consider.
 
-It's likely that you will work on dozens, hundreds, or thousands of anonymous sessions over time, of which you will only save a small minority. For the remaining, archived, sessions, you may prefer to just delete these from time to time rather than have them accumulate. Many operating systems provide standard ways to do this kind of thing -- @emph{temp folders}, usually named @code{tmp} -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
+It's likely that you will work on dozens, hundreds, or thousands of anonymous sessions over time, of which you will only save a small minority. For the remaining, archived, sessions, though you may not wish to work on them further, they still serve as a detailed and organized log of your thoughts and work over time, and you may occasionally find a need to refer to them. For this reason, the archive is valuable and we recommend preserving this default behavior.
+
+But if you prefer to consider anonymous sessions as ephemeral, to be forgotten if unsaved (perhaps you can only be truly creative if you can scrunch up that session and toss it in the bin so no one ever sees it again!), then you may prefer to delete the archive from time to time. Many operating systems provide standard ways to do this kind of thing -- @emph{temp folders}, usually named @code{tmp} -- which are occasionally cleared automatically by the operating system, without requiring you to manage this. If your operating system provides a good option here, you may prefer to use it.
 
 @subsubsection{@code{/var/tmp}}
 
@@ -236,7 +254,9 @@ Remember that the path we are configuring here is for @emph{anonymous sessions} 
 
 @subsection{Organizing Sessions}
 
-Over time, you may want to rename some sessions, delete others, or reorganize them in some way so you can keep track of them more easily. What special features does Mindstream provide for this? @emph{None}! Remember, Mindstream sessions are just @emph{ordinary folders} containing @emph{ordinary Git repositories}. You can use normal Emacs or shell tools to rename, delete, organize them as you see fit, and you would still be able to load them in Mindstream as usual (once you navigate to what may be their new locations).
+Anonymous sessions, and consequently archived sessions, are filed under their creation date under the template used to create them, in a folder structure reflecting this scheme.
+
+For sessions saved by you to another location, over time, you may want to rename some of them, delete others, or reorganize them in some way so you can keep track of them more easily. What special features does Mindstream provide for this? @emph{None}! Remember, Mindstream sessions are just @emph{ordinary folders} containing @emph{ordinary Git repositories}. You can use normal Emacs or shell tools to rename, delete, organize them as you see fit, and you would still be able to load them in Mindstream as usual (once you navigate to what may be their new locations).
 
 @section{Acknowledgements}
 
