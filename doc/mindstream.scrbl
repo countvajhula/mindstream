@@ -254,9 +254,9 @@ Remember that the path we are configuring here is for @emph{anonymous sessions} 
 
 @subsection{Organizing Sessions}
 
-Anonymous sessions, and consequently archived sessions, are filed under their creation date under the template used to create them, in a folder structure reflecting this scheme.
+Anonymous sessions, and consequently archived sessions, are filed under their creation date under the template used to create them, in a folder structure reflecting this scheme. For sessions saved by you to another location, by default, these are saved to @variable{mindstream-save-session-path}, filed just under the template used to create them (and not by creation date).
 
-For sessions saved by you to another location, over time, you may want to rename some of them, delete others, or reorganize them in some way so you can keep track of them more easily. What special features does Mindstream provide for this? @emph{None}! Remember, Mindstream sessions are just @emph{ordinary folders} containing @emph{ordinary Git repositories}. You can use normal Emacs or shell tools to rename, delete, organize them as you see fit, and you would still be able to load them in Mindstream as usual (once you navigate to what may be their new locations).
+This is a uniform and useful filing scheme. Even so, over time, you may want to rename some of your saved sessions at @variable{mindstream-save-session-path}, or move them to a new location, or reorganize them in some other way. What special features does Mindstream provide for this? @emph{None}! Remember, Mindstream sessions are just @emph{ordinary folders} containing @emph{ordinary Git repositories}. You can use normal Emacs or shell tools to rename, delete, organize them as you see fit, and you would still be able to load them in Mindstream as usual (once you navigate to what may be their new locations).
 
 @section{Acknowledgements}
 
