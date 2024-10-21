@@ -180,18 +180,20 @@ default template."
 (defun mindstream--archive-path (&optional template)
   "Path where sessions using TEMPLATE should be archived.
 
-The path includes the current date so that anonymous sessions when
-archived are easier to find and more useful as a log.
-
 TEMPLATE is expected to be a simple name corresponding to the name of
 a folder at `mindstream-template-path'.  If it isn't provided, use the
 default template."
   (mindstream--build-path mindstream-archive-path
                           (or template mindstream-default-template)))
 
-(defun mindstream--template-name (path)
-  "Name of template at PATH."
-  (file-name-base path))
+(defun mindstream--saved-path (&optional template)
+  "Path where sessions using TEMPLATE should be saved.
+
+TEMPLATE is expected to be a simple name corresponding to the name of
+a folder at `mindstream-template-path'.  If it isn't provided, use the
+default template."
+  (mindstream--build-path mindstream-save-session-path
+                          (or template mindstream-default-template)))
 
 (defun mindstream--ensure-path (path)
   "Ensure that PATH exists on the filesystem."

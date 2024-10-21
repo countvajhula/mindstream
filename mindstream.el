@@ -94,14 +94,12 @@ For example:
 
 (defun mindstream--list-templates ()
   "List all templates by name."
-  (directory-files mindstream-template-path
-                   nil
-                   directory-files-no-dot-files-regexp))
+  (mindstream--directory-files mindstream-template-path))
 
 (defun mindstream--completing-read-template ()
   "Completion for template."
-  (let ((files (mindstream--list-templates)))
-    (completing-read "Which template? " files nil t nil
+  (let ((templates (mindstream--list-templates)))
+    (completing-read "Which template? " templates nil t nil
                      'mindstream-template-history)))
 
 (defun mindstream--new (template)
@@ -258,35 +256,43 @@ saving an anonymous session, its original name is a randomly generated
 identifier.
 
 It is advisable to use a descriptive name when saving a session, i.e.
-you would typically want to specify a new, non-existent folder."
-  (interactive (list (read-directory-name "Save session in: " mindstream-save-session-path)))
-  (unless (mindstream-native-session-p)
-    ;; Only save buffers that are at a standard Mindstream path.
-    ;; We do not expect that a user would want to "save" (and thereby move)
-    ;; a repo that is already at a custom path.
-    (error "Not a mindstream buffer!"))
-  (save-buffer) ; ensure it saves any WIP
+if you are saving an anonymous session, you would typically want to
+specify a new, non-existent folder. Otherwise, if you're simply saving
+an existing saved session to a new location, then you likely just want
+to select the existing destination path."
+  (interactive
+   (let ((base-save-path (mindstream--saved-path
+                          (mindstream--template-used default-directory))))
+     (unless (mindstream-native-session-p)
+       ;; Only save buffers that are at a standard Mindstream path.
+       ;; We do not expect that a user would want to "save" (and thereby move)
+       ;; a repo that is already at a path that isn't maintained by Mindstream.
+       (error "Not a mindstream buffer!"))
+     (mindstream--ensure-path base-save-path)
+     (list
+      (read-directory-name "Save session in: "
+                           base-save-path))))
+  ;; ensure no unsaved changes
+  (save-buffer)
+  ;; note: this is a no-op if save-buffer is a trigger for iteration
+  (mindstream--iterate)
   ;; The chosen name of the directory becomes the name of the session.
-  (let* ((original-session-name (mindstream--session-name))
-         (file (file-name-nondirectory (buffer-file-name)))
-         (dir (mindstream--session-dir (current-buffer)))
-         (named (not (file-directory-p dest-dir))))
-    ;; ensure no unsaved changes
-    ;; note: this is a no-op if save-buffer is a trigger for iteration
-    (mindstream--iterate)
+  (let ((source-dir (mindstream--session-dir (current-buffer)))
+        (dest-dir (if (file-directory-p dest-dir)
+                      ;; not named - retain anonymous session name
+                      (mindstream--build-path dest-dir
+                                              (mindstream--session-name))
+                    dest-dir))
+        (file-to-open (file-name-nondirectory
+                       (buffer-file-name))))
     ;; TODO: verify behavior with existing vs non-existent containing folder
-    (mindstream--move-dir dir dest-dir)
+    (mindstream--move-dir source-dir dest-dir)
     ;; TODO: this is a no-op, and it currently leaves the
     ;; session in `mindsteam-active-sessions'. But that's OK
     ;; for now as it doesn't affect anything, and this "state"
     ;; will be removed eventually anyway in the design refactor
     ;; (mindstream--end-anonymous-session)
-    (if named
-        (mindstream-load-session dest-dir file)
-      (mindstream-load-session
-       (mindstream--build-path dest-dir
-                               original-session-name)
-       file))))
+    (mindstream-load-session dest-dir file-to-open)))
 
 (defun mindstream-load-session (dir &optional file)
   "Load a previously saved session.
