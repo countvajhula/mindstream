@@ -34,6 +34,8 @@
 
 ;;; Code:
 
+(require 'mindstream-backend)
+
 (defun mindstream--file-with-extension (extension path)
   "Return the first file with EXTENSION at PATH.
 
