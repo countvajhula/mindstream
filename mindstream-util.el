@@ -34,8 +34,6 @@
 
 ;;; Code:
 
-(require 'mindstream-backend)
-
 (defun mindstream--file-with-extension (extension path)
   "Return the first file with EXTENSION at PATH.
 
@@ -210,10 +208,6 @@ This is simply the name of the containing folder."
    (directory-file-name
     (file-name-directory (buffer-file-name)))
    "^.*/"))
-
-(defun mindstream--session-dir (&optional buffer)
-  "The repo base path containing BUFFER."
-  (mindstream-backend-root buffer))
 
 (defun mindstream--get-containing-dir (file &optional full)
   "Get the name of the directory containing FILE.

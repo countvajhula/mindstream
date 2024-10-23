@@ -83,5 +83,9 @@ and arguments that are to be supplied to the command."
       ;; but magit-toplevel seems to work.
       (magit-toplevel))))
 
+(defun mindstream--session-dir (&optional buffer)
+  "The repo base path containing BUFFER."
+  (mindstream-backend-root buffer))
+
 (provide 'mindstream-backend)
 ;;; mindstream-backend.el ends here
