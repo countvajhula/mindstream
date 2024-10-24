@@ -324,7 +324,9 @@ the file to be opened."
                                                 (expand-file-name mindstream-path))
                                                f)))
                         (append mindstream-session-history
-                                (mindstream--directory-files mindstream-save-session-path)))
+                                (apply #'append
+                                       (seq-map #'mindstream--directory-dirs
+                                                (mindstream--directory-dirs mindstream-save-session-path)))))
                        ;; trim any trailing slashes for comparison
                        (lambda (a b)
                          (equal (string-trim-right a "/")
