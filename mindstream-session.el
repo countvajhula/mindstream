@@ -137,6 +137,13 @@ That is, either the anonymous session path or the archive path."
     (or (member path mindstream-active-sessions)
         (mindstream-native-session-p path))))
 
+(defun mindstream--session-name ()
+  "Name of the current session.
+
+This is the name of the root folder of the containing git repo."
+  (mindstream--directory-name
+   (mindstream--session-dir)))
+
 (defun mindstream--iterate ()
   "Commit the current state as part of iteration."
   ;; always add the current file (where mindstream-session-mode

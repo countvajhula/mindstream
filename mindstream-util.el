@@ -198,17 +198,6 @@ If any buffers have been modified, they will be saved first."
   (and (file-directory-p dir)
        (null (directory-files dir nil directory-files-no-dot-files-regexp t))))
 
-(defun mindstream--session-name ()
-  "Name of the current session.
-
-This is simply the name of the containing folder."
-  ;; TODO: generalize to derive base repo path
-  ;; in case the file is in a nested path
-  (string-trim-left
-   (directory-file-name
-    (file-name-directory (buffer-file-name)))
-   "^.*/"))
-
 (defun mindstream--get-containing-dir (file &optional full)
   "Get the name of the directory containing FILE.
 
