@@ -409,7 +409,17 @@ present, otherwise, it creates a new one and enters it."
        (when (mindstream-anonymous-session-p)
          (push (mindstream--session-dir (current-buffer))
                sessions))))
-    (seq-uniq sessions)))
+    (let ((sessions (sort (seq-uniq sessions)
+                          #'files-sort-by-modified-time)))
+      (when (mindstream-session-p)
+        ;; ensure the session in the current buffer
+        ;; is at the top of the completion menu
+        (let ((this-session (mindstream--session-dir)))
+          (setq sessions
+                (cons this-session
+                      (remove this-session
+                              sessions)))))
+      sessions)))
 
 (defun mindstream-close-session (dir)
   "Close all open buffers at DIR."
@@ -438,7 +448,11 @@ present, otherwise, it creates a new one and enters it."
 The session is expected to be anonymous - it does not make sense to
 archive saved sessions."
   (interactive (list (completing-read "Which session? "
-                                      (mindstream--list-anonymous-sessions))))
+                                      (mindstream--list-anonymous-sessions)
+                                      nil
+                                      t
+                                      nil
+                                      'mindstream-session-history)))
   (let ((template (mindstream--template-used session)))
     (mindstream--archive session
                          template)))

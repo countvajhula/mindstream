@@ -85,7 +85,8 @@ and arguments that are to be supplied to the command."
 
 (defun mindstream--session-dir (&optional buffer)
   "The repo base path containing BUFFER."
-  (mindstream-backend-root buffer))
+  (abbreviate-file-name
+   (mindstream-backend-root buffer)))
 
 (provide 'mindstream-backend)
 ;;; mindstream-backend.el ends here
