@@ -27,5 +27,5 @@ jobs:
         # RECIPE is your recipe as written for MELPA:
         RECIPE: (mindstream :repo "countvajhula/mindstream" :fetcher github)
         # set this to false (or remove it) if the package isn't on MELPA:
-        EXIST_OK: false
+        EXIST_OK: true
       run: echo $GITHUB_REF && make -C ~/melpazoid
