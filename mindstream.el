@@ -73,6 +73,7 @@ can be retrieved and canceled when you leave live mode.")
     (define-key mindstream-map (kbd "C-c , r") #'mindstream-load-session)
     (define-key mindstream-map (kbd "C-c , a") #'mindstream-archive)
     (define-key mindstream-map (kbd "C-c , o") #'mindstream-open)
+    (define-key mindstream-map (kbd "C-c , O") #'mindstream-open-all)
     (define-key mindstream-map (kbd "C-c , C-l") #'mindstream-go-live)
     (define-key mindstream-map (kbd "C-c , C-o") #'mindstream-go-offline)
 
