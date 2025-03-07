@@ -3,7 +3,7 @@
 ;; Author: Siddhartha Kasivajhula <sid@countvajhula.com>
 ;; URL: https://github.com/countvajhula/mindstream
 ;; Version: 1.0
-;; Package-Requires: ((emacs "25.1") (magit "3.3.0"))
+;; Package-Requires: ((emacs "26.1") (magit "3.3.0"))
 ;; Keywords: convenience, files, languages, outlines, tools, vc, wp
 
 ;; This work is "part of the world." You are free to do whatever you
@@ -411,7 +411,7 @@ present, otherwise, it creates a new one and enters it."
          (push (mindstream--session-dir (current-buffer))
                sessions))))
     (let ((sessions (sort (seq-uniq sessions)
-                          #'files-sort-by-modified-time)))
+                          #'mindstream--files-sort-by-modified-time)))
       (when (mindstream-session-p)
         ;; ensure the session in the current buffer
         ;; is at the top of the completion menu

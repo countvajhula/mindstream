@@ -81,7 +81,7 @@
 
 (defcustom mindstream-triggers (list #'basic-save-buffer)
   "Functions that, when called, should implicitly iterate the mindstream buffer."
-  :type 'list
+  :type '(repeat function)
   :group 'mindstream)
 
 (defcustom mindstream-live-delay 1.5

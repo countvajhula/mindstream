@@ -102,15 +102,19 @@ This returns absolute paths to the subdirectories."
     (file-name-directory
      path))))
 
-(defun files-sort-by-modified-time (file-a file-b)
-  "A binary predicate to use to sort files by date modified."
+(defun mindstream--files-sort-by-modified-time (file-a file-b)
+  "A binary predicate to use to sort files by date modified.
+
+Sorts FILE-A and FILE-B."
   (let ((time-a (file-attribute-modification-time (file-attributes file-a)))
         (time-b (file-attribute-modification-time (file-attributes file-b))))
     (time-less-p time-b
                  time-a)))
 
-(defun files-sort-by-access-time (file-a file-b)
-  "A binary predicate to use to sort files by date accessed."
+(defun mindstream--files-sort-by-access-time (file-a file-b)
+  "A binary predicate to use to sort files by date accessed.
+
+Sorts FILE-A and FILE-B."
   (let ((time-a (file-attribute-access-time (file-attributes file-a)))
         (time-b (file-attribute-access-time (file-attributes file-b))))
     (time-less-p time-b
