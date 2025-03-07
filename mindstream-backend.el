@@ -100,16 +100,15 @@ and arguments that are to be supplied to the command."
     (with-current-buffer buffer
       (magit-rev-parse "HEAD"))))
 
-(defun mindstream-create-branch (&optional buffer)
-  "Start a new branch (stream) in the repo for BUFFER."
-  (let ((buffer (or buffer (current-buffer))))
-    (with-current-buffer buffer
-      (magit-branch-and-checkout
-       (concat mindstream-branch-prefix
-               "-"
-               (mindstream--unique-name mindstream-branch-name-length))
-       (mindstream--current-version)
-       nil))))
+(defun mindstream-create-branch (&optional name)
+  "Start a new branch (stream) in the current repo."
+  (magit-branch-and-checkout
+   (concat mindstream-branch-prefix
+           "-"
+           (or name
+               (mindstream--unique-name mindstream-branch-name-length)))
+   (mindstream--current-version)
+   nil))
 
 (defun mindstream--session-dir (&optional buffer)
   "The repo base path containing BUFFER."

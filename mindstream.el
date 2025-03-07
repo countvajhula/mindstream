@@ -152,7 +152,7 @@ New sessions always start anonymous."
        (expand-file-name filename
                          path))
       (mindstream--initialize-buffer)
-      (mindstream-begin-session)
+      (mindstream-begin-session mindstream-anonymous-session-name)
       (current-buffer))))
 
 (defun mindstream-initialize ()
@@ -304,6 +304,7 @@ protocol for selecting a file, including, if necessary, prompting for
 the file to be opened."
   (interactive (list
                 (mindstream--completing-read-session)))
+  ;; TODO: this should just be ordinary switch branch now
   (let ((file (or file
                   (mindstream--starting-file-for-session dir))))
     (find-file (expand-file-name file dir))

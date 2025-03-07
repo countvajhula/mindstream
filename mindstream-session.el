@@ -71,9 +71,9 @@ filename relative to DIR rather than an absolute path."
                        nil t nil
                        mindstream-session-file-history))))
 
-(defun mindstream--begin-session ()
+(defun mindstream--begin-session (name)
   "Begin session."
-  (mindstream-create-branch)
+  (mindstream-create-branch name)
   ;; this may be OK as is, for now.
   ;; used in archive and load
   (add-to-list 'mindstream-session-history
@@ -81,14 +81,13 @@ filename relative to DIR rather than an absolute path."
                                                        mindstream-save-session-path))
   (message "Session started at %s." default-directory))
 
-(defun mindstream-begin-session ()
+(defun mindstream-begin-session (&optional name)
   "Begin a session at the current path."
   (interactive)
-
   (if (mindstream-session-p)
       (when (y-or-n-p "Already in a mindstream session. Want to start a new one here?")
-        (mindstream--begin-session))
-    (mindstream--begin-session)))
+        (mindstream--begin-session name))
+    (mindstream--begin-session name)))
 
 (defun mindstream-native-session-p (&optional path)
   "Predicate to check whether PATH is a standard Mindstream path.
