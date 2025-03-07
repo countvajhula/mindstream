@@ -53,11 +53,6 @@ number of active sessions is likely to be small.")
 
 (defvar mindstream-session-history nil)
 
-(defun mindstream--unique-name ()
-  "Generate a unique name."
-  (sha1
-   (format "%s" (current-time))))
-
 (defun mindstream--session-file-name-relative (file dir)
   "Return relative FILE name for `mindstream-session-history'.
 
