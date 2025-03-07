@@ -37,6 +37,11 @@
 (require 'mindstream-custom)
 (require 'magit-git)
 
+;; collisions unlikely within a single project repo
+;; and we don't want branch names to be too long as they
+;; may make things awkward in the Git UI.
+(defconst mindstream-branch-name-length 7)
+
 (defun mindstream--execute-shell-command (command &optional directory)
   "Execute shell COMMAND at DIRECTORY.
 
@@ -82,6 +87,29 @@ and arguments that are to be supplied to the command."
       ;; e.g. for an anonymous text session,
       ;; but magit-toplevel seems to work.
       (magit-toplevel))))
+
+(defun mindstream-branch-name (&optional buffer)
+  "Get the Git branch name for BUFFER."
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (magit-get-current-branch))))
+
+(defun mindstream--current-version (&optional buffer)
+  "Get the Git version hash for BUFFER."
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (magit-rev-parse "HEAD"))))
+
+(defun mindstream-create-branch (&optional buffer)
+  "Start a new branch (stream) in the repo for BUFFER."
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (magit-branch-and-checkout
+       (concat mindstream-branch-prefix
+               "-"
+               (mindstream--unique-name mindstream-branch-name-length))
+       (mindstream--current-version)
+       nil))))
 
 (defun mindstream--session-dir (&optional buffer)
   "The repo base path containing BUFFER."

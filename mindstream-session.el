@@ -38,17 +38,6 @@
 (require 'mindstream-backend)
 (require 'mindstream-util)
 
-(defvar mindstream-active-sessions nil
-  "A set of active sessions.
-
-Sessions are just paths to git repos.  A path being an \"active
-session\" means that any and all changes made at that path to
-git-tracked files will be versioned if they pull any
-`mindstream-triggers`.
-
-For now, this is implemented as a list for simplicity, since the
-number of active sessions is likely to be small.")
-
 (defvar mindstream-session-file-history nil)
 
 (defvar mindstream-session-history nil)
@@ -82,41 +71,24 @@ filename relative to DIR rather than an absolute path."
                        nil t nil
                        mindstream-session-file-history))))
 
-(defun mindstream-begin-session ()
-  "Begin a session at the current path."
-  (interactive)
-  (push default-directory mindstream-active-sessions)
+(defun mindstream--begin-session ()
+  "Begin session."
+  (mindstream-create-branch)
+  ;; this may be OK as is, for now.
+  ;; used in archive and load
   (add-to-list 'mindstream-session-history
                (mindstream--session-file-name-relative default-directory
                                                        mindstream-save-session-path))
   (message "Session started at %s." default-directory))
 
-(defun mindstream-end-session (&optional session)
-  "End SESSION.
+(defun mindstream-begin-session ()
+  "Begin a session at the current path."
+  (interactive)
 
-This only removes implicit versioning.  It does not close any open
-buffers at the SESSION path."
-  (interactive (list (completing-read "Which session? "
-                                      mindstream-active-sessions
-                                      ;; We typically end sessions on existing
-                                      ;; projects to stop implicit versioning.
-                                      ;; Exclude anonymous sessions here since
-                                      ;; it's OK if those aren't ended (we can
-                                      ;; just forget about them and move on).
-                                      (lambda (session)
-                                        (not
-                                         (string-prefix-p mindstream-path
-                                                          session))))))
-  (let ((session (or session (mindstream--current-session))))
-    ;; session can be nil if called non-interactively
-    (setq mindstream-active-sessions
-          (remove session mindstream-active-sessions))
-    (message "Session %s ended." session)))
-
-(defun mindstream--current-session ()
-  "The session at the current path, if it is active."
-  (and (member default-directory mindstream-active-sessions)
-       default-directory))
+  (if (mindstream-session-p)
+      (when (y-or-n-p "Already in a mindstream session. Want to start a new one here?")
+        (mindstream--begin-session))
+    (mindstream--begin-session)))
 
 (defun mindstream-native-session-p (&optional path)
   "Predicate to check whether PATH is a standard Mindstream path.
@@ -126,11 +98,10 @@ That is, either the anonymous session path or the archive path."
     (or (mindstream-anonymous-session-p path)
         (mindstream-archived-session-p path))))
 
-(defun mindstream-session-p (&optional path)
-  "Predicate to check whether PATH is an active session."
-  (let ((path (or path default-directory)))
-    (or (member path mindstream-active-sessions)
-        (mindstream-native-session-p path))))
+(defun mindstream-session-p (&optional buffer)
+  "Predicate to check whether BUFFER is in an active session."
+  (string-prefix-p mindstream-branch-prefix
+                   (mindstream-branch-name buffer)))
 
 (defun mindstream--session-name ()
   "Name of the current session.

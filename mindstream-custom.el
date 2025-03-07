@@ -113,6 +113,11 @@ for the major mode so that it would be selected."
   :type 'string
   :group 'mindstream)
 
+(defcustom mindstream-branch-prefix "mindstream"
+  "The prefix to use in the name of a mindstream branch."
+  :type 'string
+  :group 'mindstream)
+
 (defcustom mindstream-persist nil
   "Whether anonymous sessions should persist across Emacs restarts until archived."
   :type 'boolean
