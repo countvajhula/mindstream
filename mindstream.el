@@ -103,17 +103,6 @@ For example:
     (completing-read "Which template? " templates nil t nil
                      'mindstream-template-history)))
 
-(defun mindstream--new (template)
-  "Start a new anonymous session using a specific TEMPLATE.
-
-This also begins a new session."
-  ;; start a new session (sessions always start anonymous)
-  (let ((buf (mindstream-start-anonymous-session template)))
-    ;; (ab initio) iterate
-    (with-current-buffer buf
-      (mindstream--iterate))
-    buf))
-
 (defun mindstream-new (&optional template)
   "Start a new anonymous session.
 
@@ -130,10 +119,11 @@ name, in a dedicated Git version-controlled folder at
   (interactive)
   (let ((template (or template
                       (mindstream--completing-read-template))))
-    (switch-to-buffer (mindstream--new template))))
+    ;; start a new session (sessions always start anonymous)
+    (switch-to-buffer (mindstream-start-anonymous-session template))))
 
 (defun mindstream-start-anonymous-session (&optional template)
-  "Start a new anonymous session.
+  "Start a new anonymous session using a specific TEMPLATE.
 
 This creates a new directory and Git repository for the new session
 after copying over the contents of TEMPLATE if one is specified.
@@ -152,7 +142,23 @@ New sessions always start anonymous."
        (expand-file-name filename
                          path))
       (mindstream--initialize-buffer)
-      (mindstream-begin-session mindstream-anonymous-session-name)
+      ;; (ab initio) iterate
+      (mindstream--iterate)
+      ;; An initial commit must exist before Git
+      ;; considers a branch to exist (at least on older
+      ;; versions of Git). Now that we have one, we rename
+      ;; the branch to have the Mindstream session prefix,
+      ;; so that it's implicitly versioned by Mindstream
+      (mindstream-backend-rename-branch mindstream-anonymous-session-name)
+      ;; Under typical circumstances, "begin session"
+      ;; creates a branch with a random name. But in
+      ;; the special case of starting a new anonymous
+      ;; session, we want to use a recognizable name.
+      ;; As we have already done that by renaming the
+      ;; branch (above), we have already "begun the session,"
+      ;; and just need to do the bookkeeping for completion
+      ;; history and so on by invoking this "helper."
+      (mindstream--begin-session-helper)
       (current-buffer))))
 
 (defun mindstream-initialize ()
@@ -380,7 +386,7 @@ worrying about how that happens. It is too connoted to be useful in
 features implementing the session iteration model."
   (or (mindstream--visit-anonymous-session template)
       (mindstream-open template)
-      (mindstream--new template)))
+      (mindstream-start-anonymous-session template)))
 
 (defun mindstream-enter-session-for-template (template)
   "Enter an anonymous session buffer for TEMPLATE.

@@ -119,9 +119,10 @@ creating the branch."
 (defun mindstream-backend-rename-branch (new-name)
   "Rename the current branch to NEW-NAME.
 
-Note that this uses the name verbatim and does *not* prefix it with
-`mindstream-branch-prefix'."
-  (mindstream--execute-shell-command (list "git" "branch" "-m" new-name)))
+Note that this prefixes NAME with `mindstream-branch-prefix' before
+renaming the branch."
+  (let ((full-name (concat mindstream-branch-prefix "-" new-name)))
+    (mindstream--execute-shell-command (list "git" "branch" "-m" full-name))))
 
 (defun mindstream--session-dir (&optional buffer)
   "The repo base path containing BUFFER."
