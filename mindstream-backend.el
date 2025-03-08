@@ -86,6 +86,9 @@ and arguments that are to be supplied to the command."
       ;; (vc-root-dir) returns nil in some cases,
       ;; e.g. for an anonymous text session,
       ;; but magit-toplevel seems to work.
+      ;; TODO: support returning the output of
+      ;; the shell command in `mindstream--execute-shell-command'
+      ;; to implement this using git directly.
       (magit-toplevel))))
 
 (defun mindstream-branch-name (&optional buffer)
@@ -101,7 +104,10 @@ and arguments that are to be supplied to the command."
       (magit-rev-parse "HEAD"))))
 
 (defun mindstream-create-branch (&optional name)
-  "Start a new branch (stream) in the current repo."
+  "Start a new branch (stream) in the current repo.
+
+Note that this prefixes NAME with `mindstream-branch-prefix' before
+creating the branch."
   (magit-branch-and-checkout
    (concat mindstream-branch-prefix
            "-"
@@ -109,6 +115,13 @@ and arguments that are to be supplied to the command."
                (mindstream--unique-name mindstream-branch-name-length)))
    (mindstream--current-version)
    nil))
+
+(defun mindstream-backend-rename-branch (new-name)
+  "Rename the current branch to NEW-NAME.
+
+Note that this uses the name verbatim and does *not* prefix it with
+`mindstream-branch-prefix'."
+  (mindstream--execute-shell-command (list "git" "branch" "-m" new-name)))
 
 (defun mindstream--session-dir (&optional buffer)
   "The repo base path containing BUFFER."
