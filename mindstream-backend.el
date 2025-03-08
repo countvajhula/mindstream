@@ -37,6 +37,11 @@
 (require 'mindstream-custom)
 (require 'magit-git)
 
+;; collisions unlikely within a single project repo
+;; and we don't want branch names to be too long as they
+;; may make things awkward in the Git UI.
+(defconst mindstream-branch-name-length 7)
+
 (defun mindstream--execute-shell-command (command &optional directory)
   "Execute shell COMMAND at DIRECTORY.
 
@@ -81,7 +86,43 @@ and arguments that are to be supplied to the command."
       ;; (vc-root-dir) returns nil in some cases,
       ;; e.g. for an anonymous text session,
       ;; but magit-toplevel seems to work.
+      ;; TODO: support returning the output of
+      ;; the shell command in `mindstream--execute-shell-command'
+      ;; to implement this using git directly.
       (magit-toplevel))))
+
+(defun mindstream-branch-name (&optional buffer)
+  "Get the Git branch name for BUFFER."
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (magit-get-current-branch))))
+
+(defun mindstream--current-version (&optional buffer)
+  "Get the Git version hash for BUFFER."
+  (let ((buffer (or buffer (current-buffer))))
+    (with-current-buffer buffer
+      (magit-rev-parse "HEAD"))))
+
+(defun mindstream-create-branch (&optional name)
+  "Start a new branch (stream) in the current repo.
+
+Note that this prefixes NAME with `mindstream-branch-prefix' before
+creating the branch."
+  (magit-branch-and-checkout
+   (concat mindstream-branch-prefix
+           "-"
+           (or name
+               (mindstream--unique-name mindstream-branch-name-length)))
+   (mindstream--current-version)
+   nil))
+
+(defun mindstream-backend-rename-branch (new-name)
+  "Rename the current branch to NEW-NAME.
+
+Note that this prefixes NAME with `mindstream-branch-prefix' before
+renaming the branch."
+  (let ((full-name (concat mindstream-branch-prefix "-" new-name)))
+    (mindstream--execute-shell-command (list "git" "branch" "-m" full-name))))
 
 (defun mindstream--session-dir (&optional buffer)
   "The repo base path containing BUFFER."
