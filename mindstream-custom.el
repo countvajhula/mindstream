@@ -86,7 +86,7 @@
 
 (defcustom mindstream-live-delay 1.5
   "Delay in typing after which the session is iterated."
-  :type 'list
+  :type 'number
   :group 'mindstream)
 
 (defcustom mindstream-live-action nil
