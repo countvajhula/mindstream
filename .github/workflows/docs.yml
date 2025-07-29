@@ -34,7 +34,7 @@ jobs:
         uses: zauguin/install-texlive@v4
         with:
           packages: >
-            hyperref relsize amsmath mathabx wasysym framed hyphenat collection-latex collection-latexrecommended collection-fontsrecommended
+            hyperref relsize amsmath mathabx wasysym framed hyphenat collection-latex collection-latexrecommended collection-fontsrecommended newtx
       - name: Build docs in PDF format
         run: make build-pdf-docs
       - name: Push to GitHub Pages
