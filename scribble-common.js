@@ -2,21 +2,30 @@
 
 // Page Parameters ------------------------------------------------------------
 
-var page_query_string = location.search.substring(1);
-const page_args = new URLSearchParams(location.search);
+function GetURL() {
+  return new URL(location);
+}
+
+function GetPageArgs() {
+  return GetURL().searchParams;
+}
+
+function GetPageQueryString() {
+  return GetPageArgs().toString();
+}
 
 function GetPageArg(key, def) {
-  return page_args.get(key) || def;
+  return GetPageArgs().get(key) || def;
 }
 
 function MergePageArgsIntoLink(a) {
-  if (page_args.size === 0 || !a.dataset.pltdoc) return;
+  if (GetPageArgs().size === 0 || !a.dataset.pltdoc) return;
   a.href = MergePageArgsIntoUrl(a.href);
 }
 
 function MergePageArgsIntoUrl(href) {
   const url = new URL(href, window.location.href);
-  for (const [key, val] of page_args) {
+  for (const [key, val] of GetPageArgs()) {
     if (url.searchParams.has(key)) continue;
     url.searchParams.append(key, val)
   }
@@ -70,12 +79,22 @@ function SetPLTRoot(ver, relative) {
 
 // adding index.html works because of the above
 function GotoPLTRoot(ver, relative) {
-  var u = GetCookie("PLT_Root."+ver, null);
+  var u = GetRootPath(ver);
   if (u == null) return true; // no cookie: use plain up link
   // the relative path is optional, default goes to the toplevel start page
   if (!relative) relative = "index.html";
   location = u + relative;
   return false;
+}
+
+function GetRootPath(ver) {
+    var u = GetCookie("PLT_Root."+ver, null);
+    if (u != null)
+        return u;
+    // use root specified by local-redirect wrapper, if present
+    if (typeof user_doc_root != "undefined")
+        return user_doc_root;
+    return null;
 }
 
 // Utilities ------------------------------------------------------------------
@@ -97,7 +116,7 @@ function NormalizePath(path) {
 function DoSearchKey(event, field, ver, top_path) {
   var val = field.value;
   if (event && event.key === 'Enter') {
-    var u = GetCookie("PLT_Root."+ver, null);
+    var u = GetRootPath(ver);
     if (u == null) u = top_path; // default: go to the top path
     u += "search/index.html?q=" + encodeURIComponent(val);
     u = MergePageArgsIntoUrl(u);
