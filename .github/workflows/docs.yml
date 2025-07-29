@@ -33,7 +33,8 @@ jobs:
       - name: Install TeX Live
         uses: zauguin/install-texlive@v4
         with:
-          packages: scheme-basic
+          packages: >
+            scheme-basic relsize
       - name: Build docs in PDF format
         run: make build-pdf-docs
       - name: Push to GitHub Pages
