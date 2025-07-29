@@ -34,7 +34,7 @@ jobs:
         uses: zauguin/install-texlive@v4
         with:
           packages: >
-            scheme-basic relsize mathabx
+            scheme-basic collection-latexextra
       - name: Build docs in PDF format
         run: make build-pdf-docs
       - name: Push to GitHub Pages
