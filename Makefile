@@ -46,6 +46,9 @@ remove-docs:
 build-docs:
 	scribble ++style $(DOCS-PATH)/assets/css/$(PACKAGE-NAME).css --htmls --dest $(DOCS-PATH) --dest-name output $(DOCS-PATH)/mindstream.scrbl
 
+build-pdf-docs:
+	scribble --pdf --dest $(DOCS-PATH)/output $(DOCS-PATH)/mindstream.scrbl
+
 docs: build-docs
 	open $(DOCS-PATH)/output/index.html
 

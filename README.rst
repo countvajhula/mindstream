@@ -5,8 +5,11 @@
     :alt: MELPA
     :target: https://melpa.org/#/mindstream
 
-.. image:: https://img.shields.io/badge/documentation-mindstream-blue
+.. image:: https://img.shields.io/badge/documentation-HTML-blue
     :target: https://countvajhula.github.io/mindstream/
+
+.. image:: https://img.shields.io/badge/documentation-PDF-blue
+    :target: https://countvajhula.github.io/mindstream/mindstream.pdf
 
 mindstream
 ==========
