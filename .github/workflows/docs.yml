@@ -30,11 +30,10 @@ jobs:
         run: make install-docs
       - name: Build docs for hosting
         run: make build-docs
-      - name: Install TeX environment
+      - name: Build docs in PDF format (incl. install TeX environment)
         uses: xu-cheng/texlive-action@v3
         with:
           scheme: small
-      - name: Build docs in PDF format
         run: make build-pdf-docs
       - name: Push to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.4.1
