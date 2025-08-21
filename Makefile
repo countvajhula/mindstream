@@ -79,7 +79,6 @@ lint-noiseless:
 
 checkdoc:
 	${CASK} exec $(EMACS) -Q --batch  \
-	                      --eval $(INIT_PACKAGE_EL)  \
 	                      -l "dev/build-utils.el"  \
 	                      --eval '(flycheck/batch-checkdoc ".")'
 
