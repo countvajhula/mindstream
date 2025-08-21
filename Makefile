@@ -65,7 +65,7 @@ lint:
 	${CASK} exec $(EMACS) -Q --batch  \
 	                      --eval $(INIT_PACKAGE_EL)  \
 	                      -l "package-lint.el"  \
-                          --eval "(setq package-lint-main-file \"mindstream.el\")" \
+	                      --eval "(setq package-lint-main-file \"mindstream.el\")" \
 	                      -f "package-lint-batch-and-exit"  \
 	                      ${PROJECT_FILES}
 checkdoc:
