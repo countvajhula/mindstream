@@ -258,7 +258,7 @@ identifier.
 
 It is advisable to use a descriptive name when saving a session, i.e.
 if you are saving an anonymous session, you would typically want to
-specify a new, non-existent folder. Otherwise, if you're simply saving
+specify a new, non-existent folder.  Otherwise, if you're simply saving
 an existing saved session to a new location, then you likely just want
 to select the existing destination path."
   (interactive
