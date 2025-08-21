@@ -79,4 +79,4 @@ build :
 test: build
 	${CASK} exec ert-runner
 
-.PHONY:	help lint lint+less lint-no-noise lint-noiseless checkdoc build clean install test install-docs remove-docs build-docs docs
+.PHONY:	help lint checkdoc build clean install test install-docs remove-docs build-docs docs
