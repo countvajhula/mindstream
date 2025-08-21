@@ -65,18 +65,9 @@ lint:
 	${CASK} exec $(EMACS) -Q --batch  \
 	                      --eval $(INIT_PACKAGE_EL)  \
 	                      -l "package-lint.el"  \
+                          --eval "(setq package-lint-main-file \"mindstream.el\")" \
 	                      -f "package-lint-batch-and-exit"  \
 	                      ${PROJECT_FILES}
-
-lint+less:
-	@$(MAKE) -f $(THIS_FILE) lint 2>&1 | less
-
-lint-no-noise:
-	@$(MAKE) -f $(THIS_FILE) lint 2>&1 | grep -v "start with.*prefix" |grep -v "lexical-binding" |grep -v "non-snapshot.*racket" |grep -v "non-snapshot.*clever" |grep -v "Version.*header is missing" |grep -v "Package-Version"
-
-lint-noiseless:
-	@$(MAKE) -f $(THIS_FILE) lint-no-noise 2>&1 | less
-
 checkdoc:
 	${CASK} exec $(EMACS) -Q --batch  \
 	                      -l "dev/build-utils.el"  \
