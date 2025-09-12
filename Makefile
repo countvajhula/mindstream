@@ -11,24 +11,52 @@ DOCS-PATH=doc
 DEPS-FLAGS=--check-pkg-deps --unused-pkg-deps
 
 EMACS=emacs
-CASK ?= cask
 
-PROJECT_FILES=`${CASK} files`
+export CI_PACKAGES=$(PACKAGE-NAME)
 
 help:
+	@echo "Run common development actions."
+	@echo
+	@echo "    Usage: make <target>"
+	@echo "    where <target> is one of:"
+	@echo
+	@echo "help - show this menu"
 	@echo "clean - remove all build artifacts"
-	@echo "install - install package dependencies in .cask/"
-	@echo "lint - check style with package-lint"
-	@echo "lint+less - lint piped to less"
-	@echo "lint-no-noise - lint with typically noisy warnings filtered out"
-	@echo "lint-noiseless - lint-no-noise piped to less"
-	@echo "checkdoc - check docstrings"
+	@echo "setup-ci - clone emacs-ci to run project CI actions such as linting"
+	@echo "bootstrap - install Straight.el"
+	@echo "install - install package dependencies"
 	@echo "build - byte compile the package"
-	@echo "test - run tests"
+	@echo "lint - check style with package-lint"
+	@echo "checkdoc - check docstrings"
 	@echo "install-docs - Install dependencies for building the documentation"
 	@echo "remove-docs - Uninstall docs package"
 	@echo "build-docs - Build self-contained documentation that could be hosted somewhere"
+	@echo "build-pdf-docs - view documentation in a browser"
 	@echo "docs - view documentation in a browser"
+	@echo "check-docs-deps - view documentation in a browser"
+	@echo
+	@echo "**All of these actions (aside from docs) take effect and are contained inside the emacs-ci/ folder --- they do not affect the system Emacs configuration.**"
+
+setup-ci:
+	git clone https://github.com/countvajhula/emacs-ci.git
+
+clean:
+	cd emacs-ci && rm -rf ci-init
+
+bootstrap:
+	cd emacs-ci && emacs --batch --quick --load bootstrap.el
+
+install:
+	cd emacs-ci && emacs --batch --quick --load install.el
+
+build:
+	cd emacs-ci && emacs --batch --quick --load build.el
+
+lint:
+	cd emacs-ci && emacs --batch --quick --load lint.el
+
+checkdoc:
+	cd emacs-ci && emacs --batch --quick --load checkdoc.el
 
 install-docs:
 	raco pkg install --deps search-auto -n $(PACKAGE-NAME) --link $(DOCS-PATH)
@@ -48,27 +76,4 @@ docs: build-docs
 check-docs-deps:
 	raco setup --no-docs $(DEPS-FLAGS) --pkgs $(PACKAGE-NAME)
 
-clean :
-	${CASK} clean-elc
-
-install:
-	${CASK} install
-
-lint:
-	${CASK} exec $(EMACS) -Q --batch  \
-	                      -l "package-lint.el"  \
-	                      --eval "(setq package-lint-main-file \"mindstream.el\")" \
-	                      -f "package-lint-batch-and-exit"  \
-	                      ${PROJECT_FILES}
-checkdoc:
-	${CASK} exec $(EMACS) -Q --batch  \
-	                      -l "dev/build-utils.el"  \
-	                      --eval '(flycheck/batch-checkdoc ".")'
-
-build :
-	${CASK} build
-
-test: build
-	${CASK} exec ert-runner
-
-.PHONY:	help lint checkdoc build clean install test install-docs remove-docs build-docs docs
+.PHONY: help setup-ci clean bootstrap install build lint checkdoc install-docs remove-docs build-docs build-pdf-docs docs check-docs-deps
