@@ -37,4 +37,5 @@ jobs:
       - name: Byte Compile
         run: make byte-compile
       - name: Native Compile
+        if: "matrix.emacs_version == 'snapshot'"
         run: make native-compile
