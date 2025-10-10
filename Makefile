@@ -17,7 +17,7 @@ help:
 	@echo
 	@echo "help - show this menu"
 	@echo "clean - remove all build artifacts"
-	@echo "setup-ci - clone emacs-ci to run project CI actions such as linting"
+	@echo "setup-ci - clone elci to run project CI actions such as linting"
 	@echo "bootstrap - install Straight.el"
 	@echo "install - install package dependencies"
 	@echo "byte-compile - byte compile the package"
@@ -31,37 +31,37 @@ help:
 	@echo "docs - view documentation in a browser"
 	@echo "check-docs-deps - view documentation in a browser"
 	@echo
-	@echo "**All of these actions (aside from docs) take effect and are contained inside the emacs-ci/ folder --- they do not affect the system Emacs configuration.**"
+	@echo "**All of these actions (aside from docs) take effect and are contained inside the elci/ folder --- they do not affect the system Emacs configuration.**"
 
 setup-ci:
-	@if [ -d ".emacs-ci" ]; then \
-		echo "--> Updating existing emacs-ci repository..."; \
-		cd .emacs-ci && git pull; \
+	@if [ -d ".elci" ]; then \
+		echo "--> Updating existing elci repository..."; \
+		cd .elci && git pull; \
 	else \
-		echo "--> Cloning emacs-ci repository..."; \
-		git clone https://github.com/countvajhula/emacs-ci.git .emacs-ci; \
+		echo "--> Cloning elci repository..."; \
+		git clone https://github.com/countvajhula/elci.git .elci; \
 	fi
 
 clean:
-	cd .emacs-ci && rm -rf init
+	cd .elci && rm -rf init
 
 bootstrap:
-	cd .emacs-ci && emacs --batch --quick --load bootstrap.el
+	cd .elci && emacs --batch --quick --load bootstrap.el
 
 install:
-	cd .emacs-ci && emacs --batch --quick --load install.el
+	cd .elci && emacs --batch --quick --load install.el
 
 byte-compile:
-	cd .emacs-ci && emacs --batch --quick --load byte-compile.el
+	cd .elci && emacs --batch --quick --load byte-compile.el
 
 native-compile:
-	cd .emacs-ci && emacs --batch --quick --load native-compile.el
+	cd .elci && emacs --batch --quick --load native-compile.el
 
 lint:
-	cd .emacs-ci && emacs --batch --quick --load lint.el
+	cd .elci && emacs --batch --quick --load lint.el
 
 checkdoc:
-	cd .emacs-ci && emacs --batch --quick --load checkdoc.el
+	cd .elci && emacs --batch --quick --load checkdoc.el
 
 install-docs:
 	raco pkg install --deps search-auto -n $(PACKAGE-NAME) --link $(DOCS-PATH)

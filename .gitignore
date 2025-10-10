@@ -7,7 +7,7 @@
 *.elc
 *.html
 dist
-.emacs-ci
+.elci
 
 # Docs compiled files and output
 doc/compiled
