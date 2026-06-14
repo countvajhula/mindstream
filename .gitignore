@@ -10,6 +10,7 @@
 *.js
 dist
 .elci
+.ci
 
 # Docs compiled files and output
 doc/compiled
