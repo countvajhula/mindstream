@@ -108,12 +108,6 @@ See `mindstream--execute-shell-command' for the format of COMMAND."
     (mindstream--execute-shell-command-to-string
      (list "git" "branch" "--show-current"))))
 
-(defun mindstream--current-version (&optional buffer)
-  "Get the Git version hash for BUFFER."
-  (with-current-buffer (or buffer (current-buffer))
-    (mindstream--execute-shell-command-to-string
-     (list "git" "rev-parse" "HEAD"))))
-
 (defun mindstream-create-git-branch (&optional name)
   "Start a new branch (stream) in the current repo.
 
@@ -122,10 +116,9 @@ creating the branch."
   (let ((branch-name (concat mindstream-branch-prefix
                              "-"
                              (or name
-                                 (mindstream--unique-name mindstream-branch-name-length))))
-        (start-point (mindstream--current-version)))
+                                 (mindstream--unique-name mindstream-branch-name-length)))))
     (mindstream--execute-shell-command
-     (list "git" "checkout" "-b" branch-name start-point))))
+     (list "git" "checkout" "-b" branch-name))))
 
 (defun mindstream-backend-rename-branch (new-name)
   "Rename the current branch to NEW-NAME.
