@@ -59,7 +59,9 @@ and arguments that are to be supplied to the command."
 
 (defun mindstream--execute-shell-command-to-string (command &optional directory)
   "Execute COMMAND at DIRECTORY and return its stdout as a trimmed string.
-Returns nil if the command exits with a non-zero status."
+Returns nil if the command exits with a non-zero status.
+
+See `mindstream--execute-shell-command' for the format of COMMAND."
   (let ((cmd (car command))
         (args (cdr command))
         (default-directory (or directory
