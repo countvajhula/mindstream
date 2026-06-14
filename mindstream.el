@@ -133,7 +133,7 @@ New sessions always start anonymous."
     (unless (file-directory-p path)
       (when mindstream-unique
         (mindstream-archive-template-sessions template))
-      (copy-directory template-path path)
+      (copy-directory template-path path nil t)
       (mindstream-backend-initialize path)
       (find-file
        (expand-file-name filename

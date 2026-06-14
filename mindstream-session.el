@@ -82,16 +82,12 @@ This is the name of the root folder of the containing git repo."
   (mindstream-backend-iterate))
 
 (defun mindstream--generate-anonymous-session-path (template)
-  "A path on disk to use for a newly created SESSION.
-
-This creates an appropriate base path on disk for the TEMPLATE if it
-isn't already present."
+  "A path on disk to use for a new session created from TEMPLATE."
   (let* ((session-name (mindstream--unique-name))
          (filed-date (format-time-string "%F"))
          (base-path (mindstream--build-path
                      (mindstream--anonymous-path template)
                      filed-date)))
-    (mindstream--ensure-path base-path)
     (mindstream--build-path base-path
                             session-name)))
 
