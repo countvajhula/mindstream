@@ -459,8 +459,8 @@ archive saved sessions."
           ;; Grab the first item (current or most recent) to use as default
           (default (car sessions)))
      (list (completing-read (if default
-                                (format "Which session? (default %s): " default)
-                              "Which session? ")
+                                (format "Archive which session? (default %s): " default)
+                              "Archive which session? ")
                             sessions
                             nil
                             t
