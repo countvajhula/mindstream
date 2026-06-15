@@ -86,7 +86,7 @@ it fouls up loading for reasons mysterious */
 
 
 /* Sans-serif: */
-.version, .versionNoNav, .ssansserif {
+.version, .versionNoNav, .ssansserif, .navfamily, .famlink {
     font-family: 'Fira', sans-serif;
 }
 
@@ -311,6 +311,21 @@ a:hover {
     content: "v";
 }
 
+/* ---------------------------------------- */
+/* Language Family */
+
+.navfamily {
+    position: sticky;
+    top: 0;
+    left: 100%;
+    width: 13em;
+    margin-top: -4.75em;
+    margin-right: -15em;
+    font-size: 70%;
+    font-weight: lighter;
+    height: auto;
+    padding-top: 0.5em;
+ }
 
 /* ---------------------------------------- */
 /* Margin notes */
@@ -350,6 +365,10 @@ a:hover {
          margin-top: 1.2rem; 
      }
 
+     .navfamily {
+         position: static;
+         margin: -4.75em 0em 0em 0em;
+     }
 }
 
 .refcontent, .refcontent p {
@@ -768,6 +787,10 @@ blockquote > blockquote.SVInsetFlow {
             font-weight: lighter;
         }
 
+        .navfamily {
+            position: static;
+            margin: -3.25em 0em 0em 0em;
+        }
 
         .maincolumn {
             margin-left: 1em;

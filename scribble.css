@@ -22,7 +22,7 @@
 }
 
 /* Sans-serif: */
-.version, .versionNoNav, .ssansserif {
+.version, .versionNoNav, .ssansserif, .navfamily {
   font-family: sans-serif;
 }
 .ssansserif {
@@ -211,6 +211,23 @@ table td {
 }
 
 /* ---------------------------------------- */
+/* Language Family */
+
+.navfamily {
+  float: right;
+  white-space: nowrap;
+  left: 2em;
+  height: 0em;
+  width: 10.5em;
+  margin: 1.5em -13em 0em 0em;
+  font-size: small;
+}
+
+.docfamily:after {
+  content: " language family";
+}
+
+/* ---------------------------------------- */
 /* Margin notes */
 
 .refpara, .refelem, .reffootnote {
@@ -265,6 +282,15 @@ table td {
   margin: 0 0 0 0;
 }
 
+/* narrow display => inline right-hand margin notes */
+@media screen and (max-width: 55em) {
+    .refpara, .refelem, .reffootnote {
+        all: unset !important;
+        display: block !important;
+        margin: 1em 0 !important;
+        padding: 0.75em !important;
+    }
+}
 
 /* ---------------------------------------- */
 /* Table of contents, inline */
