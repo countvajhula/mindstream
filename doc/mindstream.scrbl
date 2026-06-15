@@ -292,6 +292,14 @@ The lifecycle of a Mindstream session is described below.
 
 You can also start a @emph{stream} in an existing Git repository, which starts a new branch versioned by Mindstream, as described in @secref["Mindstream_Anywhere"].
 
+@section{Troubleshooting}
+
+@subsection{@code{wrong-type-argument} when starting a session or saving}
+
+If you have global Git commit signing enabled (@code{commit.gpgsign = true} in your @code{~/.gitconfig}), Mindstream's automatic background commits will try to trigger your GPG agent. Because Mindstream commits synchronously to capture your flow, this can cause Emacs to timeout while waiting for a PIN prompt (like @code{pinentry}) that can't render, causing the commit to fail.
+
+@bold{Solution}: Disable global commit signing and instead enable it per-repository for the specific projects that require it.
+
 @section{Acknowledgements}
 
 This package was conceived in @hyperlink["https://github.com/greghendershott/racket-mode/issues/628"]{discussion with Greg Hendershott}.
